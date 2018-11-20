@@ -532,6 +532,8 @@ void setup() {
   Serial.begin(115200);  //USB
   Serial1.begin(9600, SERIAL_8N1, 4, 2); //Serial1 Pins 4,2, Serial2 Pins 16,17
 
+  delay(1000);
+
   Serial.println("Starting...");
 
   //Pins fuer Taster und Relay initialisieren
@@ -553,8 +555,8 @@ void setup() {
   myWifi.connect();
 
   // start WebsocketServer server
-  //wsServer.onEvent(webSocketEvent);
-  //wsServer.begin();
+  wsServer.onEvent(webSocketEvent);
+  wsServer.begin();
 
   // start Webserver
   server.on("/", sbmsPage);
@@ -571,7 +573,7 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
-  //wsServer.loop();
+  wsServer.loop();
   server.handleClient();
   readSbms();
   yield();
