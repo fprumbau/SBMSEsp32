@@ -573,7 +573,7 @@ void setup() {
 void loop() {
   //wsServer.loop();
   server.handleClient();
-  //readSbms();
+  readSbms();
   yield();
   if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
       Serial.println("Check...");
