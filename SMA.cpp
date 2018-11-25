@@ -2,8 +2,9 @@
 
 #include "Vars.h"
 
-SMA::SMA(Vars& vars) {
+SMA::SMA(Vars& vars, WebCom& wc) {
   _vars = vars;
+  _wc = wc;
 }
 
 void SMA::init(MyWifi& myWifi) {

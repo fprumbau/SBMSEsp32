@@ -13,15 +13,15 @@
 
 Vars vars; //Global definierte Variablen
 
-OTA ota;  //Over-the-air updater
-SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
-SMA sma(vars);  //read SMA energy meter broadcast messages 
-
 MyWifi myWifi;
 Battery battery;
 WebServer server(80);
 
 WebCom wc(vars);
+
+OTA ota;  //Over-the-air updater
+SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+SMA sma(vars, wc);  //read SMA energy meter broadcast messages 
 
 //Ticker ticker;
 int counter = 0;
@@ -428,7 +428,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         break;
       }
     case WStype_CONNECTED: {
-        IPAddress ip = wc.wsServer.remoteIP(num);
+        IPAddress ip = wc.remoteIP(num);
         Serial.println("");
 
         // send message to client

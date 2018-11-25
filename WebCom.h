@@ -13,6 +13,7 @@ class WebCom {
     typedef void (*WebSocketServerEvent)(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
     typedef bool (*WebSocketServerHttpHeaderValFunc)(String headerName, String headerValue);
 
+    WebCom();
     WebCom(Vars& vars);  
 
     //client connected to send?
@@ -24,6 +25,7 @@ class WebCom {
     unsigned long wsServerLastSend = -1;
     WebSocketsServer wsServer = WebSocketsServer(81);
     void loop();
+    IPAddress remoteIP(uint8_t num);
     void begin(WebSocketServerEvent cbEvent);
     void sendClients(String msg, bool data);
 };

@@ -2,6 +2,8 @@
 #define SMA_H
 
 #include <WiFiUdp.h>
+
+#include "WebCom.h"
 #include "MyWifi.h"
 #include "Vars.h"
 
@@ -14,9 +16,10 @@ class SMA {
     char wlb[9]; //Wirkleistung Bezug
     char wll[9]; //Wirkleistung Lieferung
     WiFiUDP _udp;
+    WebCom _wc;
     
   public:
-    SMA(Vars& vars);
+    SMA(Vars& vars, WebCom& wc);
     void read();
     void init(MyWifi& myWifi);
   

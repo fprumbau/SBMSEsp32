@@ -1,7 +1,13 @@
 #include "WebCom.h"
 
+WebCom::WebCom() { }
+
 WebCom::WebCom(Vars& vars) {
   _vars = vars;
+}
+
+IPAddress WebCom::remoteIP(uint8_t num) {
+  return wsServer.remoteIP(num);
 }
 
 /**
