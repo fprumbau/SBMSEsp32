@@ -7,11 +7,11 @@ WebCom::WebCom(Vars& vars) {
 }
 
 IPAddress WebCom::remoteIP(uint8_t num) {
-  return wsServer.remoteIP(num);
+  return _wsServer.remoteIP(num);
 }
 
 bool WebCom::sendTXT(uint8_t num, String& payload) {
-  return wsServer.sendTXT(num, payload);
+  return _wsServer.sendTXT(num, payload);
 }
 
 /**
@@ -26,14 +26,14 @@ void WebCom::sendClients(String msg, bool data) {
   if (clientCount <= 0) {
     return;
   }
-  /*if(wsServerLastSend>0 && (millis()-wsServerLastSend) < 100) {
+  /*if(_wsServerLastSend>0 && (millis()-_wsServerLastSend) < 100) {
     if(debug) {
       Serial.print("Could not send data multiple times in 100ms; disgarding ");
       Serial.println(data);
     }
     return;
     }*/
-  wsServerLastSend = millis();
+  _wsServerLastSend = millis();
   for (int m = 0; m < clientCount; m++) {
     uint8_t client = clients[m];
     if (_vars.debug) {
@@ -42,15 +42,15 @@ void WebCom::sendClients(String msg, bool data) {
     if (!data) {
       msg = "@ " + msg;
     }
-    wsServer.sendTXT(client, msg);
+    _wsServer.sendTXT(client, msg);
   }
 }
 
 void WebCom::loop() {
-  wsServer.loop();
+  _wsServer.loop();
 }
 
 void WebCom::begin(WebSocketServerEvent cbEvent) {
-  wsServer.onEvent(cbEvent);
-  wsServer.begin();
+  _wsServer.onEvent(cbEvent);
+  _wsServer.begin();
 }

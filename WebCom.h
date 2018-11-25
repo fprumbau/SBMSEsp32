@@ -6,7 +6,9 @@
 
 class WebCom {
   private:
-    Vars _vars;
+    Vars _vars; //Globale Variablen
+    unsigned long _wsServerLastSend = -1; //Letztes Senden einer Nachricht an die Clients
+    WebSocketsServer _wsServer = WebSocketsServer(81); //Websocketserver, um Nachrichten an Clients zu senden
 
   public:
 
@@ -22,8 +24,6 @@ class WebCom {
     uint8_t clientCount = 0;
     uint8_t clients[256] = { -1};
     bool notifiedNoClient = false;
-    unsigned long wsServerLastSend = -1;
-    WebSocketsServer wsServer = WebSocketsServer(81);
     void loop();
     bool sendTXT(uint8_t num, String& payload);
     IPAddress remoteIP(uint8_t num);
