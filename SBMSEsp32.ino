@@ -1,12 +1,12 @@
 #include <WebServer.h>
 
+#include "Vars.h"
 #include "MyWifi.h"
 #include "webpage.h"
 #include "WebCom.h"
 #include "config.h"
 #include "SBMS.h"
 #include "Taster.h"
-#include "Vars.h"
 #include "Battery.h"
 #include "OTA.h"
 #include "SMA.h"
@@ -21,20 +21,15 @@ MyWifi myWifi;
 Battery battery;
 WebServer server(80);
 
-WebCom wc;
+WebCom wc(vars);
 
 //client connected to send?
 bool ready = false;
 
-uint8_t clientCount = 0;
-uint8_t clients[256] = { -1};
 bool notifiedNoClient = false;
 
 //Ticker ticker;
 int counter = 0;
-
-bool debug = false;
-bool debug2 = false;
 
 long soc = -1; //aktueller Wert State Of Charge
 int cv[8]; //aktuelle Zellspannungen
@@ -48,8 +43,6 @@ unsigned long lastCheckedMillis = -1;
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
 int failureCount = 0;
 const int errLimit = 5;
-
-unsigned long wsServerLastSend = -1;
 
 int LED_RED = 12;
 int LED_GREEN = 14;
@@ -76,7 +69,7 @@ void sbmsPage() {
   int s4 = connStr.length();
 
   long totalSize = s1 + s2 + s3 + s4;
-  if (debug) {
+  if (vars.debug) {
     Serial.print("\np1: ");
     Serial.println(s1);
     Serial.print("p2: ");
@@ -93,38 +86,6 @@ void sbmsPage() {
 }
 
 /**
-   Sende Daten zu allen über Websockets verbundenen
-   Clients. Alles, was NICHT SBMS-Daten sind, also
-   Fehler- bzw. Statusmeldungen MUSS mit einem '@'
-   eingeleitet werden, sonst wird es von der Webseite
-   falsch interpretiert und führt zu wilden Werten
-   z.B. beim Batteriestatus.
-*/
-void sendClients(String msg, bool data) {
-  if (clientCount <= 0) {
-    return;
-  }
-  /*if(wsServerLastSend>0 && (millis()-wsServerLastSend) < 100) {
-    if(debug) {
-      Serial.print("Could not send data multiple times in 100ms; disgarding ");
-      Serial.println(data);
-    }
-    return;
-    }*/
-  wsServerLastSend = millis();
-  for (int m = 0; m < clientCount; m++) {
-    uint8_t client = clients[m];
-    if (debug) {
-      Serial.printf("Sending client %u ( %u ) from %u clients\n", (m + 1), client, clientCount);
-    }
-    if (!data) {
-      msg = "@ " + msg;
-    }
-    wc.wsServer.sendTXT(client, msg);
-  }
-}
-
-/**
    Websocket-Events, wenn neue Clients sich verbinden, wenn die clients
    selbst senden oder wenn sie geschlossen werden.
 */
@@ -135,23 +96,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         //Client 'num' aus Liste rausnehmen
         uint8_t newClients[256];
         for (int a = 0; a < 256; a++) {
-          newClients[a] = clients[a];
+          newClients[a] = wc.clients[a];
         }
         int c = 0;
-        for (int x = 0; x < clientCount; x++) {
+        for (int x = 0; x < wc.clientCount; x++) {
           if (num != newClients[x]) {
-            clients[c] = newClients[x];
+            wc.clients[c] = newClients[x];
             c++;
           } else {
-            clientCount--;
+            wc.clientCount--;
           }
         }
-        if (clientCount == 0) {
+        if (wc.clientCount == 0) {
           notifiedNoClient = false;
           ready = false;
         }
-        if (debug) {
-          Serial.printf("[%u] Disconnected! Remaining %u\n", num, clientCount);
+        if (vars.debug) {
+          Serial.printf("[%u] Disconnected! Remaining %u\n", num, wc.clientCount);
         }
         break;
       }
@@ -164,18 +125,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
         bool alreadyListed = false;
         int y = 0;
-        for (; y < clientCount; y++) {
-          if (num == clients[y]) {
+        for (; y < wc.clientCount; y++) {
+          if (num == wc.clients[y]) {
             alreadyListed = true;
             break;
           }
         }
         if (!alreadyListed) {
-          clients[y] = num;
-          clientCount++;
+          wc.clients[y] = num;
+          wc.clientCount++;
         }
-        if (debug) {
-          Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, clientCount);
+        if (vars.debug) {
+          Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, wc.clientCount);
         }
         ready = true;
 
@@ -187,12 +148,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         } else {
           msg += "HIGH";
         }
-        sendClients(msg, false);
+        wc.sendClients(msg, false);
 
         break;
       }
     case WStype_TEXT:
-      if (debug) {
+      if (vars.debug) {
         Serial.printf("[Client %u] received: %s\n", num, payload);
       }
       //if(length > 1) {
@@ -240,7 +201,7 @@ void readSbms() {
   */
   if (sread.length() > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
     if (( millis() - lastReceivedMillis ) > 3000 && sread.length() > 0) { //Verarbeitung hoechstens alle 3 Sekunden
-      if (debug) {
+      if (vars.debug) {
         Serial.println(sread);
       }
       evaluate(sread);
@@ -259,25 +220,25 @@ void toggleDebug(unsigned char* payload) {
   String msg;
   if (payload[2] == '1') {    
     if (payload[4] == 't') {
-      debug = true;
+      vars.debug = true;
       msg = "Switched debug1 to true";
     } else {
-      debug = false;
+      vars.debug = false;
       msg = "Switched debug1 to false";
     }
   } else {
     if (payload[4] == 't') {
-      debug2 = true;
+      vars.debug2 = true;
       msg = "Switched debug2 to true";
     } else {
-      debug2 = false;
+      vars.debug2 = false;
       msg = "Switched debug2 to false";
     }    
   }
-  if (debug) {
+  if (vars.debug) {
     Serial.println(msg);
   }
-  sendClients(msg, false);
+  wc.sendClients(msg, false);
 }
 
 /**
@@ -286,20 +247,20 @@ void toggleDebug(unsigned char* payload) {
 */
 void evaluate(String& sread) {
 
-  if (debug2) Serial.println(sread);
+  if (vars.debug2) Serial.println(sread);
 
   if (ready) {
-    if (debug2) {
+    if (vars.debug2) {
       Serial.print("Length: ");
       Serial.println(sread.length());
     }
     if (sread.length() > 0) {
-      sendClients(sread, true);
+      wc.sendClients(sread, true);
     }
   } else {
     if (!notifiedNoClient) {
       notifiedNoClient = true;
-      if (debug) {
+      if (vars.debug) {
         Serial.println("no client connected, yet");
       }
     }
@@ -329,17 +290,17 @@ void evaluate(String& sread) {
   }
 
   //Werte
-  if (debug2) {
+  if (vars.debug2) {
     Serial.println(outString);
     Serial.print("StopBattery: ");
     Serial.println(battery.stopBattery);
     Serial.println("_______________________________________");
   }
 
-  if (debug2) {
+  if (vars.debug2) {
     String mem = " Heap (free): ";
     mem += ESP.getFreeHeap();
-    sendClients(mem , false);
+    wc.sendClients(mem , false);
   }
 
   //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
@@ -375,7 +336,7 @@ void checkValues()  {
       }
     }
   }
-  if (debug) {
+  if (vars.debug) {
     Serial.println("");
     Serial.print("Value evaluation message: ");
     Serial.println(message);
@@ -394,7 +355,7 @@ void checkValues()  {
   if (stop) {
     failureCount++;
     if (failureCount < errLimit) { //einen 'Fehlversuch' ignorieren.
-      if (debug) {
+      if (vars.debug) {
         Serial.print("Error found, waiting until failureCount reaches ");
         Serial.print(errLimit);
         Serial.print("; now: ");
@@ -402,7 +363,7 @@ void checkValues()  {
       }
     } else {
       if (!battery.stopBattery) {
-        if (debug) {
+        if (vars.debug) {
           Serial.println("Error limit reached, stopping battery...");
         }
       }
@@ -446,23 +407,23 @@ void starteNetzvorrang(String reason) {
   String msg = "";
   if (digitalRead(vars.RELAY_PIN) == HIGH) {
     digitalWrite(vars.RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
-    sendClients("Toggle battery LOW", false);
+    wc.sendClients("Toggle battery LOW", false);
     msg += "Starte Netzvorrang :: ";
     msg += reason;
     msg += '\n';
   } else {
-    if (debug)  msg = "Kann Netzvorrang nicht starten, da schon aktiv\n";
+    if (vars.debug)  msg = "Kann Netzvorrang nicht starten, da schon aktiv\n";
   }
-  if (debug) {
-    msg += "Clientcount: ";
-    msg += clientCount;
+  if (vars.debug) {
+    msg += "wc.clientCount: ";
+    msg += wc.clientCount;
     msg += '\n';
   }
   if (msg.length() > 0) {
-    if (debug) {
+    if (vars.debug) {
       Serial.println(msg);
     }
-    sendClients(msg, false);
+    wc.sendClients(msg, false);
   }
 }
 
@@ -474,7 +435,7 @@ void starteBatterie(String reason) {
   if (!battery.stopBattery) {
     if (digitalRead(vars.RELAY_PIN) == LOW) {
       digitalWrite(vars.RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
-      sendClients("Toggle battery HIGH", false);
+      wc.sendClients("Toggle battery HIGH", false);
       msg += "Starte Netzvorrang :: ";
       msg += reason;
       msg += '\n';
@@ -484,16 +445,16 @@ void starteBatterie(String reason) {
   } else {
     msg = "Kann Netzvorrang nicht stoppen, da Stopflag aktiv\n";
   }
-  if (debug) {
-    msg += "Clientcount: ";
-    msg += clientCount;
+  if (vars.debug) {
+    msg += "wc.clientCount: ";
+    msg += wc.clientCount;
     msg += '\n';
   }
   if (msg.length() > 0) {
-    if (debug) {
+    if (vars.debug) {
       Serial.println(msg);
     }
-    sendClients(msg, false);
+    wc.sendClients(msg, false);
   }
 }
 
@@ -504,7 +465,7 @@ void starteBatterie(String reason) {
    attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
 */
 void IRAM_ATTR handleButton() {
-  if (debug) Serial.println("Button pressed");
+  if (vars.debug) Serial.println("Button pressed");
 
   if ((millis() - tasterZeit) > entprellZeit) {
 
@@ -518,7 +479,7 @@ void IRAM_ATTR handleButton() {
       if (!battery.stopBattery) {
         starteBatterie("Buttonaction");
       } else {
-        if (debug) {
+        if (vars.debug) {
           Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
         }
       }
@@ -584,7 +545,7 @@ void setup() {
 
   // start WebsocketServer server
   wc.wsServer.onEvent(webSocketEvent);
-  wc.wsServer.begin();
+  wc.begin();
 
   // start Webserver
   server.on("/", sbmsPage);
