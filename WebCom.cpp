@@ -10,6 +10,10 @@ IPAddress WebCom::remoteIP(uint8_t num) {
   return wsServer.remoteIP(num);
 }
 
+bool WebCom::sendTXT(uint8_t num, String& payload) {
+  return wsServer.sendTXT(num, payload);
+}
+
 /**
    Sende Daten zu allen über Websockets verbundenen
    Clients. Alles, was NICHT SBMS-Daten sind, also

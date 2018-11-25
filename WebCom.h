@@ -25,6 +25,7 @@ class WebCom {
     unsigned long wsServerLastSend = -1;
     WebSocketsServer wsServer = WebSocketsServer(81);
     void loop();
+    bool sendTXT(uint8_t num, String& payload);
     IPAddress remoteIP(uint8_t num);
     void begin(WebSocketServerEvent cbEvent);
     void sendClients(String msg, bool data);

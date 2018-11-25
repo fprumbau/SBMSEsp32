@@ -432,7 +432,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         Serial.println("");
 
         // send message to client
-        wc.wsServer.sendTXT(num, "@ Connected");
+        String msg = "@ Connected";
+        wc.sendTXT(num, msg);
 
         bool alreadyListed = false;
         int y = 0;
@@ -453,7 +454,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
         //Relaistatus uebermitteln
         vars.relayStatus = digitalRead(vars.RELAY_PIN);
-        String msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
+        msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
         if (vars.relayStatus == 0) {
           msg += "LOW";
         } else {
