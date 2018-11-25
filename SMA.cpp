@@ -49,12 +49,16 @@ void SMA::read() {
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
     if (lieferung < 200) {
+      _wc.sendClients("Aktiviere Solarlader 1, deaktiviere 2", false);
+      
       digitalWrite(_vars.RELAY_S1, LOW);
       digitalWrite(_vars.RELAY_S2, HIGH);
 
       digitalWrite(_vars.LED_S1, HIGH);
       digitalWrite(_vars.LED_S2, LOW);
     } else {
+      _wc.sendClients("Aktiviere Solarlader 2, deaktiviere 1", false);
+      
       digitalWrite(_vars.RELAY_S1, HIGH);
       digitalWrite(_vars.RELAY_S2, LOW);
 

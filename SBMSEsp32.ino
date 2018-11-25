@@ -108,11 +108,76 @@ void readSbms() {
      und damit der Netzvorrang aktiv.
   */
   if (sread.length() > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
-    if (( millis() - lastReceivedMillis ) > 3000 && sread.length() > 0) { //Verarbeitung hoechstens alle 3 Sekunden
+    if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
       if (vars.debug) {
         Serial.println(sread);
       }
-      evaluate(sread);
+      if (vars.debug2) Serial.println(sread);
+
+      //Wert zu Clients publishen (wird dort in Webseite visualisiert oder gelisted)
+      if (wc.ready) {
+        if (vars.debug2) {
+          Serial.print("Length 'sread': ");
+          Serial.println(sread.length());
+        }
+        if (sread.length() > 0) {
+          wc.sendClients(sread, true);
+        }
+      } else {
+        if (!wc.notifiedNoClient) {
+          wc.notifiedNoClient = true;
+          if (vars.debug) {
+            Serial.println("no client connected, yet");
+          }
+        }
+      }
+      
+      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also sread.length=0,dann muss erst der failureCount 
+      // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
+      soc = 0;
+
+      //Werte nun lesen
+      if(sread.length() > 0) {
+        int len = sread.length();
+        const char* txt = sread.c_str();
+      
+        String outString = "\nSOC: ";
+        if(len>=8) {
+          soc = sbms.dcmp(6, 2, txt, len);
+          outString += soc;
+          outString += " ( Limit: ";
+          outString += battery.SOC_LIMIT;
+          outString += " ) \n";
+        }
+        if(len>=24) {
+          for (int k = 0; k < 8; k++) {
+            int loc = k * 2 + 8;
+            cv[k] = sbms.dcmp(loc, 2, txt, len);
+        
+            outString += "\ncv";
+            outString += ( k + 1 );
+            outString += ": ";
+            outString += cv[k];
+          }
+        }
+      
+        //Werte
+        if (vars.debug2) {
+          Serial.println(outString);
+          Serial.print("StopBattery: ");
+          Serial.println(battery.stopBattery);
+          Serial.println("_______________________________________");
+        }
+      
+        if (vars.debug2) {
+          String mem = " Heap (free): ";
+          mem += ESP.getFreeHeap();
+          wc.sendClients(mem , false);
+        }
+      
+        //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
+        lastReceivedMillis = millis();
+      }
     }
   }
 }
@@ -147,74 +212,6 @@ void toggleDebug(unsigned char* payload) {
     Serial.println(msg);
   }
   wc.sendClients(msg, false);
-}
-
-/**
-   Auswertung des vom SBMS120 über Seriell
-   empfangenen Datenpakets.
-*/
-void evaluate(String& sread) {
-
-  if (vars.debug2) Serial.println(sread);
-
-  if (wc.ready) {
-    if (vars.debug2) {
-      Serial.print("Length: ");
-      Serial.println(sread.length());
-    }
-    if (sread.length() > 0) {
-      wc.sendClients(sread, true);
-    }
-  } else {
-    if (!wc.notifiedNoClient) {
-      wc.notifiedNoClient = true;
-      if (vars.debug) {
-        Serial.println("no client connected, yet");
-      }
-    }
-  }
-
-  int len = sread.length();
-  const char* txt = sread.c_str();
-
-  String outString = "\nSOC: ";
-  if(len>=8) {
-    soc = sbms.dcmp(6, 2, txt, len);
-    outString += soc;
-    outString += " ( Limit: ";
-    outString += battery.SOC_LIMIT;
-    outString += " ) \n";
-  }
-  if(len>=24) {
-    for (int k = 0; k < 8; k++) {
-      int loc = k * 2 + 8;
-      cv[k] = sbms.dcmp(loc, 2, txt, len);
-  
-      outString += "\ncv";
-      outString += ( k + 1 );
-      outString += ": ";
-      outString += cv[k];
-    }
-  }
-
-  //Werte
-  if (vars.debug2) {
-    Serial.println(outString);
-    Serial.print("StopBattery: ");
-    Serial.println(battery.stopBattery);
-    Serial.println("_______________________________________");
-  }
-
-  if (vars.debug2) {
-    String mem = " Heap (free): ";
-    mem += ESP.getFreeHeap();
-    wc.sendClients(mem , false);
-  }
-
-  //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
-  if (sread.length() > 1) {
-    lastReceivedMillis = millis();
-  }
 }
 
 /*
@@ -533,7 +530,8 @@ void setup() {
   
   //Button-Handlermethode anbinden
   //Guru Meditation Error: Core  1 panic'ed (Cache disabled but cached memory region accessed)
-  //attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
+  pinMode(TASTER, INPUT);
+  attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
 
   // etabliere Wifi Verbindung
   myWifi.connect();
@@ -557,12 +555,24 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
+  if(interruptCounter>0){
+ 
+      portENTER_CRITICAL(&mux);
+      interruptCounter--;
+      portEXIT_CRITICAL(&mux);
+ 
+      numberOfInterrupts++;
+      Serial.print("An interrupt has occurred. Total: ");
+      Serial.println(numberOfInterrupts);
+  }
+  
   wc.loop();
   server.handleClient();
   readSbms();
   yield();
   if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
-      Serial.println("Check...");
+      Serial.print("Check...  ; failureCount: ");
+      Serial.println(failureCount);
       lastCheckedMillis = millis();
       checkValues();
   }
