@@ -601,7 +601,7 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
-  wc.wsServer.loop();
+  wc.loop();
   server.handleClient();
   readSbms();
   yield();

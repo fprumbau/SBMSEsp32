@@ -8,7 +8,7 @@ class WebCom {
     
   public:
     WebSocketsServer wsServer = WebSocketsServer(81);
-    
+    void loop();
 };
 
 #endif
