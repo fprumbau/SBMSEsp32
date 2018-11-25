@@ -46,9 +46,12 @@ const int errLimit = 5;
 
 unsigned long wsServerLastSend = -1;
 
-int LED_RED = 16;
-int LED_GREEN = 5;
-int LED_BLUE = 0;
+int LED_RED = 12;
+int LED_GREEN = 14;
+int LED_BLUE = 27;
+
+int LED_S1 = 25;
+int LED_S2 = 26;
 
 /*
    Schreibt die Webseite in Teilen (<6kb)
@@ -207,7 +210,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 }
 
 //nicht auf Serial1 warten, Feste Werte annehmen
-bool testFixed = true;
+bool testFixed = false;
 
 void readSbms() {
 
@@ -498,7 +501,7 @@ void starteBatterie(String reason) {
 
    attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
 */
-void handleButton() {
+void IRAM_ATTR handleButton() {
   if (debug) Serial.println("Button pressed");
 
   if ((millis() - tasterZeit) > entprellZeit) {
@@ -524,13 +527,15 @@ void handleButton() {
 
 /**********************************************************************/
 /*                                                                    */
-/*                 Setup                                              */
+/* Setup                                                              */
+/*       - ´                          */
+/*                                                                    */
 /*                                                                    */
 /**********************************************************************/
 void setup() {
 
   Serial.begin(115200);  //USB
-  Serial1.begin(9600, SERIAL_8N1, 4, 2); //Serial1 Pins 4,2, Serial2 Pins 16,17
+  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
 
   delay(1000);
 
@@ -545,10 +550,22 @@ void setup() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
 
+  pinMode(LED_S1, OUTPUT);
+  //digitalWrite(LED_S1, HIGH);
+
+  pinMode(LED_S2, OUTPUT);
+  //digitalWrite(LED_S2, HIGH);
+  
+
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  
+
   //Beim Laden BLAU zeigen
   setBlue();
 
   //Button-Handlermethode anbinden
+  //Guru Meditation Error: Core  1 panic'ed (Cache disabled but cached memory region accessed)
   //attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
 
   // etabliere Wifi Verbindung

@@ -195,7 +195,9 @@ function toggleBattery(txt) {
     }
 }
 function toggleDebug(nr) {
-    debug=document.getElementById("dbg"+nr).checked;
+    if(nr==1) {
+       debug=document.getElementById("dbg"+nr).checked;
+    }
     connection.send("@d"+nr+"-"+debug);
 }
 
