@@ -13,10 +13,14 @@ void MyWifi::connect() {
 
   IPAddress ip = WiFi.localIP();
   Serial.println(ip);
-
+  _localIP = ip;
   _ip=ip.toString();
 }
 
 String MyWifi::getIpAddress() {
   return _ip;
+}
+
+IPAddress MyWifi::localIP() {
+  return _localIP;
 }

@@ -1,22 +1,27 @@
 #include <WebServer.h>
-#include <WebSocketsServer.h>
 
 #include "MyWifi.h"
 #include "webpage.h"
+#include "WebCom.h"
 #include "config.h"
 #include "SBMS.h"
 #include "Taster.h"
-#include "Relay.h"
+#include "Vars.h"
 #include "Battery.h"
 #include "OTA.h"
+#include "SMA.h"
 
-OTA ota;
-SBMS sbms;
+Vars vars; //Global definierte Variablen
+
+OTA ota;  //Over-the-air updater
+SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+SMA sma(vars);  //read SMA energy meter broadcast messages 
 
 MyWifi myWifi;
 Battery battery;
 WebServer server(80);
-WebSocketsServer wsServer = WebSocketsServer(81);
+
+WebCom wc;
 
 //client connected to send?
 bool ready = false;
@@ -49,9 +54,6 @@ unsigned long wsServerLastSend = -1;
 int LED_RED = 12;
 int LED_GREEN = 14;
 int LED_BLUE = 27;
-
-int LED_S1 = 25;
-int LED_S2 = 26;
 
 /*
    Schreibt die Webseite in Teilen (<6kb)
@@ -118,7 +120,7 @@ void sendClients(String msg, bool data) {
     if (!data) {
       msg = "@ " + msg;
     }
-    wsServer.sendTXT(client, msg);
+    wc.wsServer.sendTXT(client, msg);
   }
 }
 
@@ -154,11 +156,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         break;
       }
     case WStype_CONNECTED: {
-        IPAddress ip = wsServer.remoteIP(num);
+        IPAddress ip = wc.wsServer.remoteIP(num);
         Serial.println("");
 
         // send message to client
-        wsServer.sendTXT(num, "@ Connected");
+        wc.wsServer.sendTXT(num, "@ Connected");
 
         bool alreadyListed = false;
         int y = 0;
@@ -178,9 +180,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         ready = true;
 
         //Relaistatus uebermitteln
-        relayStatus = digitalRead(RELAY_PIN);
+        vars.relayStatus = digitalRead(vars.RELAY_PIN);
         String msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
-        if (relayStatus == 0) {
+        if (vars.relayStatus == 0) {
           msg += "LOW";
         } else {
           msg += "HIGH";
@@ -442,8 +444,8 @@ void setRed() {
 */
 void starteNetzvorrang(String reason) {
   String msg = "";
-  if (digitalRead(RELAY_PIN) == HIGH) {
-    digitalWrite(RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
+  if (digitalRead(vars.RELAY_PIN) == HIGH) {
+    digitalWrite(vars.RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
     sendClients("Toggle battery LOW", false);
     msg += "Starte Netzvorrang :: ";
     msg += reason;
@@ -470,8 +472,8 @@ void starteNetzvorrang(String reason) {
 void starteBatterie(String reason) {
   String msg = "";
   if (!battery.stopBattery) {
-    if (digitalRead(RELAY_PIN) == LOW) {
-      digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
+    if (digitalRead(vars.RELAY_PIN) == LOW) {
+      digitalWrite(vars.RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
       sendClients("Toggle battery HIGH", false);
       msg += "Starte Netzvorrang :: ";
       msg += reason;
@@ -508,8 +510,8 @@ void IRAM_ATTR handleButton() {
 
     tasterZeit = millis();
 
-    relayStatus = digitalRead(RELAY_PIN);
-    if (relayStatus == HIGH) {
+    vars.relayStatus = digitalRead(vars.RELAY_PIN);
+    if (vars.relayStatus == HIGH) {
       // starte Netzvorrang
       starteNetzvorrang("Buttonaction");
     } else {
@@ -537,43 +539,52 @@ void setup() {
   Serial.begin(115200);  //USB
   Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
 
-  delay(1000);
-
   Serial.println("Starting...");
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(TASTER, INPUT);
-  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(vars.RELAY_PIN, OUTPUT);
+  pinMode(vars.RELAY_S1, OUTPUT);
+  pinMode(vars.RELAY_S2, OUTPUT);
+
+  digitalWrite(vars.RELAY_S1, HIGH);
+  digitalWrite(vars.RELAY_S2, HIGH);
 
   //Leds
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
+  pinMode(vars.LED_S1, OUTPUT);
+  pinMode(vars.LED_S2, OUTPUT);
 
-  pinMode(LED_S1, OUTPUT);
-  //digitalWrite(LED_S1, HIGH);
+  //Startup-LED-Test
+  digitalWrite(vars.LED_S1, HIGH);
+  digitalWrite(vars.LED_S2, HIGH);
+  setRed();
+  delay(600);
+  setGreen();
+  delay(600);
+  setBlue(); //Beim Laden BLAU zeigen
+  delay(600);
+  digitalWrite(vars.LED_S1, LOW);
+  digitalWrite(vars.LED_S2, LOW);
+  //LED-Test ENDE
 
-  pinMode(LED_S2, OUTPUT);
-  //digitalWrite(LED_S2, HIGH);
+  //entfernen? (2 Zeilen)
+  //pinMode(13, OUTPUT);
+  //digitalWrite(13, HIGH);
   
-
-  pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
-  
-
-  //Beim Laden BLAU zeigen
-  setBlue();
-
   //Button-Handlermethode anbinden
   //Guru Meditation Error: Core  1 panic'ed (Cache disabled but cached memory region accessed)
   //attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
 
   // etabliere Wifi Verbindung
   myWifi.connect();
+  sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
 
   // start WebsocketServer server
-  wsServer.onEvent(webSocketEvent);
-  wsServer.begin();
+  wc.wsServer.onEvent(webSocketEvent);
+  wc.wsServer.begin();
 
   // start Webserver
   server.on("/", sbmsPage);
@@ -581,7 +592,7 @@ void setup() {
   server.begin();
 
   // initialize other the air updates
-  ota.init(server, "esp32b");
+  ota.init(server, "esp32a");
 }
 
 /**********************************************************************/
@@ -590,7 +601,7 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
-  wsServer.loop();
+  wc.wsServer.loop();
   server.handleClient();
   readSbms();
   yield();
@@ -599,4 +610,6 @@ void loop() {
       lastCheckedMillis = millis();
       checkValues();
   }
+  yield();
+  sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
 }
