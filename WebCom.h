@@ -7,14 +7,24 @@
 class WebCom {
   private:
     Vars _vars;
+
   public:
+
+    typedef void (*WebSocketServerEvent)(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+    typedef bool (*WebSocketServerHttpHeaderValFunc)(String headerName, String headerValue);
+
     WebCom(Vars& vars);  
+
+    //client connected to send?
+    bool ready = false;
+
     uint8_t clientCount = 0;
     uint8_t clients[256] = { -1};
+    bool notifiedNoClient = false;
     unsigned long wsServerLastSend = -1;
     WebSocketsServer wsServer = WebSocketsServer(81);
     void loop();
-    void begin();
+    void begin(WebSocketServerEvent cbEvent);
     void sendClients(String msg, bool data);
 };
 

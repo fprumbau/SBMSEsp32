@@ -4,14 +4,6 @@ WebCom::WebCom(Vars& vars) {
   _vars = vars;
 }
 
-void WebCom::loop() {
-  wsServer.loop();
-}
-
-void WebCom::begin() {
-  wsServer.begin();
-}
-
 /**
    Sende Daten zu allen über Websockets verbundenen
    Clients. Alles, was NICHT SBMS-Daten sind, also
@@ -42,4 +34,13 @@ void WebCom::sendClients(String msg, bool data) {
     }
     wsServer.sendTXT(client, msg);
   }
+}
+
+void WebCom::loop() {
+  wsServer.loop();
+}
+
+void WebCom::begin(WebSocketServerEvent cbEvent) {
+  wsServer.onEvent(cbEvent);
+  wsServer.begin();
 }

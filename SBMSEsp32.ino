@@ -23,11 +23,6 @@ WebServer server(80);
 
 WebCom wc(vars);
 
-//client connected to send?
-bool ready = false;
-
-bool notifiedNoClient = false;
-
 //Ticker ticker;
 int counter = 0;
 
@@ -83,93 +78,6 @@ void sbmsPage() {
   server.sendContent_P(part2);
   server.sendContent(connStr);
   server.sendContent_P(part3);
-}
-
-/**
-   Websocket-Events, wenn neue Clients sich verbinden, wenn die clients
-   selbst senden oder wenn sie geschlossen werden.
-*/
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-
-  switch (type) {
-    case WStype_DISCONNECTED: {
-        //Client 'num' aus Liste rausnehmen
-        uint8_t newClients[256];
-        for (int a = 0; a < 256; a++) {
-          newClients[a] = wc.clients[a];
-        }
-        int c = 0;
-        for (int x = 0; x < wc.clientCount; x++) {
-          if (num != newClients[x]) {
-            wc.clients[c] = newClients[x];
-            c++;
-          } else {
-            wc.clientCount--;
-          }
-        }
-        if (wc.clientCount == 0) {
-          notifiedNoClient = false;
-          ready = false;
-        }
-        if (vars.debug) {
-          Serial.printf("[%u] Disconnected! Remaining %u\n", num, wc.clientCount);
-        }
-        break;
-      }
-    case WStype_CONNECTED: {
-        IPAddress ip = wc.wsServer.remoteIP(num);
-        Serial.println("");
-
-        // send message to client
-        wc.wsServer.sendTXT(num, "@ Connected");
-
-        bool alreadyListed = false;
-        int y = 0;
-        for (; y < wc.clientCount; y++) {
-          if (num == wc.clients[y]) {
-            alreadyListed = true;
-            break;
-          }
-        }
-        if (!alreadyListed) {
-          wc.clients[y] = num;
-          wc.clientCount++;
-        }
-        if (vars.debug) {
-          Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, wc.clientCount);
-        }
-        ready = true;
-
-        //Relaistatus uebermitteln
-        vars.relayStatus = digitalRead(vars.RELAY_PIN);
-        String msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
-        if (vars.relayStatus == 0) {
-          msg += "LOW";
-        } else {
-          msg += "HIGH";
-        }
-        wc.sendClients(msg, false);
-
-        break;
-      }
-    case WStype_TEXT:
-      if (vars.debug) {
-        Serial.printf("[Client %u] received: %s\n", num, payload);
-      }
-      //if(length > 1) {
-        if (payload[0] == '@') {
-          if (payload[1] == '+') {
-            starteBatterie("Websockets");
-          } else if (payload[1] == '-') {
-            starteNetzvorrang("Websockets");
-          }
-          if (payload[1] == 'd') { //&& length > 4
-            toggleDebug(payload);
-          }
-        }
-      //}
-      break;
-  }
 }
 
 //nicht auf Serial1 warten, Feste Werte annehmen
@@ -249,7 +157,7 @@ void evaluate(String& sread) {
 
   if (vars.debug2) Serial.println(sread);
 
-  if (ready) {
+  if (wc.ready) {
     if (vars.debug2) {
       Serial.print("Length: ");
       Serial.println(sread.length());
@@ -258,8 +166,8 @@ void evaluate(String& sread) {
       wc.sendClients(sread, true);
     }
   } else {
-    if (!notifiedNoClient) {
-      notifiedNoClient = true;
+    if (!wc.notifiedNoClient) {
+      wc.notifiedNoClient = true;
       if (vars.debug) {
         Serial.println("no client connected, yet");
       }
@@ -488,6 +396,93 @@ void IRAM_ATTR handleButton() {
   }
 }
 
+/**
+   Websocket-Events, wenn neue Clients sich verbinden, wenn die clients
+   selbst senden oder wenn sie geschlossen werden.
+*/
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+
+  switch (type) {
+    case WStype_DISCONNECTED: {
+        //Client 'num' aus Liste rausnehmen
+        uint8_t newClients[256];
+        for (int a = 0; a < 256; a++) {
+          newClients[a] = wc.clients[a];
+        }
+        int c = 0;
+        for (int x = 0; x < wc.clientCount; x++) {
+          if (num != newClients[x]) {
+            wc.clients[c] = newClients[x];
+            c++;
+          } else {
+            wc.clientCount--;
+          }
+        }
+        if (wc.clientCount == 0) {
+          wc.notifiedNoClient = false;
+          wc.ready = false;
+        }
+        if (vars.debug) {
+          Serial.printf("[%u] Disconnected! Remaining %u\n", num, wc.clientCount);
+        }
+        break;
+      }
+    case WStype_CONNECTED: {
+        IPAddress ip = wc.wsServer.remoteIP(num);
+        Serial.println("");
+
+        // send message to client
+        wc.wsServer.sendTXT(num, "@ Connected");
+
+        bool alreadyListed = false;
+        int y = 0;
+        for (; y < wc.clientCount; y++) {
+          if (num == wc.clients[y]) {
+            alreadyListed = true;
+            break;
+          }
+        }
+        if (!alreadyListed) {
+          wc.clients[y] = num;
+          wc.clientCount++;
+        }
+        if (vars.debug) {
+          Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, wc.clientCount);
+        }
+        wc.ready = true;
+
+        //Relaistatus uebermitteln
+        vars.relayStatus = digitalRead(vars.RELAY_PIN);
+        String msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
+        if (vars.relayStatus == 0) {
+          msg += "LOW";
+        } else {
+          msg += "HIGH";
+        }
+        wc.sendClients(msg, false);
+
+        break;
+      }
+    case WStype_TEXT:
+      if (vars.debug) {
+        Serial.printf("[Client %u] received: %s\n", num, payload);
+      }
+      //if(length > 1) {
+        if (payload[0] == '@') {
+          if (payload[1] == '+') {
+            starteBatterie("Websockets");
+          } else if (payload[1] == '-') {
+            starteNetzvorrang("Websockets");
+          }
+          if (payload[1] == 'd') { //&& length > 4
+            toggleDebug(payload);
+          }
+        }
+      //}
+      break;
+  }
+}
+
 /**********************************************************************/
 /*                                                                    */
 /* Setup                                                              */
@@ -543,9 +538,8 @@ void setup() {
   myWifi.connect();
   sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
 
-  // start WebsocketServer server
-  wc.wsServer.onEvent(webSocketEvent);
-  wc.begin();
+  // register WebsocketServer handler and start server
+  wc.begin(webSocketEvent);
 
   // start Webserver
   server.on("/", sbmsPage);
