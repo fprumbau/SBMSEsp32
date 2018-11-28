@@ -173,13 +173,13 @@ connection.onmessage = function (e) {
         bb.style.background='#f00';
         bb.style.color='#ff0';
         bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
-      } else if(data.indexOf('debug to 1')!==-1) {
+      } else if(data.indexOf('debug to true')!==-1) {
         document.getElementById("dbg1").checked=true
-      } else if(data.indexOf('debug to 0')!==-1) {
+      } else if(data.indexOf('debug to false')!==-1) {
         document.getElementById("dbg1").checked=false
-      } else if(data.indexOf('debug2 to 1')!==-1) {
+      } else if(data.indexOf('debug2 to true')!==-1) {
         document.getElementById("dbg2").checked=true
-      } else if(data.indexOf('debug2 to 0')!==-1) {
+      } else if(data.indexOf('debug2 to false')!==-1) {
         document.getElementById("dbg2").checked=false
       } else if(data.indexOf('s1 aus')!==-1) {
         b1.style.background='#D8BFD8';

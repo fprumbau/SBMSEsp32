@@ -28,7 +28,7 @@ WebCom wc(vars);
 
 OTA ota;  //Over-the-air updater
 SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
-SMA sma(vars, wc);  //read SMA energy meter broadcast messages 
+SMA sma(vars, wc);  //read SMA energy meter broadcast messages
 
 //Ticker ticker;
 int counter = 0;
@@ -142,36 +142,36 @@ void readSbms() {
           }
         }
       }
-      
-      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also sread.length=0,dann muss erst der failureCount 
+
+      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also sread.length=0,dann muss erst der failureCount
       // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
       soc = 0;
 
       //Werte nun lesen
-      if(len > 0) {
-        
+      if (len > 0) {
+
         const char* txt = sread.c_str();
-      
+
         String outString = "\nSOC: ";
-        if(len>=8) {
+        if (len >= 8) {
           soc = sbms.dcmp(6, 2, txt, len);
           outString += soc;
           outString += " ( Limit: ";
           outString += battery.SOC_LIMIT;
           outString += " ) \n";
         }
-        if(len>=24) {
+        if (len >= 24) {
           for (int k = 0; k < 8; k++) {
             int loc = k * 2 + 8;
             cv[k] = sbms.dcmp(loc, 2, txt, len);
-        
+
             outString += "\ncv";
             outString += ( k + 1 );
             outString += ": ";
             outString += cv[k];
           }
         }
-      
+
         //Werte
         if (vars.debug2) {
           Serial.println(outString);
@@ -179,13 +179,13 @@ void readSbms() {
           Serial.println(battery.stopBattery);
           Serial.println("_______________________________________");
         }
-      
+
         if (vars.debug2) {
           String mem = " Heap (free): ";
           mem += ESP.getFreeHeap();
           wc.sendClients(mem , false);
         }
-      
+
         //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
         lastReceivedMillis = millis();
       }
@@ -202,7 +202,7 @@ void readSbms() {
 */
 void toggleDebug(unsigned char* payload) {
   String msg;
-  if (payload[2] == '1') {    
+  if (payload[2] == '1') {
     if (payload[4] == 't') {
       vars.debug = true;
       msg = "Switched debug1 to true";
@@ -217,7 +217,7 @@ void toggleDebug(unsigned char* payload) {
     } else {
       vars.debug2 = false;
       msg = "Switched debug2 to false";
-    }    
+    }
   }
   if (vars.debug) {
     Serial.println(msg);
@@ -231,7 +231,7 @@ void toggleDebug(unsigned char* payload) {
 void checkValues()  {
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
-  if(testFixed) {
+  if (testFixed) {
     return; //keine Auswertung, wenn Testwerte
   }
 
@@ -387,11 +387,11 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
   switch (eventType) {
     case AceButton::kEventPressed:
       if (vars.debug) Serial.println("Button pressed");
-    
+
       if ((millis() - tasterZeit) > entprellZeit) {
-    
+
         tasterZeit = millis();
-    
+
         vars.relayStatus = digitalRead(vars.RELAY_PIN);
         if (vars.relayStatus == HIGH) {
           // starte Netzvorrang
@@ -468,29 +468,41 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
         //Relaistatus uebermitteln
         vars.relayStatus = digitalRead(vars.RELAY_PIN);
-        msg = "Batteriestatus: "; 
+        msg = "Batteriestatus: ";
         if (vars.relayStatus == 0) {
           msg += "LOW";
         } else {
           msg += "HIGH";
         }
-        wc.sendClients(msg, false);
+        wc.sendTXT(num, msg);
         //Status Solarcharger S1/S2
         bool s1;
         s1 = !digitalRead(vars.RELAY_S1);
         if (s1) {
-          wc.sendClients("s1 an", false);
+          msg = "s1 an";
         } else {
-          wc.sendClients("s1 aus", false);
+          msg= "s1 aus";
         }
         bool s2;
         s2 = !digitalRead(vars.RELAY_S2);
         if (s2) {
-          wc.sendClients("s2 an", false);
+          msg = "s2 an";
         } else {
-          wc.sendClients("s2 aus", false);
+          msg = "s2 aus";
         }
-
+        wc.sendTXT(num, msg);
+        //Status Debugschalter übermitteln
+        if(vars.debug) {
+          msg= "debug to 1";
+        } else {
+          msg= "debug to 0";
+        }
+        if(vars.debug2) {
+          msg= "debug2 to 1";
+        } else {
+          msg= "debug2 to 0";
+        }
+        wc.sendTXT(num, msg);
         break;
       }
     case WStype_TEXT:
@@ -498,39 +510,39 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         Serial.printf("[Client %u] received: %s\n", num, payload);
       }
       //if(length > 1) {
-        if (payload[0] == '@') {
-          if (payload[1] == '+') {
-            starteBatterie("Websockets");
-          } else if (payload[1] == '-') {
-            starteNetzvorrang("Websockets");
-          } else if (payload[1] == 's' && length > 3) {
-              //Solar charger s1 an / ausschalten
-              if(payload[2]=='1') {
-                if(payload[3]=='+') {
-                  //s1 anschalten
-                  sma.toggleCharger(1,true,true);
-                  wc.sendClients("s1 an", false);  
-                } else {
-                  //s1 abschalten
-                  sma.toggleCharger(1,false,true);
-                  wc.sendClients("s1 aus", false);  
-                }              
-              } else {
-                if(payload[3]=='+') {
-                  //s2 anschalten
-                  sma.toggleCharger(2,true,true);
-                  wc.sendClients("s2 an", false);  
-                } else {
-                  //s2 abschalten
-                  sma.toggleCharger(2,false,true);
-                  wc.sendClients("s2 aus", false);  
-                }  
-              }                        
-          }
-          if (payload[1] == 'd') { //&& length > 4
-            toggleDebug(payload);
+      if (payload[0] == '@') {
+        if (payload[1] == '+') {
+          starteBatterie("Websockets");
+        } else if (payload[1] == '-') {
+          starteNetzvorrang("Websockets");
+        } else if (payload[1] == 's' && length > 3) {
+          //Solar charger s1 an / ausschalten
+          if (payload[2] == '1') {
+            if (payload[3] == '+') {
+              //s1 anschalten
+              sma.toggleCharger(1, true, true);
+              wc.sendClients("s1 an", false);
+            } else {
+              //s1 abschalten
+              sma.toggleCharger(1, false, true);
+              wc.sendClients("s1 aus", false);
+            }
+          } else {
+            if (payload[3] == '+') {
+              //s2 anschalten
+              sma.toggleCharger(2, true, true);
+              wc.sendClients("s2 an", false);
+            } else {
+              //s2 abschalten
+              sma.toggleCharger(2, false, true);
+              wc.sendClients("s2 aus", false);
+            }
           }
         }
+        if (payload[1] == 'd') { //&& length > 4
+          toggleDebug(payload);
+        }
+      }
       //}
       break;
   }
@@ -561,7 +573,7 @@ void setup() {
   pinMode(TASTER, INPUT_PULLUP);
   tasterConfig.setEventHandler(handleButton);
   taster.init(TASTER, HIGH, 0 /* id */);
-  
+
 
   digitalWrite(vars.RELAY_S1, HIGH);
   digitalWrite(vars.RELAY_S2, HIGH);
@@ -609,27 +621,27 @@ void setup() {
 /**********************************************************************/
 void loop() {
   taster.check(); //AceButton
-  
-  if(interruptCounter>0){
- 
-      portENTER_CRITICAL(&mux);
-      interruptCounter--;
-      portEXIT_CRITICAL(&mux);
- 
-      numberOfInterrupts++;
-      Serial.print("An interrupt has occurred. Total: ");
-      Serial.println(numberOfInterrupts);
+
+  if (interruptCounter > 0) {
+
+    portENTER_CRITICAL(&mux);
+    interruptCounter--;
+    portEXIT_CRITICAL(&mux);
+
+    numberOfInterrupts++;
+    Serial.print("An interrupt has occurred. Total: ");
+    Serial.println(numberOfInterrupts);
   }
-  
+
   wc.loop();
   server.handleClient();
   readSbms();
   yield();
   if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
-      Serial.print("Check...  ; failureCount: ");
-      Serial.println(failureCount);
-      lastCheckedMillis = millis();
-      checkValues();
+    Serial.print("Check...  ; failureCount: ");
+    Serial.println(failureCount);
+    lastCheckedMillis = millis();
+    checkValues();
   }
   yield();
   sma.read(); //energymeter lesen, wenn upd-Paket vorhanden

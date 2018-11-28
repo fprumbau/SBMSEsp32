@@ -19,7 +19,9 @@ void OTA::init(WebServer& server, const char* host) {
      changes += "<li> Acebutton und ButtonConfig zur Entprellung einsetzen.";
      changes += "<li> ToggleCharger-Methoden.";
      changes += "<li> S1 / S2 nun manuell zu schalten.";     
-     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.8", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li> Initmeldungen, wenn neuer Client connected sollte nicht an alle gehen."; 
+     changes += "<li> Initmeldungen fuer debug/debug2 an neue Clients."; 
+     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.10", "SBMS120 Solar Charger", "Branch : master", changes);
      _otaUpdater.setup(&server);
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
