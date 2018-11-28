@@ -50,8 +50,8 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <button id="bb" onclick="toggleBattery(this.innerHTML);">Netz</button>
 <button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg1' onclick='toggleDebug(1);'>&nbsp;Dbg1</input>
-<input type='checkbox' id='dbg2' onclick='toggleDebug(2);'>&nbsp;Dbg2</input>
+<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;Dbg1</input>
+<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;Dbg2</input>
 </div2>
 </div3>
 <div3>
@@ -173,9 +173,9 @@ connection.onmessage = function (e) {
         bb.style.background='#f00';
         bb.style.color='#ff0';
         bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
-      } else if(data.indexOf('debug to true')!==-1) {
+      } else if(data.indexOf('debug1 to true')!==-1) {
         document.getElementById("dbg1").checked=true
-      } else if(data.indexOf('debug to false')!==-1) {
+      } else if(data.indexOf('debug1 to false')!==-1) {
         document.getElementById("dbg1").checked=false
       } else if(data.indexOf('debug2 to true')!==-1) {
         document.getElementById("dbg2").checked=true
