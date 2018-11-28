@@ -51,14 +51,14 @@ void SMA::read() {
     if (lieferung < 200) {
       _wc.sendClients("Aktiviere Solarlader 2, deaktiviere 1", false);
 
-      toggleCharger(2,true,false);
-      toggleCharger(1,false,false);
+      //toggleCharger(2,true,false);
+      //toggleCharger(1,false,false);
 
     } else {
       _wc.sendClients("Aktiviere Solarlader 1, deaktiviere 2", false);
       
-      toggleCharger(2,false,false);
-      toggleCharger(1,true,false);
+      //toggleCharger(2,false,false);
+      //toggleCharger(1,true,false);
     }
     if(_vars.debug) {
       Serial.print("\nWirkleistung (Bezug/Lieferung): ");
@@ -81,9 +81,9 @@ void SMA::toggleCharger(byte nr, bool onOff, bool override) {
   bool isOn = isChargerOn(nr);
   if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
     if(isOn) {
-      enableCharger(nr, true);
+      disableCharger(nr, override);
     } else {     
-      disableCharger(nr, false);
+      enableCharger(nr, override);
     }
   }
   Serial.printf("SMA::toggleCharger(%d, %d, %d); s1override: %d, s2override: %d, isOn: %s\n", nr, onOff, override, s1override, s2override, isOn?"true":"false");
@@ -91,9 +91,9 @@ void SMA::toggleCharger(byte nr, bool onOff, bool override) {
 
 bool SMA::isChargerOn(byte nr) {
   if(nr == 1) {
-    return digitalRead(_vars.RELAY_S1);
+    return !digitalRead(_vars.RELAY_S1);
   } else {
-    return digitalRead(_vars.RELAY_S2);
+    return !digitalRead(_vars.RELAY_S2);
   }
 }
 

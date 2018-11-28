@@ -1,0 +1,99 @@
+CV[4]: 2948
+
+CV[5]: 1401
+
+CV[6]: 3767
+
+
+
+Kann Netzvorrang nicht starten, da schon aktiv
+wc.clientCount: 3
+
+
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+
+#$87%G$*GBGGGRGBG1GLGKGM*m##-##<##C#####################%N( 
+
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+Check...  ; failureCount: 3296
+
+
+
+Value evaluation message: Undervoltage cell: 5
+
+Stop-value: 1
+
+SOC: 3277
+
+CV[0]: 673
+
+CV[1]: 2857
+
+CV[2]: 3312
+
+CV[3]: 4313
+
+CV[4]: 2857
+
+CV[5]: 1310
+
+CV[6]: 3767
+
+
+
+Kann Netzvorrang nicht starten, da schon aktiv
+wc.clientCount: 3
+
+
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+
+#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N( 
+
+Check...  ; failureCount: 3297
+
+
+
+Value evaluation message: Undervoltage cell: 5
+
+Stop-value: 1
+
+SOC: 3641
+
+CV[0]: 673
+
+CV[1]: 3039
+
+CV[2]: 3312
+
+CV[3]: 4131
+
+CV[4]: 3039
+
+CV[5]: 1401
+
+CV[6]: 3767
+
+
+
+Kann Netzvorrang nicht starten, da schon aktiv
+wc.clientCount: 3
+
+
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(2, 1, 0); s1override: 1, s2override: 1, isOn: false
+SMA::toggleCharger(1, 0, 0); s1override: 1, s2override: 1, isOn: false
+
+#$87%O$*GCGFGPGBG2GLGJGL*l##-##%##H#####################%N( 
+

@@ -181,19 +181,19 @@ connection.onmessage = function (e) {
         document.getElementById("dbg2").checked=true
       } else if(data.indexOf('debug2 to 0')!==-1) {
         document.getElementById("dbg2").checked=false
-      } else if(data.indexOf('s1 to 0')!==-1) {
+      } else if(data.indexOf('s1 aus')!==-1) {
         b1.style.background='#D8BFD8';
         b1.style.color='#b50';
         b1.innerHTML='S1off';
-      } else if(data.indexOf('s1 to 1')!==-1) {
+      } else if(data.indexOf('s1 an')!==-1) {
         b1.style.background='#f00';
         b1.style.color='#ff0';
         b1.innerHTML='S1on';
-      } else if(data.indexOf('s2 to 0')!==-1) {
+      } else if(data.indexOf('s2 aus')!==-1) {
         b2.style.background='#D8BFD8';
         b2.style.color='#b50';
         b2.innerHTML='S2off';
-      } else if(data.indexOf('s2 to 1')!==-1) {
+      } else if(data.indexOf('s2 an')!==-1) {
         b2.style.background='#f00';
         b2.style.color='#ff0';
         b2.innerHTML='S2on';

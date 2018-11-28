@@ -102,8 +102,10 @@ void readSbms() {
     //sread = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
     //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
     //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-    sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
+    //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
+    sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
   }
+  int len = sread.length();
 
   /**
      Solange etwas empfangen wird (sread gefuellt) sollte ausgewertet werden.
@@ -114,19 +116,21 @@ void readSbms() {
 
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
-  if (sread.length() > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
+  if (len > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
     if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
-      if (vars.debug && sread.length() > 0) {
-        Serial.println(sread);
-      }
-      if (vars.debug2) Serial.println(sread);
+      if (vars.debug2 && len > 0) {
+        Serial.printf("____%s____\n", sread);
+        Serial.print(".____");
+        Serial.print(sread);
+        Serial.println("____.");
+      };
 
       //Wert zu Clients publishen (wird dort in Webseite visualisiert oder gelisted)
       if (wc.ready) {
-        if (sread.length() > 0) {
+        if (len > 0) {
           if (vars.debug2) {
             Serial.print("Length 'sread': ");
-            Serial.println(sread.length());
+            Serial.println(len);
           }
           wc.sendClients(sread, true);
         }
@@ -144,8 +148,8 @@ void readSbms() {
       soc = 0;
 
       //Werte nun lesen
-      if(sread.length() > 0) {
-        int len = sread.length();
+      if(len > 0) {
+        
         const char* txt = sread.c_str();
       
         String outString = "\nSOC: ";
@@ -464,13 +468,28 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
         //Relaistatus uebermitteln
         vars.relayStatus = digitalRead(vars.RELAY_PIN);
-        msg = "Batteriestatus: "; //wird die Message von @ eingeleitet, wird sie nicht als SBMS-Datum interpretiert!
+        msg = "Batteriestatus: "; 
         if (vars.relayStatus == 0) {
           msg += "LOW";
         } else {
           msg += "HIGH";
         }
         wc.sendClients(msg, false);
+        //Status Solarcharger S1/S2
+        bool s1;
+        s1 = !digitalRead(vars.RELAY_S1);
+        if (s1) {
+          wc.sendClients("s1 an", false);
+        } else {
+          wc.sendClients("s1 aus", false);
+        }
+        bool s2;
+        s2 = !digitalRead(vars.RELAY_S2);
+        if (s2) {
+          wc.sendClients("s2 an", false);
+        } else {
+          wc.sendClients("s2 aus", false);
+        }
 
         break;
       }
@@ -490,21 +509,21 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
                 if(payload[3]=='+') {
                   //s1 anschalten
                   sma.toggleCharger(1,true,true);
-                  wc.sendClients("s1 an", true);  
+                  wc.sendClients("s1 an", false);  
                 } else {
                   //s1 abschalten
                   sma.toggleCharger(1,false,true);
-                  wc.sendClients("s1 aus", true);  
+                  wc.sendClients("s1 aus", false);  
                 }              
               } else {
                 if(payload[3]=='+') {
                   //s2 anschalten
                   sma.toggleCharger(2,true,true);
-                  wc.sendClients("s2 an", true);  
+                  wc.sendClients("s2 an", false);  
                 } else {
                   //s2 abschalten
                   sma.toggleCharger(2,false,true);
-                  wc.sendClients("s2 aus", true);  
+                  wc.sendClients("s2 aus", false);  
                 }  
               }                        
           }
