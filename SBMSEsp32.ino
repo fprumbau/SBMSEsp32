@@ -1,3 +1,5 @@
+#include <ButtonConfig.h>
+#include <AceButton.h>
 #include <WebServer.h>
 
 #include "Vars.h"
@@ -10,6 +12,11 @@
 #include "Battery.h"
 #include "OTA.h"
 #include "SMA.h"
+
+using namespace ace_button;
+
+ButtonConfig tasterConfig;
+AceButton taster(&tasterConfig);
 
 Vars vars; //Global definierte Variablen
 
@@ -94,7 +101,8 @@ void readSbms() {
   } else {
     //sread = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
     //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-    sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+    //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+    sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
   }
 
   /**
@@ -105,22 +113,21 @@ void readSbms() {
      Gleichzeitig ist es nicht mehr möglich, auf Batterie zu wechseln.
 
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
-     und damit der Netzvorrang aktiv.
   */
   if (sread.length() > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
     if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
-      if (vars.debug) {
+      if (vars.debug && sread.length() > 0) {
         Serial.println(sread);
       }
       if (vars.debug2) Serial.println(sread);
 
       //Wert zu Clients publishen (wird dort in Webseite visualisiert oder gelisted)
       if (wc.ready) {
-        if (vars.debug2) {
-          Serial.print("Length 'sread': ");
-          Serial.println(sread.length());
-        }
         if (sread.length() > 0) {
+          if (vars.debug2) {
+            Serial.print("Length 'sread': ");
+            Serial.println(sread.length());
+          }
           wc.sendClients(sread, true);
         }
       } else {
@@ -368,28 +375,34 @@ void starteBatterie(String reason) {
    Interrupt angebunden:
 
    attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
+
+   Ohne AceButton:
+      void IRAM_ATTR handleButton() {
 */
-void IRAM_ATTR handleButton() {
-  if (vars.debug) Serial.println("Button pressed");
-
-  if ((millis() - tasterZeit) > entprellZeit) {
-
-    tasterZeit = millis();
-
-    vars.relayStatus = digitalRead(vars.RELAY_PIN);
-    if (vars.relayStatus == HIGH) {
-      // starte Netzvorrang
-      starteNetzvorrang("Buttonaction");
-    } else {
-      if (!battery.stopBattery) {
-        starteBatterie("Buttonaction");
-      } else {
-        if (vars.debug) {
-          Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
+void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonState */) {
+  switch (eventType) {
+    case AceButton::kEventPressed:
+      if (vars.debug) Serial.println("Button pressed");
+    
+      if ((millis() - tasterZeit) > entprellZeit) {
+    
+        tasterZeit = millis();
+    
+        vars.relayStatus = digitalRead(vars.RELAY_PIN);
+        if (vars.relayStatus == HIGH) {
+          // starte Netzvorrang
+          starteNetzvorrang("Buttonaction");
+        } else {
+          if (!battery.stopBattery) {
+            starteBatterie("Buttonaction");
+          } else {
+            if (vars.debug) {
+              Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
+            }
+          }
         }
       }
-    }
-
+      break;
   }
 }
 
@@ -471,6 +484,29 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             starteBatterie("Websockets");
           } else if (payload[1] == '-') {
             starteNetzvorrang("Websockets");
+          } else if (payload[1] == 's' && length > 3) {
+              //Solar charger s1 an / ausschalten
+              if(payload[2]=='1') {
+                if(payload[3]=='+') {
+                  //s1 anschalten
+                  sma.toggleCharger(1,true,true);
+                  wc.sendClients("s1 an", true);  
+                } else {
+                  //s1 abschalten
+                  sma.toggleCharger(1,false,true);
+                  wc.sendClients("s1 aus", true);  
+                }              
+              } else {
+                if(payload[3]=='+') {
+                  //s2 anschalten
+                  sma.toggleCharger(2,true,true);
+                  wc.sendClients("s2 an", true);  
+                } else {
+                  //s2 abschalten
+                  sma.toggleCharger(2,false,true);
+                  wc.sendClients("s2 aus", true);  
+                }  
+              }                        
           }
           if (payload[1] == 'd') { //&& length > 4
             toggleDebug(payload);
@@ -496,10 +532,17 @@ void setup() {
   Serial.println("Starting...");
 
   //Pins fuer Taster und Relay initialisieren
-  pinMode(TASTER, INPUT);
   pinMode(vars.RELAY_PIN, OUTPUT);
   pinMode(vars.RELAY_S1, OUTPUT);
   pinMode(vars.RELAY_S2, OUTPUT);
+
+  //Button-Handlermethode anbinden
+  //attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, FALLING);
+
+  pinMode(TASTER, INPUT_PULLUP);
+  tasterConfig.setEventHandler(handleButton);
+  taster.init(TASTER, HIGH, 0 /* id */);
+  
 
   digitalWrite(vars.RELAY_S1, HIGH);
   digitalWrite(vars.RELAY_S2, HIGH);
@@ -524,15 +567,6 @@ void setup() {
   digitalWrite(vars.LED_S2, LOW);
   //LED-Test ENDE
 
-  //entfernen? (2 Zeilen)
-  //pinMode(13, OUTPUT);
-  //digitalWrite(13, HIGH);
-  
-  //Button-Handlermethode anbinden
-  //Guru Meditation Error: Core  1 panic'ed (Cache disabled but cached memory region accessed)
-  pinMode(TASTER, INPUT);
-  attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
-
   // etabliere Wifi Verbindung
   myWifi.connect();
   sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
@@ -555,6 +589,8 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
+  taster.check(); //AceButton
+  
   if(interruptCounter>0){
  
       portENTER_CRITICAL(&mux);

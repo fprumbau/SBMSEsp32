@@ -36,7 +36,7 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{color:#b50;background:#D8BFD8;border:2px solid white;width:120px;height:25px;}
+button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22px;}
 </style>
 </head>
 <body style='background: #000;'>
@@ -47,7 +47,9 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:120px;height:2
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
 <div2 style='width:350px; top:82px; left:520px;'>
-<button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
+<button id="bb" onclick="toggleBattery(this.innerHTML);">Netz</button>
+<button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
+<button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
 <br><input type='checkbox' id='dbg1' onclick='toggleDebug(1);'>&nbsp;Dbg1</input>
 <input type='checkbox' id='dbg2' onclick='toggleDebug(2);'>&nbsp;Dbg2</input>
 </div2>
@@ -179,6 +181,22 @@ connection.onmessage = function (e) {
         document.getElementById("dbg2").checked=true
       } else if(data.indexOf('debug2 to 0')!==-1) {
         document.getElementById("dbg2").checked=false
+      } else if(data.indexOf('s1 to 0')!==-1) {
+        b1.style.background='#D8BFD8';
+        b1.style.color='#b50';
+        b1.innerHTML='S1off';
+      } else if(data.indexOf('s1 to 1')!==-1) {
+        b1.style.background='#f00';
+        b1.style.color='#ff0';
+        b1.innerHTML='S1on';
+      } else if(data.indexOf('s2 to 0')!==-1) {
+        b2.style.background='#D8BFD8';
+        b2.style.color='#b50';
+        b2.innerHTML='S2off';
+      } else if(data.indexOf('s2 to 1')!==-1) {
+        b2.style.background='#f00';
+        b2.style.color='#ff0';
+        b2.innerHTML='S2on';
       }
     }
   }
@@ -192,6 +210,20 @@ function toggleBattery(txt) {
       connection.send("@+"); //auf Batterie aendern
     } else {
       connection.send("@-"); //auf Netzvorrang schalten
+    }
+}
+function toggleS1(txt) {
+    if(txt == 'S1off') {
+      connection.send("@s1+"); //Solarlader S1 an
+    } else {
+      connection.send("@s1-"); //Solarlader S1 off
+    }
+}
+function toggleS2(txt) {
+    if(txt == 'S2off') {
+      connection.send("@s2+"); //Solarlader S2 an
+    } else {
+      connection.send("@s2-"); //Solarlader S2 off
     }
 }
 function toggleDebug(nr) {

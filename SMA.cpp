@@ -49,27 +49,90 @@ void SMA::read() {
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
     if (lieferung < 200) {
+      _wc.sendClients("Aktiviere Solarlader 2, deaktiviere 1", false);
+
+      toggleCharger(2,true,false);
+      toggleCharger(1,false,false);
+
+    } else {
       _wc.sendClients("Aktiviere Solarlader 1, deaktiviere 2", false);
       
-      digitalWrite(_vars.RELAY_S1, LOW);
-      digitalWrite(_vars.RELAY_S2, HIGH);
-
-      digitalWrite(_vars.LED_S1, HIGH);
-      digitalWrite(_vars.LED_S2, LOW);
-    } else {
-      _wc.sendClients("Aktiviere Solarlader 2, deaktiviere 1", false);
-      
-      digitalWrite(_vars.RELAY_S1, HIGH);
-      digitalWrite(_vars.RELAY_S2, LOW);
-
-      digitalWrite(_vars.LED_S1, LOW);
-      digitalWrite(_vars.LED_S2, HIGH);
+      toggleCharger(2,false,false);
+      toggleCharger(1,true,false);
     }
-
-    Serial.print("\nWirkleistung (Bezug/Lieferung): ");
-    Serial.print(bezug);
-    Serial.print(" / ");
-    Serial.println(lieferung);
+    if(_vars.debug) {
+      Serial.print("\nWirkleistung (Bezug/Lieferung): ");
+      Serial.print(bezug);
+      Serial.print(" / ");
+      Serial.println(lieferung);
+    }
    
+  }
+}
+
+/**
+ * An-/Ausschalten der Solarcharger S1 und S2.
+ * Erfolgt die Schaltung manuell, dann wird beim
+ * Anschalten ein Sperrflag gesetzt, welcher ein
+ * automatisches Ausschalten verhindert ( Der 
+ * Charger MUSS manuell wieder ausgeschaltet werden)
+ */
+void SMA::toggleCharger(byte nr, bool onOff, bool override) {
+  bool isOn = isChargerOn(nr);
+  if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
+    if(isOn) {
+      enableCharger(nr, true);
+    } else {     
+      disableCharger(nr, false);
+    }
+  }
+  Serial.printf("SMA::toggleCharger(%d, %d, %d); s1override: %d, s2override: %d, isOn: %s\n", nr, onOff, override, s1override, s2override, isOn?"true":"false");
+}
+
+bool SMA::isChargerOn(byte nr) {
+  if(nr == 1) {
+    return digitalRead(_vars.RELAY_S1);
+  } else {
+    return digitalRead(_vars.RELAY_S2);
+  }
+}
+
+void SMA::enableCharger(byte nr, bool override) {
+  if(nr == 1) {
+      if(override) {
+        s1override = true;
+      }
+      digitalWrite(_vars.RELAY_S1, LOW);
+      digitalWrite(_vars.LED_S1, HIGH);
+      _wc.sendClients("Aktiviere Solarlader: s1 to 1", false);
+  } else {
+      if(override) {
+        s2override = true;
+      }    
+      digitalWrite(_vars.RELAY_S2, LOW);
+      digitalWrite(_vars.LED_S2, HIGH);
+      _wc.sendClients("Aktiviere Solarlader: s2 to 1", false); 
+  }
+}
+
+void SMA::disableCharger(byte nr, bool override) {
+  if(nr == 1) {
+      if(override) {
+        s1override = false;
+      }
+      if(override || !s1override) {
+        digitalWrite(_vars.RELAY_S1, HIGH);
+        digitalWrite(_vars.LED_S1, LOW);
+        _wc.sendClients("Deaktiviere Solarlader: s1 to 0", false); 
+      }  
+  } else {
+      if(override) {
+        s2override = false;
+      }    
+      if(override || !s2override) {
+        digitalWrite(_vars.RELAY_S2, HIGH);
+        digitalWrite(_vars.LED_S2, LOW);
+        _wc.sendClients("Deaktiviere Solarlader: s2 to 0", false); 
+      } 
   }
 }

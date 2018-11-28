@@ -13,7 +13,13 @@ void OTA::init(WebServer& server, const char* host) {
      String changes = "Device info : ukn";
      changes += "<li> Integrierte Schaltung der beiden Solarlader, WebSocketServer als WebCom gekapselt";
      changes += "<li> Errormodus wird bei fehlenden SBMS-Paketen nun wieder aktiviert.";    
-     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.2", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li> Interruptbehandlung (Taster) wieder akiviert.";  
+     changes += "<li> Wenn debug sread nur ausgeben, wenn Inhalt vorhanden.";  
+     changes += "<li> Fix input Pullup fuer Taster auf GPIO19.";
+     changes += "<li> Acebutton und ButtonConfig zur Entprellung einsetzen.";
+     changes += "<li> Erster Versuch, S1 / S2 manuell schalten zu können.";
+     changes += "<li> ToggleCharger-Methoden.";
+     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.7", "SBMS120 Solar Charger", "Branch : master", changes);
      _otaUpdater.setup(&server);
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");

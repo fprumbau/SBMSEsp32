@@ -17,11 +17,18 @@ class SMA {
     char wll[9]; //Wirkleistung Lieferung
     WiFiUDP _udp;
     WebCom _wc;
+    //manuelle Schaltung der Solarcharger ermöglichen
+    bool s1override = false;
+    bool s2override = false;
+    bool isChargerOn(byte nr);
+    void enableCharger(byte nr, bool active);
+    void disableCharger(byte nr, bool active);
     
   public:
     SMA(Vars& vars, WebCom& wc);
     void read();
     void init(MyWifi& myWifi);
+    void toggleCharger(byte nr, bool onOff, bool override);
   
 };
 
