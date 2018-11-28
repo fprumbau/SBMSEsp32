@@ -21,6 +21,7 @@ void OTA::init(WebServer& server, const char* host) {
      changes += "<li> S1 / S2 nun manuell zu schalten.";     
      changes += "<li> Initmeldungen, wenn neuer Client connected sollte nicht an alle gehen."; 
      changes += "<li> Initmeldungen fuer debug/debug2 an neue Clients."; 
+     changes += "<li> Einbinden von JSON zwischen Server -> Client.";
      _otaUpdater.setUpdaterUi("Title", "Build : 0.8.10", "SBMS120 Solar Charger", "Branch : master", changes);
      _otaUpdater.setup(&server);
   } else {

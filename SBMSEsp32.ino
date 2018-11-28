@@ -1,6 +1,7 @@
 #include <ButtonConfig.h>
 #include <AceButton.h>
 #include <WebServer.h>
+#include <ArduinoJson.h>
 
 #include "Vars.h"
 #include "MyWifi.h"
@@ -119,7 +120,6 @@ void readSbms() {
   if (len > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
     if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
       if (vars.debug2 && len > 0) {
-        Serial.printf("____%s____\n", sread);
         Serial.print(".____");
         Serial.print(sread);
         Serial.println("____.");
@@ -491,8 +491,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           msg = "s2 aus";
         }
         wc.sendTXT(num, msg);
+        
+        
         //Status Debugschalter übermitteln
-        if(vars.debug) {
+        /*if(vars.debug) {
           msg= "debug to 1";
         } else {
           msg= "debug to 0";
@@ -503,6 +505,20 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           msg= "debug2 to 0";
         }
         wc.sendTXT(num, msg);
+        */
+
+        //mit JSON
+        StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
+        JsonObject& root = jsonBuffer.createObject();
+        root["d1"]=vars.debug;
+        root["d2"]=vars.debug2;
+        char jsonChar[512];
+        root.printTo(jsonChar);
+        String str(jsonChar);
+        if(vars.debug2) {
+          Serial.println(str);
+        }
+        wc.sendTXT(num, str);        
         break;
       }
     case WStype_TEXT:

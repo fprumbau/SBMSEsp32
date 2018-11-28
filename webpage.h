@@ -146,6 +146,7 @@ connection.onclose = function(){
 //vom Server empfangen
 var server = '';
 var data = '';
+var json = null;
 connection.onmessage = function (e) { 
   if(server == '') {
     server = e.data;
@@ -153,56 +154,77 @@ connection.onmessage = function (e) {
     log('Server: ' + server);
   } else {
     data = e.data;
-    if(data[0] != '@') {
-      if(debug) {
-        console.log('Daten: ', data);
-        log('Daten: ' + data);
-      }
-      sbms=data
-      localStorage['sbmsb']=sbms;
-      all();
-    } else {
-      console.log('Daten: ', data);
-      log(data);      
-      bb = document.getElementById('bb')
-      if(data.indexOf('LOW')!==-1) {
-        bb.style.background='#D8BFD8';
-        bb.style.color='#b50';
-        bb.innerHTML='Netzvorrang';
-      } else if(data.indexOf('HIGH')!==-1) {
-        bb.style.background='#f00';
-        bb.style.color='#ff0';
-        bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
-      } else if(data.indexOf('debug1 to true')!==-1) {
-        document.getElementById("dbg1").checked=true
-      } else if(data.indexOf('debug1 to false')!==-1) {
-        document.getElementById("dbg1").checked=false
-      } else if(data.indexOf('debug2 to true')!==-1) {
-        document.getElementById("dbg2").checked=true
-      } else if(data.indexOf('debug2 to false')!==-1) {
-        document.getElementById("dbg2").checked=false
-      } else if(data.indexOf('s1 aus')!==-1) {
-        b1.style.background='#D8BFD8';
-        b1.style.color='#b50';
-        b1.innerHTML='S1off';
-      } else if(data.indexOf('s1 an')!==-1) {
-        b1.style.background='#f00';
-        b1.style.color='#ff0';
-        b1.innerHTML='S1on';
-      } else if(data.indexOf('s2 aus')!==-1) {
-        b2.style.background='#D8BFD8';
-        b2.style.color='#b50';
-        b2.innerHTML='S2off';
-      } else if(data.indexOf('s2 an')!==-1) {
-        b2.style.background='#f00';
-        b2.style.color='#ff0';
-        b2.innerHTML='S2on';
-      }
+    switch(data[0]) {
+      case '@':
+            console.log('Daten: ', data);
+            log(data);      
+            bb = document.getElementById('bb')
+            if(data.indexOf('LOW')!==-1) {
+              bb.style.background='#D8BFD8';
+              bb.style.color='#b50';
+              bb.innerHTML='Netzvorrang';
+            } else if(data.indexOf('HIGH')!==-1) {
+              bb.style.background='#f00';
+              bb.style.color='#ff0';
+              bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
+            } else if(data.indexOf('debug1 to true')!==-1) {
+              document.getElementById("dbg1").checked=true
+            } else if(data.indexOf('debug1 to false')!==-1) {
+              document.getElementById("dbg1").checked=false
+            } else if(data.indexOf('debug2 to true')!==-1) {
+              document.getElementById("dbg2").checked=true
+            } else if(data.indexOf('debug2 to false')!==-1) {
+              document.getElementById("dbg2").checked=false
+            } else if(data.indexOf('s1 aus')!==-1) {
+              b1.style.background='#D8BFD8';
+              b1.style.color='#b50';
+              b1.innerHTML='S1off';
+            } else if(data.indexOf('s1 an')!==-1) {
+              b1.style.background='#f00';
+              b1.style.color='#ff0';
+              b1.innerHTML='S1on';
+            } else if(data.indexOf('s2 aus')!==-1) {
+              b2.style.background='#D8BFD8';
+              b2.style.color='#b50';
+              b2.innerHTML='S2off';
+            } else if(data.indexOf('s2 an')!==-1) {
+              b2.style.background='#f00';
+              b2.style.color='#ff0';
+              b2.innerHTML='S2on';
+            }
+          break;
+       case '{':
+            console.log('JSon: ', data);
+            json = JSON.parse(data); 
+            updateUiFromData();  
+          break;
+      default:
+            if(debug) {
+              console.log('Non-Daten: ', data);
+              log('Daten: ' + data);
+            }
+            sbms=data
+            localStorage['sbmsb']=sbms;
+            all();
     }
   }
 };
 console.log('End trying to open Webclient socket');
 log('End trying to open webclient socket');
+
+/**
+ * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
+ */
+function updateUiFromData() {
+  var debug1 = json.debug1;
+  if(null != debug1) {
+    document.getElementById("dbg1").checked = debug1;
+  }
+  var debug2 = json.debug2;
+  if(null != debug2) {
+    document.getElementById("dbg2").checked = debug2;
+  }
+}
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
 function toggleBattery(txt) {
@@ -299,7 +321,11 @@ function all(){
       //Frank: Divisor von 1000 auf 100 geaendert
       x.setAttribute('min',dcmp(5,2,xsbms)/100);
       x.setAttribute('max',dcmp(3,2,xsbms)/100);
-      x.setAttribute('value',cv);
+      if(!isNaN(cv) {
+        x.setAttribute('value',cv);      
+      } else {
+        x.setAttribute('value',0);   
+      }
       x.style.top=((x1*21)+3)+'px'
       mt.appendChild(x);
     } 
