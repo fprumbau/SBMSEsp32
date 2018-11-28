@@ -216,11 +216,13 @@ log('End trying to open webclient socket');
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
 function updateUiFromData() {
-  var debug1 = json.debug1;
+  var debug1 = json.d1;
+  console.log("Debug1: " + debug1);
   if(null != debug1) {
     document.getElementById("dbg1").checked = debug1;
   }
-  var debug2 = json.debug2;
+  var debug2 = json.d2;
+  console.log("Debug2: " + debug2);
   if(null != debug2) {
     document.getElementById("dbg2").checked = debug2;
   }
@@ -249,9 +251,7 @@ function toggleS2(txt) {
     }
 }
 function toggleDebug(nr) {
-    if(nr==1) {
-       debug=document.getElementById("dbg"+nr).checked;
-    }
+    debug=document.getElementById("dbg"+nr).checked;
     connection.send("@d"+nr+"-"+debug);
 }
 
@@ -275,7 +275,11 @@ function all(){
   var SOC='';
   SOC =dcmp(6,2,sbms);
   htm('SOC','<b>'+SOC+'%</b>');
-  document.getElementById('bat').value=SOC;
+  if(!isNaN(SOC)) {
+    document.getElementById('bat').value=SOC;
+  } else {
+    document.getElementById('bat').value=0;
+  }
 
   if (sbms2[10]!=1){mos(0);};if (sbms2[11]!=1){mos(1);};
   function mos(rr){document.getElementById('mo'+rr).style.background='rgba(120,90,0,0.7)';}
@@ -321,10 +325,10 @@ function all(){
       //Frank: Divisor von 1000 auf 100 geaendert
       x.setAttribute('min',dcmp(5,2,xsbms)/100);
       x.setAttribute('max',dcmp(3,2,xsbms)/100);
-      if(!isNaN(cv) {
+      if(!isNaN(cv)) {
         x.setAttribute('value',cv);      
       } else {
-        x.setAttribute('value',0);   
+        x.setAttribute('value',cv);   
       }
       x.style.top=((x1*21)+3)+'px'
       mt.appendChild(x);
