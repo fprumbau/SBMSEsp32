@@ -9,7 +9,6 @@
 #include "WebCom.h"
 #include "config.h"
 #include "SBMS.h"
-#include "Taster.h"
 #include "Battery.h"
 #include "OTA.h"
 #include "SMA.h"
@@ -50,6 +49,9 @@ const int errLimit = 5;
 int LED_RED = 12;
 int LED_GREEN = 14;
 int LED_BLUE = 27;
+
+//manuelle Inverterumschaltung
+int TASTER = 19;
 
 /*
    Schreibt die Webseite in Teilen (<6kb)
@@ -106,6 +108,7 @@ void readSbms() {
     //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
     sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
   }
+  sread.trim();
   int len = sread.length();
 
   /**
@@ -388,24 +391,20 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
     case AceButton::kEventPressed:
       if (vars.debug) Serial.println("Button pressed");
 
-      if ((millis() - tasterZeit) > entprellZeit) {
-
-        tasterZeit = millis();
-
-        vars.relayStatus = digitalRead(vars.RELAY_PIN);
-        if (vars.relayStatus == HIGH) {
-          // starte Netzvorrang
-          starteNetzvorrang("Buttonaction");
+      vars.relayStatus = digitalRead(vars.RELAY_PIN);
+      if (vars.relayStatus == HIGH) {
+        // starte Netzvorrang
+        starteNetzvorrang("Buttonaction");
+      } else {
+        if (!battery.stopBattery) {
+          starteBatterie("Buttonaction");
         } else {
-          if (!battery.stopBattery) {
-            starteBatterie("Buttonaction");
-          } else {
-            if (vars.debug) {
-              Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
-            }
+          if (vars.debug) {
+            Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
           }
         }
       }
+
       break;
   }
 }
@@ -637,17 +636,6 @@ void setup() {
 /**********************************************************************/
 void loop() {
   taster.check(); //AceButton
-
-  if (interruptCounter > 0) {
-
-    portENTER_CRITICAL(&mux);
-    interruptCounter--;
-    portEXIT_CRITICAL(&mux);
-
-    numberOfInterrupts++;
-    Serial.print("An interrupt has occurred. Total: ");
-    Serial.println(numberOfInterrupts);
-  }
 
   wc.loop();
   server.handleClient();

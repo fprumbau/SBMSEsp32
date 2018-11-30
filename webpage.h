@@ -1,5 +1,3 @@
-
-
 const char part1[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
@@ -126,10 +124,6 @@ const char part3[] PROGMEM = R"=====(
 
 //var timerID=0;
 connection.onopen = function () { 
-  //if(window.timerID){
-  //  window.clearInterval(window.timerID);
-  //  window.timerID=0;
-  //}  
   connection.send('Connect ' + new Date()); 
 };
 connection.onerror = function (error) { 
@@ -138,9 +132,6 @@ connection.onerror = function (error) {
 };
 
 connection.onclose = function(){
-   //if(!window.timerID){
-   //   window.timerID = setInterval(function(){connect()}, 30000);
-   //}
 };
 
 //vom Server empfangen

@@ -22,7 +22,8 @@ void OTA::init(WebServer& server, const char* host) {
      changes += "<li> Initmeldungen, wenn neuer Client connected sollte nicht an alle gehen."; 
      changes += "<li> Initmeldungen fuer debug/debug2 an neue Clients."; 
      changes += "<li> Einbinden von JSON zwischen Server -> Client.";
-     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.10", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li> Automatisches Ein-/Ausschalten der Charger.";
+     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.11", "SBMS120 Solar Charger", "Branch : master", changes);
      _otaUpdater.setup(&server);
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");

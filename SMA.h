@@ -17,6 +17,8 @@ class SMA {
     char wll[9]; //Wirkleistung Lieferung
     WiFiUDP _udp;
     WebCom _wc;
+    int s1_switched = -1;
+    int s2_switched = -1;
     //manuelle Schaltung der Solarcharger ermöglichen
     bool s1override = false;
     bool s2override = false;
