@@ -122,19 +122,17 @@ void readSbms() {
   */
   if (len > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
     if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
-      if (vars.debug2 && len > 0) {
+      if (vars.debug && len > 0) {
         Serial.print(".____");
         Serial.print(sread);
         Serial.println("____.");
+        Serial.print("Length 'sread': ");
+        Serial.println(len);
       };
 
       //Wert zu Clients publishen (wird dort in Webseite visualisiert oder gelisted)
       if (wc.ready) {
         if (len > 0) {
-          if (vars.debug2) {
-            Serial.print("Length 'sread': ");
-            Serial.println(len);
-          }
           wc.sendClients(sread, true);
         }
       } else {
@@ -176,14 +174,14 @@ void readSbms() {
         }
 
         //Werte
-        if (vars.debug2) {
+        if (vars.debug) {
           Serial.println(outString);
           Serial.print("StopBattery: ");
           Serial.println(battery.stopBattery);
           Serial.println("_______________________________________");
         }
 
-        if (vars.debug2) {
+        if (vars.debug) {
           String mem = " Heap (free): ";
           mem += ESP.getFreeHeap();
           wc.sendClients(mem , false);
@@ -222,7 +220,7 @@ void toggleDebug(unsigned char* payload) {
       msg = "Switched debug2 to false";
     }
   }
-  if (vars.debug) {
+  if (vars.debug2) {
     Serial.println(msg);
   }
   wc.sendClients(msg, false);
@@ -255,22 +253,6 @@ void checkValues()  {
       }
     }
   }
-  if (vars.debug) {
-    Serial.println("");
-    Serial.print("Value evaluation message: ");
-    Serial.println(message);
-    Serial.print("Stop-value: ");
-    Serial.println(stop);
-    Serial.print("SOC: ");
-    Serial.println(soc);
-    for (int j = 0; j < 7; j++) {
-      Serial.print("CV[");
-      Serial.print(j);
-      Serial.print("]: ");
-      Serial.println(cv[j]);
-    }
-    Serial.println("");
-  }
   if (stop) {
     failureCount++;
     if (failureCount < errLimit) { //einen 'Fehlversuch' ignorieren.
@@ -295,7 +277,6 @@ void checkValues()  {
       failureCount = 0;
     }
     //Hier sollte nicht die Batterie gestartet, sondern nur freigeschaltet werden!!!
-    //starteBatterie("Interrupt(BAT); " + message);
     battery.stopBattery = false;
     setGreen();
   }
@@ -378,21 +359,15 @@ void starteBatterie(String reason) {
 }
 
 /**
-   Der Button wird über ein in der Setup-Funktion definierten
-   Interrupt angebunden:
-
-   attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, RISING);
-
-   Ohne AceButton:
-      void IRAM_ATTR handleButton() {
+ * Buttonsteuerung, um manuell den Inverter schalten zu koennen
 */
 void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonState */) {
   switch (eventType) {
     case AceButton::kEventPressed:
-      if (vars.debug) Serial.println("Button pressed");
+      Serial.println("Button pressed");
 
-      vars.relayStatus = digitalRead(vars.RELAY_PIN);
-      if (vars.relayStatus == HIGH) {
+      bool relayStatus = digitalRead(vars.RELAY_PIN);
+      if (relayStatus == HIGH) {
         // starte Netzvorrang
         starteNetzvorrang("Buttonaction");
       } else {
@@ -404,7 +379,6 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
           }
         }
       }
-
       break;
   }
 }
@@ -466,9 +440,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         wc.ready = true;
 
         //Relaistatus uebermitteln
-        vars.relayStatus = digitalRead(vars.RELAY_PIN);
+        bool relayStatus = digitalRead(vars.RELAY_PIN);
         msg = "Batteriestatus: ";
-        if (vars.relayStatus == 0) {
+        if (relayStatus == 0) {
           msg += "LOW";
         } else {
           msg += "HIGH";
@@ -490,21 +464,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           msg = "s2 aus";
         }
         wc.sendTXT(num, msg);
-        
-        
-        //Status Debugschalter übermitteln
-        /*if(vars.debug) {
-          msg= "debug to 1";
-        } else {
-          msg= "debug to 0";
-        }
-        if(vars.debug2) {
-          msg= "debug2 to 1";
-        } else {
-          msg= "debug2 to 0";
-        }
-        wc.sendTXT(num, msg);
-        */
 
         //mit JSON
         StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
@@ -582,13 +541,10 @@ void setup() {
   pinMode(vars.RELAY_S1, OUTPUT);
   pinMode(vars.RELAY_S2, OUTPUT);
 
-  //Button-Handlermethode anbinden
-  //attachInterrupt(digitalPinToInterrupt(TASTER), handleButton, FALLING);
-
+  //manuell Invertersteuerung
   pinMode(TASTER, INPUT_PULLUP);
   tasterConfig.setEventHandler(handleButton);
   taster.init(TASTER, HIGH, 0 /* id */);
-
 
   digitalWrite(vars.RELAY_S1, HIGH);
   digitalWrite(vars.RELAY_S2, HIGH);

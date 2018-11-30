@@ -157,7 +157,7 @@ connection.onmessage = function (e) {
             } else if(data.indexOf('HIGH')!==-1) {
               bb.style.background='#f00';
               bb.style.color='#ff0';
-              bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
+              bb.innerHTML='Batt&nbsp;&nbsp;&nbsp;&nbsp;';
             } else if(data.indexOf('debug1 to true')!==-1) {
               document.getElementById("dbg1").checked=true
             } else if(data.indexOf('debug1 to false')!==-1) {
@@ -221,7 +221,7 @@ function updateUiFromData() {
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
 function toggleBattery(txt) {
-    if(txt == 'Netzvorrang') {
+    if(txt == 'Netz') {
       connection.send("@+"); //auf Batterie aendern
     } else {
       connection.send("@-"); //auf Netzvorrang schalten

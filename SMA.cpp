@@ -48,6 +48,13 @@ void SMA::read() {
     float bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
+    if(_vars.debug2) {
+      Serial.print("\nWirkleistung (Bezug/Lieferung): ");
+      Serial.print(bezug);
+      Serial.print(" / ");
+      Serial.println(lieferung);
+    }
+
     /**
      * Ist der Charger2 aus UND ist der letzte Schaltvorgang
      * mehr als 10s her UND gibt es einen Energieüberschuss von 
@@ -61,7 +68,7 @@ void SMA::read() {
         _wc.sendClients("Aktiviere Solarlader 2", false);
         toggleCharger(2,true,false);
       } 
-    } else if(lieferung <= 0) {
+    } else if(lieferung <= 0 && bezug > 100) {
         Serial.println("Deaktiviere Solarcharger 2");
         _wc.sendClients("Deaktiviere Solarlader 2", false);
         toggleCharger(2,false,false);
@@ -80,17 +87,10 @@ void SMA::read() {
         _wc.sendClients("Aktiviere Solarlader 1", false);
         toggleCharger(1,true,false);
       }
-    } else if(lieferung <= 0) {
+    } else if(lieferung <= 0 && bezug > 300) {
         Serial.println("Deaktiviere Solarcharger 2");
         _wc.sendClients("Deaktiviere Solarlader 1", false);
         toggleCharger(1,false,false);
-    }
-
-    if(_vars.debug) {
-      Serial.print("\nWirkleistung (Bezug/Lieferung): ");
-      Serial.print(bezug);
-      Serial.print(" / ");
-      Serial.println(lieferung);
     }
    
   }
