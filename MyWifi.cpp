@@ -1,8 +1,9 @@
 #include "MyWifi.h"
 
 void MyWifi::connect() {
+  
+  //WiFi.mode(WIFI_STA); //para que no inicie el SoftAP en el modo normal
   WiFi.begin(_ssid, _password);
-  WiFi.mode(WIFI_STA); //para que no inicie el SoftAP en el modo normal
   
   while(WiFi.status() != WL_CONNECTED) {
       Serial.print(".");

@@ -53,15 +53,155 @@ int LED_BLUE = 27;
 //manuelle Inverterumschaltung
 int TASTER = 19;
 
+//nicht auf Serial1 warten, Feste Werte annehmen
+bool testFixed = false;
+
 /*
-   Schreibt die Webseite in Teilen (<6kb)
-   auf den Webclient, der sich gerade verbunden
-   hat. Es ist wichtig, hier die korrekte
-   Laenge des contents zu senden. Weitere Teile
-   sollten immer mit server.sendContent_P(partN)
-   versendet werden. Das _P ist hier wichtig, da
-   die Seitendefinition im PROGMEM liegen (s. webpage.h)
+ * Schreibt die Webseite in Teilen (<6kb)
+ * auf den Webclient, der sich gerade verbunden
+ * hat. Es ist wichtig, hier die korrekte
+ * Laenge des contents zu senden. Weitere Teile
+ * sollten immer mit server.sendContent_P(partN)
+ * versendet werden. Das _P ist hier wichtig, da
+ * die Seitendefinition im PROGMEM liegen (s. webpage.h)
 */
+void sbmsPage();
+
+/**
+ * SBMS über serielle Schnittstelle auslesen.
+ * Wird 'testFixed' gesetzt (s.o.), dann wird
+ * hier immer nur ein fester Werte ausgewertet.
+ */
+void readSbms();
+
+/**
+ * Toggle:
+ * - @d1-true
+ * - @d1-false
+ * - @d2-true
+ * - @d2-false
+*/
+void toggleDebug(unsigned char* payload);
+
+/**
+ * Pruefen aller Werte
+*/
+void checkValues();
+
+void setBlue();
+void setGreen();
+void setRed();
+
+/**
+ * Netzvorrang starten
+*/
+void starteNetzvorrang(String reason);
+
+/**
+ * Batteriebetrieb starten
+*/
+void starteBatterie(String reason);
+
+/**
+ * Buttonsteuerung, um manuell den Inverter schalten zu koennen
+*/
+void handleButton(AceButton*, uint8_t eventType, uint8_t);
+
+/**
+ * Websocket-Events, wenn neue Clients sich verbinden, wenn die clients
+ * selbst senden oder wenn sie geschlossen werden.
+*/
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+
+/**********************************************************************/
+/*                                                                    */
+/* Setup                                                              */
+/*                                                                    */
+/*                                                                    */
+/**********************************************************************/
+void setup() {
+
+  Serial.begin(115200);  //USB
+  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
+
+  Serial.println("Starting...");
+
+  //Pins fuer Taster und Relay initialisieren
+  pinMode(vars.RELAY_PIN, OUTPUT);
+  pinMode(vars.RELAY_S1, OUTPUT);
+  pinMode(vars.RELAY_S2, OUTPUT);
+
+  //manuell Invertersteuerung
+  pinMode(TASTER, INPUT_PULLUP);
+  tasterConfig.setEventHandler(handleButton);
+  taster.init(TASTER, HIGH, 0 /* id */);
+
+  digitalWrite(vars.RELAY_S1, HIGH);
+  digitalWrite(vars.RELAY_S2, HIGH);
+
+  //Leds
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(vars.LED_S1, OUTPUT);
+  pinMode(vars.LED_S2, OUTPUT);
+
+  //Startup-LED-Test
+  digitalWrite(vars.LED_S1, HIGH);
+  digitalWrite(vars.LED_S2, HIGH);
+  setRed();
+  delay(600);
+  setGreen();
+  delay(600);
+  setBlue(); //Beim Laden BLAU zeigen
+  delay(600);
+  digitalWrite(vars.LED_S1, LOW);
+  digitalWrite(vars.LED_S2, LOW);
+  //LED-Test ENDE
+
+  // etabliere Wifi Verbindung
+  myWifi.connect();
+  sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
+
+  // register WebsocketServer handler and start server
+  wc.begin(webSocketEvent);
+
+  // start Webserver
+  server.on("/", sbmsPage);
+  server.on("/sbms", sbmsPage);
+  server.begin();
+
+  // initialize other the air updates
+  ota.init(server, vars, "esp32a");
+}
+
+/**********************************************************************/
+/*                                                                    */
+/*                 Loop                                               */
+/*                                                                    */
+/**********************************************************************/
+void loop() {
+  taster.check(); //AceButton
+
+  wc.loop();
+  server.handleClient();
+  readSbms();
+  yield();
+  if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
+    Serial.print("Check...  ; failureCount: ");
+    Serial.println(failureCount);
+    lastCheckedMillis = millis();
+    checkValues();
+  }
+  yield();
+  sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
+}
+
+/**********************************************************************/
+/*                                                                    */
+/*                 Functions                                          */
+/*                                                                    */
+/**********************************************************************/
 void sbmsPage() {
   long s1 = sizeof(part1);
   long s2 = sizeof(part2);
@@ -89,9 +229,6 @@ void sbmsPage() {
   server.sendContent(connStr);
   server.sendContent_P(part3);
 }
-
-//nicht auf Serial1 warten, Feste Werte annehmen
-bool testFixed = false;
 
 void readSbms() {
 
@@ -226,9 +363,6 @@ void toggleDebug(unsigned char* payload) {
   wc.sendClients(msg, false);
 }
 
-/*
-   Pruefen aller Werte
-*/
 void checkValues()  {
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
@@ -282,24 +416,6 @@ void checkValues()  {
   }
 }
 
-void setBlue() {
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_BLUE, HIGH);
-}
-
-void setGreen() {
-  digitalWrite(LED_GREEN, HIGH);
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_BLUE, LOW);
-}
-
-void setRed() {
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(LED_BLUE, LOW);
-}
-
 /**
    Netzvorrang starten
 */
@@ -317,6 +433,8 @@ void starteNetzvorrang(String reason) {
   if (vars.debug) {
     msg += "wc.clientCount: ";
     msg += wc.clientCount;
+    msg += '\n';
+    msg += reason;
     msg += '\n';
   }
   if (msg.length() > 0) {
@@ -358,9 +476,6 @@ void starteBatterie(String reason) {
   }
 }
 
-/**
- * Buttonsteuerung, um manuell den Inverter schalten zu koennen
-*/
 void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonState */) {
   switch (eventType) {
     case AceButton::kEventPressed:
@@ -383,12 +498,25 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
   }
 }
 
-/**
-   Websocket-Events, wenn neue Clients sich verbinden, wenn die clients
-   selbst senden oder wenn sie geschlossen werden.
-*/
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+void setBlue() {
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_BLUE, HIGH);
+}
 
+void setGreen() {
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_BLUE, LOW);
+}
+
+void setRed() {
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_RED, HIGH);
+  digitalWrite(LED_BLUE, LOW);
+}
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED: {
         //Client 'num' aus Liste rausnehmen
@@ -520,89 +648,4 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       //}
       break;
   }
-}
-
-/**********************************************************************/
-/*                                                                    */
-/* Setup                                                              */
-/*       - ´                          */
-/*                                                                    */
-/*                                                                    */
-/**********************************************************************/
-void setup() {
-
-  Serial.begin(115200);  //USB
-  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
-
-  Serial.println("Starting...");
-
-  //Pins fuer Taster und Relay initialisieren
-  pinMode(vars.RELAY_PIN, OUTPUT);
-  pinMode(vars.RELAY_S1, OUTPUT);
-  pinMode(vars.RELAY_S2, OUTPUT);
-
-  //manuell Invertersteuerung
-  pinMode(TASTER, INPUT_PULLUP);
-  tasterConfig.setEventHandler(handleButton);
-  taster.init(TASTER, HIGH, 0 /* id */);
-
-  digitalWrite(vars.RELAY_S1, HIGH);
-  digitalWrite(vars.RELAY_S2, HIGH);
-
-  //Leds
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(vars.LED_S1, OUTPUT);
-  pinMode(vars.LED_S2, OUTPUT);
-
-  //Startup-LED-Test
-  digitalWrite(vars.LED_S1, HIGH);
-  digitalWrite(vars.LED_S2, HIGH);
-  setRed();
-  delay(600);
-  setGreen();
-  delay(600);
-  setBlue(); //Beim Laden BLAU zeigen
-  delay(600);
-  digitalWrite(vars.LED_S1, LOW);
-  digitalWrite(vars.LED_S2, LOW);
-  //LED-Test ENDE
-
-  // etabliere Wifi Verbindung
-  myWifi.connect();
-  sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
-
-  // register WebsocketServer handler and start server
-  wc.begin(webSocketEvent);
-
-  // start Webserver
-  server.on("/", sbmsPage);
-  server.on("/sbms", sbmsPage);
-  server.begin();
-
-  // initialize other the air updates
-  ota.init(server, "esp32a");
-}
-
-/**********************************************************************/
-/*                                                                    */
-/*                 Loop                                               */
-/*                                                                    */
-/**********************************************************************/
-void loop() {
-  taster.check(); //AceButton
-
-  wc.loop();
-  server.handleClient();
-  readSbms();
-  yield();
-  if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
-    Serial.print("Check...  ; failureCount: ");
-    Serial.println(failureCount);
-    lastCheckedMillis = millis();
-    checkValues();
-  }
-  yield();
-  sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
 }

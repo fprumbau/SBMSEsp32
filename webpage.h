@@ -45,7 +45,7 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
 <div2 style='width:350px; top:82px; left:520px;'>
-<button id="bb" onclick="toggleBattery(this.innerHTML);">Netz</button>
+<button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
 <br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;Dbg1</input>
@@ -157,7 +157,7 @@ connection.onmessage = function (e) {
             } else if(data.indexOf('HIGH')!==-1) {
               bb.style.background='#f00';
               bb.style.color='#ff0';
-              bb.innerHTML='Batt&nbsp;&nbsp;&nbsp;&nbsp;';
+              bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
             } else if(data.indexOf('debug1 to true')!==-1) {
               document.getElementById("dbg1").checked=true
             } else if(data.indexOf('debug1 to false')!==-1) {
@@ -221,7 +221,7 @@ function updateUiFromData() {
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
 function toggleBattery(txt) {
-    if(txt == 'Netz') {
+    if(txt == 'Netzvorrang') {
       connection.send("@+"); //auf Batterie aendern
     } else {
       connection.send("@-"); //auf Netzvorrang schalten

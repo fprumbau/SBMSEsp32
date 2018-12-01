@@ -10,13 +10,12 @@
 class SMA {
 
   private:
-    Vars _vars;
+    Vars& vars;
+    WebCom& wc;
     byte buf[601]; //buffer to hold incoming packet
     char hex[1202]; //Hex von buf
     char wlb[9]; //Wirkleistung Bezug
     char wll[9]; //Wirkleistung Lieferung
-    WiFiUDP _udp;
-    WebCom _wc;
     int s1_switched = -1;
     int s2_switched = -1;
     //manuelle Schaltung der Solarcharger ermöglichen

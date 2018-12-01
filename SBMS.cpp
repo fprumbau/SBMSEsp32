@@ -16,28 +16,25 @@ const unsigned char dec[91] = {
  * Dekodierung der vom SBMS120 kommenden Werte
  */
 long SBMS::dcmp(int loc, int size,  const char* sbms, int sbmsLen) {
-  long rv = 0;
   if(loc > sbmsLen) {
-    return rv;
+    return 0;
   }
+  long rv = 0;
   for (int i=0; i < size; i++){
     int ind = loc + size - 1 - i;
     char c = sbms[ind];
     int offc = SBMS::char_off(c);
-    long pw = pwrs[i];
-    rv += ( offc * pw );
+    rv += ( offc * pwrs[i] );
   }
   return rv;
 }
 
 unsigned int SBMS::char_off(char c) {
-  unsigned int rv = 0;
   for(int i = 0; i < 91; i++) {
       if(dec[i] == c) {
-        rv = i;
-        break;
+        return i;
       }
     
   }
-  return rv;
+  return 0;
 }

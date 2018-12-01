@@ -1,14 +1,17 @@
 #ifndef RELAY_H
 #define RELAY_H
 
+#include <WiFiUdp.h>
 
 class Vars {
   public:
+    WiFiUDP udp;
+      
     bool debug = false;
     bool debug2 = false;
 
-    int RELAY_S1 = 32;
-    int RELAY_S2 = 33;
+    int RELAY_S1 = 33;
+    int RELAY_S2 = 32;
     
     int RELAY_PIN = 21;
     

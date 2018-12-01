@@ -2,17 +2,18 @@
 #define OTA_H
 
 #include <Esp.h>
-#include <WString.h>
-#include <ESP32OTA.h>
-#include <ESPmDNS.h>
 #include <WiFi.h>
+#include <WString.h>
+#include <ESPmDNS.h>
 #include <WebServer.h>
+#include "ESP32OTA.h"
+#include "Vars.h"
 
 class OTA {
    private:
-      ESP32OTA _otaUpdater;
+      ESP32OTA updater;
    public:
-      void init(WebServer& server, const char* host);
+      void init(WebServer &server, Vars &vars, const char* host);
 };
 
 #endif

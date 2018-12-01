@@ -1,6 +1,7 @@
 #include "OTA.h"
+#include "Vars.h"
 
-void OTA::init(WebServer& server, const char* host) {
+void OTA::init(WebServer &server, Vars &vars, const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
   Serial.print("Flash Size: ");
@@ -10,7 +11,7 @@ void OTA::init(WebServer& server, const char* host) {
      MDNS.begin(host);
      MDNS.addService("http", "tcp", 80);
      Serial.printf("\n\nHTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
-     String changes = "Device info : ukn";
+     String changes = "<b>Device info</b>: Frank's Solar Charger Monitor";
      changes += "<li> Integrierte Schaltung der beiden Solarlader, WebSocketServer als WebCom gekapselt";
      changes += "<li> Errormodus wird bei fehlenden SBMS-Paketen nun wieder aktiviert.";    
      changes += "<li> Interruptbehandlung (Taster) wieder akiviert.";  
@@ -23,8 +24,9 @@ void OTA::init(WebServer& server, const char* host) {
      changes += "<li> Initmeldungen fuer debug/debug2 an neue Clients."; 
      changes += "<li> Einbinden von JSON zwischen Server -> Client.";
      changes += "<li> Automatisches Ein-/Ausschalten der Charger.";
-     _otaUpdater.setUpdaterUi("Title", "Build : 0.8.11", "SBMS120 Solar Charger", "Branch : master", changes);
-     _otaUpdater.setup(&server);
+     changes += "<li> OTA-Updaterklasse uebernommen, Hauptklasse aufgeraeumt.";
+     updater.setUpdaterUi("Title", "Build : 0.8.17", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setup(&server,&vars, "/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
   }

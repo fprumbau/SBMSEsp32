@@ -1,13 +1,9 @@
 #include "SMA.h"
-
 #include "Vars.h"
 
-SMA::SMA(Vars& vars, WebCom& wc) {
-  _vars = vars;
-  _wc = wc;
-}
+SMA::SMA(Vars &vars, WebCom &wc): vars(vars), wc(wc) { }
 
-void SMA::init(MyWifi& myWifi) {
+void SMA::init(MyWifi &myWifi) {
 
   IPAddress ip = myWifi.localIP();
 
@@ -15,7 +11,7 @@ void SMA::init(MyWifi& myWifi) {
   IPAddress ipMulti(239,12,255,254);
   unsigned int portMulti = 9522;      
   
-  _udp.beginMulticast(ipMulti, portMulti);
+  vars.udp.beginMulticast(ipMulti, portMulti);
   Serial.println("\nUDP init fertig!\n");
 
   wlb[8]='\0';
@@ -23,11 +19,16 @@ void SMA::init(MyWifi& myWifi) {
 }
 
 void SMA::read() {
-  int packetSize = _udp.parsePacket();
+
+  if(vars.debug2) {
+    Serial.print("\nSMA::read()");
+  }
+  
+  int packetSize = vars.udp.parsePacket();
   if(packetSize) {
  
     // read the packet into buf and get the senders IP addr and port number
-    _udp.read(buf,packetSize);
+    vars.udp.read(buf,packetSize);
    
     static char const lookup[] = "0123456789ABCDEF";
 
@@ -48,7 +49,7 @@ void SMA::read() {
     float bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
-    if(_vars.debug2) {
+    if(vars.debug2) {
       Serial.print("\nWirkleistung (Bezug/Lieferung): ");
       Serial.print(bezug);
       Serial.print(" / ");
@@ -65,12 +66,12 @@ void SMA::read() {
     if(!isChargerOn(2) && ( millis() - s2_switched ) > 10000) {
       if (lieferung > 200) {
         Serial.println("Aktiviere Solarcharger 2");
-        _wc.sendClients("Aktiviere Solarlader 2", false);
+        wc.sendClients("Aktiviere Solarlader 2", false);
         toggleCharger(2,true,false);
       } 
-    } else if(lieferung <= 0 && bezug > 100) {
+    } else if(lieferung <= 0 && bezug > 100 && !s2override) {
         Serial.println("Deaktiviere Solarcharger 2");
-        _wc.sendClients("Deaktiviere Solarlader 2", false);
+        wc.sendClients("Deaktiviere Solarlader 2", false);
         toggleCharger(2,false,false);
     }
 
@@ -84,12 +85,12 @@ void SMA::read() {
     if(!isChargerOn(1) && ( millis() - s1_switched ) > 10000) {
       if(lieferung > 600){
         Serial.println("Aktiviere Solarcharger 1");
-        _wc.sendClients("Aktiviere Solarlader 1", false);
+        wc.sendClients("Aktiviere Solarlader 1", false);
         toggleCharger(1,true,false);
       }
-    } else if(lieferung <= 0 && bezug > 300) {
+    } else if(lieferung <= 0 && bezug > 300 && !s1override) {
         Serial.println("Deaktiviere Solarcharger 2");
-        _wc.sendClients("Deaktiviere Solarlader 1", false);
+        wc.sendClients("Deaktiviere Solarlader 1", false);
         toggleCharger(1,false,false);
     }
    
@@ -122,9 +123,9 @@ void SMA::toggleCharger(byte nr, bool onOff, bool override) {
 
 bool SMA::isChargerOn(byte nr) {
   if(nr == 1) {
-    return !digitalRead(_vars.RELAY_S1);
+    return !digitalRead(vars.RELAY_S1);
   } else {
-    return !digitalRead(_vars.RELAY_S2);
+    return !digitalRead(vars.RELAY_S2);
   }
 }
 
@@ -133,16 +134,16 @@ void SMA::enableCharger(byte nr, bool override) {
       if(override) {
         s1override = true;
       }
-      digitalWrite(_vars.RELAY_S1, LOW);
-      digitalWrite(_vars.LED_S1, HIGH);
-      _wc.sendClients("Aktiviere Solarlader: s1 to 1", false);
+      digitalWrite(vars.RELAY_S1, LOW);
+      digitalWrite(vars.LED_S1, HIGH);
+      wc.sendClients("Aktiviere Solarlader: s1 to 1", false);
   } else {
       if(override) {
         s2override = true;
       }    
-      digitalWrite(_vars.RELAY_S2, LOW);
-      digitalWrite(_vars.LED_S2, HIGH);
-      _wc.sendClients("Aktiviere Solarlader: s2 to 1", false); 
+      digitalWrite(vars.RELAY_S2, LOW);
+      digitalWrite(vars.LED_S2, HIGH);
+      wc.sendClients("Aktiviere Solarlader: s2 to 1", false); 
   }
 }
 
@@ -152,18 +153,18 @@ void SMA::disableCharger(byte nr, bool override) {
         s1override = false;
       }
       if(override || !s1override) {
-        digitalWrite(_vars.RELAY_S1, HIGH);
-        digitalWrite(_vars.LED_S1, LOW);
-        _wc.sendClients("Deaktiviere Solarlader: s1 to 0", false); 
+        digitalWrite(vars.RELAY_S1, HIGH);
+        digitalWrite(vars.LED_S1, LOW);
+        wc.sendClients("Deaktiviere Solarlader: s1 to 0", false); 
       }  
   } else {
       if(override) {
         s2override = false;
       }    
       if(override || !s2override) {
-        digitalWrite(_vars.RELAY_S2, HIGH);
-        digitalWrite(_vars.LED_S2, LOW);
-        _wc.sendClients("Deaktiviere Solarlader: s2 to 0", false); 
+        digitalWrite(vars.RELAY_S2, HIGH);
+        digitalWrite(vars.LED_S2, LOW);
+        wc.sendClients("Deaktiviere Solarlader: s2 to 0", false); 
       } 
   }
 }

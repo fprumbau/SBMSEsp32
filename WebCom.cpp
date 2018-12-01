@@ -26,13 +26,6 @@ void WebCom::sendClients(String msg, bool data) {
   if (clientCount <= 0) {
     return;
   }
-  /*if(_wsServerLastSend>0 && (millis()-_wsServerLastSend) < 100) {
-    if(debug) {
-      Serial.print("Could not send data multiple times in 100ms; disgarding ");
-      Serial.println(data);
-    }
-    return;
-    }*/
   _wsServerLastSend = millis();
   for (int m = 0; m < clientCount; m++) {
     uint8_t client = clients[m];
