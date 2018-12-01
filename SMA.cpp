@@ -19,10 +19,6 @@ void SMA::init(MyWifi &myWifi) {
 }
 
 void SMA::read() {
-
-  if(vars.debug2) {
-    Serial.print("\nSMA::read()");
-  }
   
   int packetSize = vars.udp.parsePacket();
   if(packetSize) {

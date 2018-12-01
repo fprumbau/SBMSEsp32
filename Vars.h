@@ -17,6 +17,10 @@ class Vars {
     
     int LED_S1 = 25;
     int LED_S2 = 26;
+
+    //manuelle Inverterumschaltung
+    int TASTER = 19;
+
 };
 
 #endif

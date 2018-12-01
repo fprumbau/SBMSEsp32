@@ -217,6 +217,48 @@ function updateUiFromData() {
   if(null != debug2) {
     document.getElementById("dbg2").checked = debug2;
   }
+  var s1 = json.s1;
+  console.log("Solar1: " + s1);
+  if(null != s1) {
+    b1 = document.getElementById("b1");
+    if(s1) {   
+      b1.style.background='#f00';
+      b1.style.color='#ff0';
+      b1.innerHTML='S1on';
+    } else {
+      b1.style.background='#D8BFD8';
+      b1.style.color='#b50';
+      b1.innerHTML='S1off';      
+    }
+  }
+  var s2 = json.s2;
+  console.log("Solar2: " + s2);
+  if(null != s2) {
+    b2 = document.getElementById("b2");
+    if(s2) {   
+      b2.style.background='#f00';
+      b2.style.color='#ff0';
+      b2.innerHTML='S2on';
+    } else {
+      b2.style.background='#D8BFD8';
+      b2.style.color='#b50';
+      b2.innerHTML='S2off';
+    }
+  }
+  var batt = json.battery;
+  console.log("Batterie: " + batt);
+  if(null != batt) {
+    bb = document.getElementById("bb");
+    if(batt) {
+        bb.style.background='#f00';
+        bb.style.color='#ff0';
+        bb.innerHTML='Batterie';
+      } else {
+        bb.style.background='#D8BFD8';
+        bb.style.color='#b50';
+        bb.innerHTML='Netzvorrang';
+      }
+  }  
 }
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm

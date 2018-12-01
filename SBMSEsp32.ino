@@ -19,12 +19,11 @@ ButtonConfig tasterConfig;
 AceButton taster(&tasterConfig);
 
 Vars vars; //Global definierte Variablen
+WebCom wc(vars);
 
 MyWifi myWifi;
-Battery battery;
+Battery battery(vars);
 WebServer server(80);
-
-WebCom wc(vars);
 
 OTA ota;  //Over-the-air updater
 SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
@@ -598,6 +597,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         JsonObject& root = jsonBuffer.createObject();
         root["d1"]=vars.debug;
         root["d2"]=vars.debug2;
+        root["s1"]=sma.isChargerOn(1);
+        root["s2"]=sma.isChargerOn(2);
+        root["battery"]=battery.isBatteryOn();
         char jsonChar[512];
         root.printTo(jsonChar);
         String str(jsonChar);
