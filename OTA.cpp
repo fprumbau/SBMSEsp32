@@ -1,9 +1,7 @@
-#include "OTA.h"
-#include "Vars.h"
+#include "global.h"
+#include <ESPmDNS.h>
 
-OTA::OTA(ESP32OTA &updater): updater(updater) { }
-
-void OTA::init(WebServer &server, const char* host) {
+void OTA::init(const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
   Serial.print("Flash Size: ");
@@ -31,8 +29,9 @@ void OTA::init(WebServer &server, const char* host) {
      changes += "<li> OTAUpdater mit Debugsettings ueber d2.";
      changes += "<li> ESP32OTA kann nun auf vars (debug2 und udp) zugreifen, update geht (vorher Reset empfehlenswert!).";
      changes += "<li> Werden S1 oder S2 ueber SMA.cpp geschaltet, muss s1 an, s2 aus etc. uebermittelt werden.";
-     updater.setUpdaterUi("Title", "Build : 0.8.24", "SBMS120 Solar Charger", "Branch : master", changes);
-     updater.setup(&server, "/update", "", "");
+     changes += "<li> Globale Objekte mit global.h.";
+     updater.setUpdaterUi("Title", "Build : 0.9.0", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
   }

@@ -1,10 +1,6 @@
-#include "WebCom.h"
+#include "global.h"
 
 WebCom::WebCom() { }
-
-WebCom::WebCom(Vars& vars) {
-  _vars = vars;
-}
 
 IPAddress WebCom::remoteIP(uint8_t num) {
   return _wsServer.remoteIP(num);
@@ -29,7 +25,7 @@ void WebCom::sendClients(String msg, bool data) {
   _wsServerLastSend = millis();
   for (int m = 0; m < clientCount; m++) {
     uint8_t client = clients[m];
-    if (_vars.debug) {
+    if (vars.debug) {
       Serial.printf("Sending client %u ( %u ) from %u clients\n", (m + 1), client, clientCount);
     }
     if (!data) {

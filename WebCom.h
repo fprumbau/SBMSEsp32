@@ -1,12 +1,11 @@
 #ifndef WEBCOM_H
 #define WEBCOM_H
 
-#include "Vars.h"
+#include "global.h"
 #include <WebSocketsServer.h>
 
 class WebCom {
   private:
-    Vars _vars; //Globale Variablen
     unsigned long _wsServerLastSend = -1; //Letztes Senden einer Nachricht an die Clients
     WebSocketsServer _wsServer = WebSocketsServer(81); //Websocketserver, um Nachrichten an Clients zu senden
 
@@ -16,7 +15,6 @@ class WebCom {
     typedef bool (*WebSocketServerHttpHeaderValFunc)(String headerName, String headerValue);
 
     WebCom();
-    WebCom(Vars& vars);  
 
     //client connected to send?
     bool ready = false;

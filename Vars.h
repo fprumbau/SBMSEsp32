@@ -1,6 +1,7 @@
-#ifndef RELAY_H
-#define RELAY_H
+#ifndef VARS_H
+#define VARS_H
 
+#include "global.h"
 #include <WiFiUdp.h>
 
 class Vars {

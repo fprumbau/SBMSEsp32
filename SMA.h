@@ -3,15 +3,9 @@
 
 #include <WiFiUdp.h>
 
-#include "WebCom.h"
-#include "MyWifi.h"
-#include "Vars.h"
-
 class SMA {
 
   private:
-    Vars& vars;
-    WebCom& wc;
     byte buf[601]; //buffer to hold incoming packet
     char hex[1202]; //Hex von buf
     char wlb[9]; //Wirkleistung Bezug
@@ -25,9 +19,8 @@ class SMA {
     void disableCharger(byte nr, bool active);
     
   public:
-    SMA(Vars& vars, WebCom& wc);
+    void init();
     void read();
-    void init(MyWifi& myWifi);
     void toggleCharger(byte nr, bool onOff, bool override);
     bool isChargerOn(byte nr);
 };

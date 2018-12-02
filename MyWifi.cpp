@@ -2,7 +2,18 @@
 
 void MyWifi::connect() {
 
-  WiFi.mode(WIFI_STA); //para que no inicie el SoftAP en el modo normal
+  //This is here to force the ESP32 to reset the WiFi and initialise correctly.
+  WiFi.enableSTA(true);
+  Serial.print("WIFI status = ");
+  Serial.println(WiFi.getMode());
+  WiFi.disconnect(true);
+  delay(1000);
+  WiFi.mode(WIFI_STA);
+  delay(1000);
+  Serial.print("WIFI status = ");
+  Serial.println(WiFi.getMode());
+  //Ende silly mode 
+ 
   WiFi.begin(_ssid, _password);
   WiFi.setSleep(false);
   
@@ -11,6 +22,7 @@ void MyWifi::connect() {
       delay(500); 
   }
   Serial.println("\n");
+  Serial.printf("New Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
   Serial.print("Ip Address: ");
 
   IPAddress ip = WiFi.localIP();

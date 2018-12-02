@@ -1,9 +1,6 @@
-#include "SMA.h"
-#include "Vars.h"
+#include "global.h"
 
-SMA::SMA(Vars &vars, WebCom &wc): vars(vars), wc(wc) { }
-
-void SMA::init(MyWifi &myWifi) {
+void SMA::init() {
 
   IPAddress ip = myWifi.localIP();
 
@@ -154,7 +151,7 @@ void SMA::disableCharger(byte nr, bool override) {
       if(override || !s1override) {
         digitalWrite(vars.RELAY_S1, HIGH);
         digitalWrite(vars.LED_S1, LOW);
-        wc.sendClients("Deaktiviere Solarlader: s2 aus", false); 
+        wc.sendClients("Deaktiviere Solarlader: s1 aus", false); 
       }  
   } else {
       if(override) {

@@ -1,34 +1,15 @@
-#include <ButtonConfig.h>
 #include <AceButton.h>
-#include <WebServer.h>
+#include <ButtonConfig.h>
 #include <ArduinoJson.h>
 
-#include "Vars.h"
-#include "MyWifi.h"
+#include "global.h"
 #include "webpage.h"
-#include "WebCom.h"
 #include "config.h"
-#include "SBMS.h"
-#include "Battery.h"
-#include "OTA.h"
-#include "SMA.h"
 
 using namespace ace_button;
 
 ButtonConfig tasterConfig;
 AceButton taster(&tasterConfig);
-
-Vars vars; //Global definierte Variablen
-WebCom wc(vars);
-
-MyWifi myWifi;
-Battery battery(vars);
-WebServer server(80);
-
-ESP32OTA updater(vars);
-OTA ota(updater);  //Over-the-air updater
-SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
-SMA sma(vars, wc);  //read SMA energy meter broadcast messages
 
 //Ticker ticker;
 int counter = 0;
@@ -54,8 +35,8 @@ int LED_BLUE = 27;
 int TASTER = 19;
 
 //nicht auf Serial1 warten, Feste Werte annehmen
-bool testFixed = false;
-const char* hostName = "esp32a";
+bool testFixed = true;
+const char* hostName = "esp32b";
 
 /*
  * Schreibt die Webseite in Teilen (<6kb)
@@ -162,7 +143,6 @@ void setup() {
 
   // etabliere Wifi Verbindung
   myWifi.connect();
-  sma.init(myWifi); //sma liest energymeter und braucht Wifi Initialisierung
 
   // register WebsocketServer handler and start server
   wc.begin(webSocketEvent);
@@ -173,7 +153,7 @@ void setup() {
   server.begin();
 
   // initialize other the air updates
-  ota.init(server, hostName);
+  ota.init(hostName);
 }
 
 /**********************************************************************/

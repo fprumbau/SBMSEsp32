@@ -1,33 +1,24 @@
 #include <Arduino.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
-#include <WebServer.h>
 #include <WiFiUdp.h>
 #include <Update.h>
-#include "ESP32OTA.h"
-#include "Vars.h"
+#include "global.h"
 
 //https://github.com/bbx10/WebServer_tng/issues/4 Anpassung ESP32
-
-
-ESP32OTA::ESP32OTA(Vars &vars): vars(vars){
-  _server = NULL;
-  _authenticated = false;
-}
 
 double calcSpeed(unsigned long ms, size_t len){
     return (double)(len * 125) / (double)(ms * 16);
 }
 
-void ESP32OTA::setup(WebServer *server, const char *path, String username, String password) {
-    _server = server;
+void ESP32OTA::setup(const char *path, String username, String password) {
     _username = username;
     _password = password;
 
     // handler for the /update form page
-    _server->on(path, HTTP_GET, [&](){
-        if(_username != "" && _password != "" && !_server->authenticate(_username.c_str(), _password.c_str())) {
-          return _server->requestAuthentication();
+    server.on(path, HTTP_GET, [&](){
+        if(_username != "" && _password != "" && !server.authenticate(_username.c_str(), _password.c_str())) {
+          return server.requestAuthentication();
         }
         String pageIndex = FPSTR(UPDATE_INDEX);
         pageIndex.replace("{title}",_title);
@@ -36,13 +27,13 @@ void ESP32OTA::setup(WebServer *server, const char *path, String username, Strin
         pageIndex.replace("{branch}",_branch);
         pageIndex.replace("{deviceInfo}",_deviceInfo);
         pageIndex.replace("{footer}",_footer);
-        _server->send(200, "text/html", pageIndex);
+        server.send(200, "text/html", pageIndex);
     });
 
     // handler for the /update form POST (once file upload finishes)
-    _server->on(path, HTTP_POST, [&](){
+    server.on(path, HTTP_POST, [&](){
         if(!_authenticated) {
-          return _server->requestAuthentication();
+          return server.requestAuthentication();
         }
         String pageIndex = FPSTR(UPDATE_INDEX);
         pageIndex.replace("{title}",_title);
@@ -51,17 +42,18 @@ void ESP32OTA::setup(WebServer *server, const char *path, String username, Strin
         pageIndex.replace("{branch}",_branch);
         pageIndex.replace("{deviceInfo}",_deviceInfo);
         pageIndex.replace("{footer}",_footer);
-        _server->send(200, "text/html", pageIndex);
-      ESP.restart();
+        server.send(200, "text/html", pageIndex);
+        delay(1000);
+        ESP.restart();
     },[&](){
       // handler for the file upload, get's the sketch bytes, and writes them through the Update object
-      HTTPUpload& upload = _server->upload();
+      HTTPUpload& upload = server.upload();
       unsigned long t_start,t_stop;
       if(upload.status == UPLOAD_FILE_START){
         t_start = millis();
         Serial.setDebugOutput(true); 
 
-        _authenticated = (_username == "" || _password == "" || _server->authenticate(_username.c_str(), _password.c_str()));
+        _authenticated = (_username == "" || _password == "" || server.authenticate(_username.c_str(), _password.c_str()));
         if(!_authenticated){
           Serial.printf("Unauthenticated Update\n");
           return;
