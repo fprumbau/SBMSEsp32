@@ -13,7 +13,8 @@ class OTA {
    private:
       ESP32OTA updater;
    public:
-      void init(WebServer &server, Vars &vars, const char* host);
+      OTA(ESP32OTA &updater);
+      void init(WebServer &server, const char* host);
 };
 
 #endif

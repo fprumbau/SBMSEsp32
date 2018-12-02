@@ -25,7 +25,8 @@ MyWifi myWifi;
 Battery battery(vars);
 WebServer server(80);
 
-OTA ota;  //Over-the-air updater
+ESP32OTA updater(vars);
+OTA ota(updater);  //Over-the-air updater
 SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 SMA sma(vars, wc);  //read SMA energy meter broadcast messages
 
@@ -54,6 +55,7 @@ int TASTER = 19;
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 bool testFixed = false;
+const char* hostName = "esp32a";
 
 /*
  * Schreibt die Webseite in Teilen (<6kb)
@@ -171,7 +173,7 @@ void setup() {
   server.begin();
 
   // initialize other the air updates
-  ota.init(server, vars, "esp32a");
+  ota.init(server, hostName);
 }
 
 /**********************************************************************/
@@ -181,9 +183,11 @@ void setup() {
 /**********************************************************************/
 void loop() {
   taster.check(); //AceButton
-
+  yield();
   wc.loop();
+  yield();
   server.handleClient();
+  yield();
   readSbms();
   yield();
   if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
@@ -565,33 +569,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, wc.clientCount);
         }
         wc.ready = true;
-
-        //Relaistatus uebermitteln
-        bool relayStatus = digitalRead(vars.RELAY_PIN);
-        msg = "Batteriestatus: ";
-        if (relayStatus == 0) {
-          msg += "LOW";
-        } else {
-          msg += "HIGH";
-        }
-        wc.sendTXT(num, msg);
-        //Status Solarcharger S1/S2
-        bool s1;
-        s1 = !digitalRead(vars.RELAY_S1);
-        if (s1) {
-          msg = "s1 an";
-        } else {
-          msg= "s1 aus";
-        }
-        bool s2;
-        s2 = !digitalRead(vars.RELAY_S2);
-        if (s2) {
-          msg = "s2 an";
-        } else {
-          msg = "s2 aus";
-        }
-        wc.sendTXT(num, msg);
-
         //mit JSON
         StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
         JsonObject& root = jsonBuffer.createObject();

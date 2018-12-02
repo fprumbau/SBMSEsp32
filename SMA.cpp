@@ -46,10 +46,13 @@ void SMA::read() {
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
     if(vars.debug2) {
-      Serial.print("\nWirkleistung (Bezug/Lieferung): ");
-      Serial.print(bezug);
-      Serial.print(" / ");
-      Serial.println(lieferung);
+      String msg;
+      msg = "\nWirkleistung (Bezug/Lieferung): ";
+      msg += bezug;
+      msg += " / ";
+      msg += lieferung;
+      wc.sendClients(msg, false);
+      Serial.println(msg);
     }
 
     /**
@@ -132,14 +135,14 @@ void SMA::enableCharger(byte nr, bool override) {
       }
       digitalWrite(vars.RELAY_S1, LOW);
       digitalWrite(vars.LED_S1, HIGH);
-      wc.sendClients("Aktiviere Solarlader: s1 to 1", false);
+      wc.sendClients("Aktiviere Solarlader: s1 an", false);
   } else {
       if(override) {
         s2override = true;
       }    
       digitalWrite(vars.RELAY_S2, LOW);
       digitalWrite(vars.LED_S2, HIGH);
-      wc.sendClients("Aktiviere Solarlader: s2 to 1", false); 
+      wc.sendClients("Aktiviere Solarlader: s2 an", false); 
   }
 }
 
@@ -151,7 +154,7 @@ void SMA::disableCharger(byte nr, bool override) {
       if(override || !s1override) {
         digitalWrite(vars.RELAY_S1, HIGH);
         digitalWrite(vars.LED_S1, LOW);
-        wc.sendClients("Deaktiviere Solarlader: s1 to 0", false); 
+        wc.sendClients("Deaktiviere Solarlader: s2 aus", false); 
       }  
   } else {
       if(override) {
@@ -160,7 +163,7 @@ void SMA::disableCharger(byte nr, bool override) {
       if(override || !s2override) {
         digitalWrite(vars.RELAY_S2, HIGH);
         digitalWrite(vars.LED_S2, LOW);
-        wc.sendClients("Deaktiviere Solarlader: s2 to 0", false); 
+        wc.sendClients("Deaktiviere Solarlader: s2 aus", false); 
       } 
   }
 }
