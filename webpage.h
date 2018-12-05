@@ -166,7 +166,10 @@ connection.onmessage = function (e) {
               document.getElementById("dbg2").checked=true
             } else if(data.indexOf('debug2 to false')!==-1) {
               document.getElementById("dbg2").checked=false
-            } else if(data.indexOf('s1 aus')!==-1) {
+            } 
+
+            /*
+            else if(data.indexOf('s1 aus')!==-1) {
               b1.style.background='#D8BFD8';
               b1.style.color='#b50';
               b1.innerHTML='S1off';
@@ -183,6 +186,8 @@ connection.onmessage = function (e) {
               b2.style.color='#ff0';
               b2.innerHTML='S2on';
             }
+            */
+            
           break;
        case '{':
             console.log('JSon: ', data);

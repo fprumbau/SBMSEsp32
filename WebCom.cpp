@@ -1,4 +1,5 @@
 #include "global.h"
+#include <ArduinoJson.h>
 
 WebCom::WebCom() { }
 
@@ -42,4 +43,26 @@ void WebCom::loop() {
 void WebCom::begin(WebSocketServerEvent cbEvent) {
   _wsServer.onEvent(cbEvent);
   _wsServer.begin();
+}
+
+void WebCom::updateUi(uint8_t num) {
+        //mit JSON
+        StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
+        JsonObject& root = jsonBuffer.createObject();
+        root["d1"]=vars.debug;
+        root["d2"]=vars.debug2;
+        root["s1"]=sma.isChargerOn(1);
+        root["s2"]=sma.isChargerOn(2);
+        root["battery"]=battery.isBatteryOn();
+        char jsonChar[512];
+        root.printTo(jsonChar);
+        String str(jsonChar);
+        if(vars.debug2) {
+          Serial.println(str);
+        }
+        if (num > 0) {
+          wc.sendTXT(num, str);
+        } else {
+          sendClients(str, false); 
+        }
 }

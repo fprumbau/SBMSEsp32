@@ -54,6 +54,7 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         Serial.setDebugOutput(true); 
 
         _authenticated = (_username == "" || _password == "" || server.authenticate(_username.c_str(), _password.c_str()));
+        
         if(!_authenticated){
           Serial.printf("Unauthenticated Update\n");
           return;

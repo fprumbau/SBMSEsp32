@@ -62,12 +62,10 @@ void SMA::read() {
     if(!isChargerOn(2) && ( millis() - s2_switched ) > 10000) {
       if (lieferung > 200) {
         Serial.println("Aktiviere Solarcharger 2");
-        wc.sendClients("Aktiviere Solarlader 2", false);
         toggleCharger(2,true,false);
       } 
     } else if(lieferung <= 0 && bezug > 100 && !s2override) {
         Serial.println("Deaktiviere Solarcharger 2");
-        wc.sendClients("Deaktiviere Solarlader 2", false);
         toggleCharger(2,false,false);
     }
 
@@ -81,12 +79,10 @@ void SMA::read() {
     if(!isChargerOn(1) && ( millis() - s1_switched ) > 10000) {
       if(lieferung > 600){
         Serial.println("Aktiviere Solarcharger 1");
-        wc.sendClients("Aktiviere Solarlader 1", false);
         toggleCharger(1,true,false);
       }
     } else if(lieferung <= 0 && bezug > 300 && !s1override) {
         Serial.println("Deaktiviere Solarcharger 2");
-        wc.sendClients("Deaktiviere Solarlader 1", false);
         toggleCharger(1,false,false);
     }
    
@@ -132,15 +128,14 @@ void SMA::enableCharger(byte nr, bool override) {
       }
       digitalWrite(vars.RELAY_S1, LOW);
       digitalWrite(vars.LED_S1, HIGH);
-      wc.sendClients("Aktiviere Solarlader: s1 an", false);
   } else {
       if(override) {
         s2override = true;
       }    
       digitalWrite(vars.RELAY_S2, LOW);
       digitalWrite(vars.LED_S2, HIGH);
-      wc.sendClients("Aktiviere Solarlader: s2 an", false); 
   }
+  wc.updateUi(0);
 }
 
 void SMA::disableCharger(byte nr, bool override) {
@@ -151,7 +146,6 @@ void SMA::disableCharger(byte nr, bool override) {
       if(override || !s1override) {
         digitalWrite(vars.RELAY_S1, HIGH);
         digitalWrite(vars.LED_S1, LOW);
-        wc.sendClients("Deaktiviere Solarlader: s1 aus", false); 
       }  
   } else {
       if(override) {
@@ -160,7 +154,7 @@ void SMA::disableCharger(byte nr, bool override) {
       if(override || !s2override) {
         digitalWrite(vars.RELAY_S2, HIGH);
         digitalWrite(vars.LED_S2, LOW);
-        wc.sendClients("Deaktiviere Solarlader: s2 aus", false); 
       } 
   }
+  wc.updateUi(0);
 }

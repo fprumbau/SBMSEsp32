@@ -14,6 +14,7 @@ class MyWifi {
       void connect();
       String getIpAddress();
       IPAddress localIP();
+      void reconnect();
 };
 
 #endif
