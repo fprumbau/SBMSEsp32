@@ -10,12 +10,14 @@
 #include "ESP32OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
+#include "ESPAsyncWebServer.h"
 
 extern Vars vars; //Global definierte Variablen
 extern MyWifi myWifi;
 extern WebCom wc;
 extern Battery battery;
-extern WebServer server;
+//extern WebServer server;
+extern AsyncWebServer server;   
 extern ESP32OTA updater;
 extern OTA ota;  //Over-the-air updater
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.

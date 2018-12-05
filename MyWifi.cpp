@@ -2,7 +2,7 @@
 
 void MyWifi::connect() {
 
-  //This is here to force the ESP32 to reset the WiFi and initialise correctly.
+  //This is here to force the ESP32 to reset the WiFi and initialize correctly.
   WiFi.enableSTA(true);
   Serial.print("WIFI status = ");
   Serial.println(WiFi.getMode());
@@ -37,4 +37,10 @@ String MyWifi::getIpAddress() {
 
 IPAddress MyWifi::localIP() {
   return _localIP;
+}
+
+void MyWifi::reconnect() {
+  Serial.println("Restarting WiFi...");
+  WiFi.disconnect();
+  connect();
 }

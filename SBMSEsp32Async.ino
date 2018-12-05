@@ -1,6 +1,5 @@
 #include <AceButton.h>
 #include <ButtonConfig.h>
-#include <ArduinoJson.h>
 
 #include "global.h"
 #include "webpage.h"
@@ -35,8 +34,8 @@ int LED_BLUE = 27;
 int TASTER = 19;
 
 //nicht auf Serial1 warten, Feste Werte annehmen
-bool testFixed = true;
-const char* hostName = "esp32b";
+bool testFixed = false;
+const char* hostName = "esp32a";
 
 /*
  * Schreibt die Webseite in Teilen (<6kb)
@@ -95,6 +94,12 @@ void handleButton(AceButton*, uint8_t eventType, uint8_t);
 */
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
 
+/**
+ * Kommandos von Serial lesen, wie z.B.
+ * Neustart von WiFi
+ */
+void commandLine();
+
 /**********************************************************************/
 /*                                                                    */
 /* Setup                                                              */
@@ -105,6 +110,7 @@ void setup() {
 
   Serial.begin(115200);  //USB
   Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
+  Serial2.begin(115200); //wegen Restart
 
   Serial.println("Starting...");
 
@@ -148,9 +154,9 @@ void setup() {
   wc.begin(webSocketEvent);
 
   // start Webserver
-  server.on("/", sbmsPage);
-  server.on("/sbms", sbmsPage);
-  server.begin();
+  //server.on("/", sbmsPage);
+  //server.on("/sbms", sbmsPage);
+  //server.begin();
 
   // initialize other the air updates
   ota.init(hostName);
@@ -166,7 +172,7 @@ void loop() {
   yield();
   wc.loop();
   yield();
-  server.handleClient();
+  //server.handleClient();
   yield();
   readSbms();
   yield();
@@ -178,6 +184,8 @@ void loop() {
   }
   yield();
   sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
+  yield();
+  commandLine();
 }
 
 /**********************************************************************/
@@ -549,21 +557,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
           Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s; ConnCount: %u\n", num, ip[0], ip[1], ip[2], ip[3], payload, wc.clientCount);
         }
         wc.ready = true;
-        //mit JSON
-        StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
-        JsonObject& root = jsonBuffer.createObject();
-        root["d1"]=vars.debug;
-        root["d2"]=vars.debug2;
-        root["s1"]=sma.isChargerOn(1);
-        root["s2"]=sma.isChargerOn(2);
-        root["battery"]=battery.isBatteryOn();
-        char jsonChar[512];
-        root.printTo(jsonChar);
-        String str(jsonChar);
-        if(vars.debug2) {
-          Serial.println(str);
-        }
-        wc.sendTXT(num, str);        
+
+        //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
+        wc.updateUi(num);             
         break;
       }
     case WStype_TEXT:
@@ -607,4 +603,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       //}
       break;
   }
+}
+
+void commandLine() {
+  if(Serial.available()) {
+      String cmd = Serial.readString();
+      Serial.print("Echo: ");
+      Serial.println(cmd);
+      if(cmd.startsWith("restart wifi")) {      
+        myWifi.reconnect();
+      } else if(cmd.startsWith("restart esp")) {      
+        Serial.println("Restarting ESP...");
+        delay(1000);
+        ESP.restart();
+      } else {
+        Serial.println("Available commands:");
+        Serial.println(" - restart wifi  :: restarting Wifi connection");
+        Serial.println(" - restart esp   :: restarting whole ESP32");
+      }
+    }  
 }

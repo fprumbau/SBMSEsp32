@@ -53,7 +53,9 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         t_start = millis();
         Serial.setDebugOutput(true); 
 
-        _authenticated = (_username == "" || _password == "" || server.authenticate(_username.c_str(), _password.c_str()));
+        //ESP32OTA.cpp:20:58: error: 'class AsyncWebServer' has no member named 'authenticate'
+        //_authenticated = (_username == "" || _password == "" || server.authenticate(_username.c_str(), _password.c_str()));
+        
         if(!_authenticated){
           Serial.printf("Unauthenticated Update\n");
           return;

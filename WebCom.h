@@ -27,6 +27,7 @@ class WebCom {
     IPAddress remoteIP(uint8_t num);
     void begin(WebSocketServerEvent cbEvent);
     void sendClients(String msg, bool data);
+    void updateUi(uint8_t num);
 };
 
 #endif
