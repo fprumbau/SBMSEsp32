@@ -2,11 +2,9 @@
 #define VARS_H
 
 #include "global.h"
-#include <WiFiUdp.h>
 
 class Vars {
   public:
-    WiFiUDP udp;
       
     bool debug = false;
     bool debug2 = false;

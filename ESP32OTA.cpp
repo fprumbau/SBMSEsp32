@@ -60,7 +60,7 @@ void ESP32OTA::setup(const char *path, String username, String password) {
           return;
         }
         //UDP stoppen, stoert Update sonst
-        vars.udp.stop();
+        udp.stop();
         
         Serial.printf("Update: %s\n", upload.filename.c_str());
         uint32_t maxSketchSpace = (1048576 - 0x1000) & 0xFFFFF000;

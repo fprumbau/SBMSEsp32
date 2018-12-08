@@ -1,4 +1,5 @@
 #include "MyWifi.h"
+#include "global.h"
 
 void MyWifi::connect() {
 
@@ -29,6 +30,9 @@ void MyWifi::connect() {
   Serial.println(ip);
   _localIP = ip;
   _ip=ip.toString();
+
+  Serial.println("Initializing sma.init)");
+  sma.init();
 }
 
 String MyWifi::getIpAddress() {

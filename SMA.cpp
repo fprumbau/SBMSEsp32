@@ -8,20 +8,27 @@ void SMA::init() {
   IPAddress ipMulti(239,12,255,254);
   unsigned int portMulti = 9522;      
   
-  vars.udp.beginMulticast(ipMulti, portMulti);
+  udp.beginMulticast(ipMulti, portMulti);
   Serial.println("\nUDP init fertig!\n");
 
   wlb[8]='\0';
   wll[8]='\0';
+  initialized = true;
 }
 
 void SMA::read() {
+
+  if(!initialized) {
+    return;
+  }
   
-  int packetSize = vars.udp.parsePacket();
+  int packetSize = udp.parsePacket();
   if(packetSize) {
+
+    lastUdpRead = millis(); //Dient als WiFi isAlive
  
     // read the packet into buf and get the senders IP addr and port number
-    vars.udp.read(buf,packetSize);
+    udp.read(buf,packetSize);
    
     static char const lookup[] = "0123456789ABCDEF";
 
@@ -86,6 +93,15 @@ void SMA::read() {
         toggleCharger(1,false,false);
     }
    
+  } else {
+      //Wird 10s kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
+      if((millis() - lastUdpRead) > 15000) {
+          Serial.println("Restarting WiFi, last successfull sma udp packet more than 15s ago...");
+          wc.sendClients("Restarting WiFi, last successfull sma udp packet more than 15s ago...", false);
+          delay(500);
+          lastUdpRead = millis();
+          myWifi.reconnect();
+      }
   }
 }
 

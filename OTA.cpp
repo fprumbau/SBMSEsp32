@@ -31,8 +31,9 @@ void OTA::init(const char* host) {
      changes += "<li> Werden S1 oder S2 ueber SMA.cpp geschaltet, muss s1 an, s2 aus etc. uebermittelt werden.";
      changes += "<li> Globale Objekte mit global.h.";
      changes += "<li> Variablenupdats nun nur noch mittels JSon";
-     changes += "<li> Moeglichkeit, WiFi mittels 'restart wifi' ueber serielle Schnittstelle zu restarten";
-     updater.setUpdaterUi("Title", "Build : 0.9.2", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li> Moeglichkeit, WiFi mittels 'restart wifi' ueber serielle Schnittstelle zu restarten";     
+     changes += "<li> Wifi restartet, wenn 10s kein UDP-Paket des SMA-Energymeters empfangen wurde";
+     updater.setUpdaterUi("Title", "Build : 0.9.5", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
