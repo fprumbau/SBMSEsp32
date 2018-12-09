@@ -41,7 +41,7 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>OTA.h/OTA.cpp mit ESP32OTA.h/ESP32OTA.cpp verschmolzen";
      changes += "<li>Vars.h in global.h ueberfuehrt, updaterui.h und webpage.h in html.h konsolidiert";
      changes += "<li>Eigene IP in JavaScript mit location.host auslesen und verwenden";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.3", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.4", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
@@ -101,6 +101,8 @@ void ESP32OTA::setup(const char *path, String username, String password) {
     },[&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
       //Upload handler chunks in data     
       if(!index){ // if index == 0 then this is the first frame of data
+        udp.stop(); //koennte helfen
+        
         Serial.printf("UploadStart: %s\n", filename.c_str());
         Serial.setDebugOutput(true);
         t_start = millis();
