@@ -42,7 +42,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Vars.h in global.h ueberfuehrt, updaterui.h und webpage.h in html.h konsolidiert";
      changes += "<li>Eigene IP in JavaScript mit location.host auslesen und verwenden";
      changes += "<li>Battery.h/.cpp in wechselrichter.h/.cpp überführt";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.4", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse übernommen";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.6", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");

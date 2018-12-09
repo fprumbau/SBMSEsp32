@@ -42,15 +42,6 @@ const char* hostName = "esp32a";
 void readSbms();
 
 /**
- * Toggle:
- * - @d1-true
- * - @d1-false
- * - @d2-true
- * - @d2-false
-*/
-void toggleDebug(unsigned char* payload);
-
-/**
  * Pruefen aller Werte
 */
 void checkValues();
@@ -60,30 +51,22 @@ void setGreen();
 void setRed();
 
 /**
- * Netzvorrang starten
-*/
-void starteNetzvorrang(String reason);
-
-/**
- * Batteriebetrieb starten
-*/
-void starteBatterie(String reason);
-
-/**
  * Buttonsteuerung, um manuell den Inverter schalten zu koennen
 */
 void handleButton(AceButton*, uint8_t eventType, uint8_t);
-
-/**
- * Neu fuer Async
- */
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 
 /**
  * Kommandos von Serial lesen, wie z.B.
  * Neustart von WiFi
  */
 void commandLine();
+
+/**
+ * Registriere Eventhandler für WebSocketEvents in WebCom
+ */
+void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  wc.onWsEvent(server, client, type, arg, data, len);
+}
 
 /**********************************************************************/
 /*                                                                    */
@@ -141,8 +124,9 @@ void setup() {
     request->send(200, "text/html", html);
   });
 
-  //Stattdessen mit Async
+  //Registriere Eventhandler WebsocketEvents
   ws.onEvent(onWsEvent);
+    
   server.addHandler(&ws);
   
   server.begin();
@@ -274,38 +258,6 @@ void readSbms() {
   }
 }
 
-/**
-   Toggle:
-   - @d1-true
-   - @d1-false
-   - @d2-true
-   - @d2-false
-*/
-void toggleDebug(unsigned char* payload) {
-  String msg;
-  if (payload[2] == '1') {
-    if (payload[4] == 't') {
-      debug = true;
-      msg = "Switched debug1 to true";
-    } else {
-      debug = false;
-      msg = "Switched debug1 to false";
-    }
-  } else {
-    if (payload[4] == 't') {
-      debug2 = true;
-      msg = "Switched debug2 to true";
-    } else {
-      debug2 = false;
-      msg = "Switched debug2 to false";
-    }
-  }
-  if (debug2) {
-    Serial.println(msg);
-  }
-  wc.sendClients(msg, false);
-}
-
 void checkValues()  {
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
@@ -345,8 +297,8 @@ void checkValues()  {
           Serial.println("Error limit reached, stopping inverter...");
         }
       }
-      inverter.stopBattery = true;
-      starteNetzvorrang("Interrupt(NZV); " + message);
+      inverter.stopBattery = true; //
+      inverter.starteNetzvorrang("Interrupt(NZV); " + message);
       setRed();
     }
   } else {
@@ -359,54 +311,6 @@ void checkValues()  {
   }
 }
 
-/**
-   Netzvorrang starten
-*/
-void starteNetzvorrang(String reason) {
-  String msg = "";
-  if (digitalRead(RELAY_PIN) == HIGH) {
-    digitalWrite(RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
-    wc.sendClients("Toggle battery LOW", false);
-    msg += "Starte Netzvorrang :: ";
-    msg += reason;
-    msg += '\n';
-  } else {
-    if (debug)  msg = "Kann Netzvorrang nicht starten, da schon aktiv\n";
-  }
-  if (msg.length() > 0) {
-    if (debug) {
-      Serial.println(msg);
-    }
-    wc.sendClients(msg, false);
-  }
-}
-
-/**
-   Batteriebetrieb starten
-*/
-void starteBatterie(String reason) {
-  String msg = "";
-  if (!inverter.stopBattery) {
-    if (digitalRead(RELAY_PIN) == LOW) {
-      digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
-      wc.sendClients("Toggle battery HIGH", false);
-      msg += "Starte Netzvorrang :: ";
-      msg += reason;
-      msg += '\n';
-    } else {
-      return;
-    }
-  } else {
-    msg = "Kann Netzvorrang nicht stoppen, da Stopflag aktiv\n";
-  }
-  if (msg.length() > 0) {
-    if (debug) {
-      Serial.println(msg);
-    }
-    wc.sendClients(msg, false);
-  }
-}
-
 void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonState */) {
   switch (eventType) {
     case AceButton::kEventPressed:
@@ -415,10 +319,10 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
       bool relayStatus = digitalRead(RELAY_PIN);
       if (relayStatus == HIGH) {
         // starte Netzvorrang
-        starteNetzvorrang("Buttonaction");
+        inverter.starteNetzvorrang("Buttonaction");
       } else {
         if (!inverter.stopBattery) {
-          starteBatterie("Buttonaction");
+          inverter.starteBatterie("Buttonaction");
         } else {
           if (debug) {
             Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
@@ -463,54 +367,4 @@ void commandLine() {
         Serial.println(" - restart esp   :: restarting whole ESP32");
       }
     }  
-}
-
-void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len){
-
-  switch (type) {
-    case WS_EVT_CONNECT: {       
-       
-          client->text("@ Connected");
-         
-          //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
-          wc.updateUi(client, false);             
-          break;
-      }    
-      case WS_EVT_DATA:
-
-      if (data[0] == '@') {
-          if (data[1] == '+') {
-            starteBatterie("Websockets");
-          } else if (data[1] == '-') {
-            starteNetzvorrang("Websockets");
-          } else if (data[1] == 's' && len > 3) {
-            //Solar charger s1 an / ausschalten
-            if (data[2] == '1') {
-              if (data[3] == '+') {
-                //s1 anschalten
-                sma.toggleCharger(1, true, true);
-                wc.sendClients("s1 an", false);
-              } else {
-                //s1 abschalten
-                sma.toggleCharger(1, false, true);
-                wc.sendClients("s1 aus", false);
-              }
-            } else {
-              if (data[3] == '+') {
-                //s2 anschalten
-                sma.toggleCharger(2, true, true);
-                wc.sendClients("s2 an", false);
-              } else {
-                //s2 abschalten
-                sma.toggleCharger(2, false, true);
-                wc.sendClients("s2 aus", false);
-              }
-            }
-          }
-          if (data[1] == 'd' && len > 4) { 
-            toggleDebug(data);
-          }
-      }
-      break;
-    }
 }

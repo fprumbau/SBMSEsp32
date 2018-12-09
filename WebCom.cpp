@@ -37,3 +37,85 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           ws.text(client->id(), str.c_str());
         }
 }
+
+/**
+   Toggle:
+   - @d1-true
+   - @d1-false
+   - @d2-true
+   - @d2-false
+*/
+void WebCom::toggleDebug(unsigned char* payload) {
+  String msg;
+  if (payload[2] == '1') {
+    if (payload[4] == 't') {
+      debug = true;
+      msg = "Switched debug1 to true";
+    } else {
+      debug = false;
+      msg = "Switched debug1 to false";
+    }
+  } else {
+    if (payload[4] == 't') {
+      debug2 = true;
+      msg = "Switched debug2 to true";
+    } else {
+      debug2 = false;
+      msg = "Switched debug2 to false";
+    }
+  }
+  if (debug2) {
+    Serial.println(msg);
+  }
+  wc.sendClients(msg, false);
+}
+
+void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len){
+
+  switch (type) {
+    case WS_EVT_CONNECT: {       
+       
+          client->text("@ Connected");
+         
+          //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
+          wc.updateUi(client, false);             
+          break;
+      }    
+      case WS_EVT_DATA:
+
+      if (data[0] == '@') {
+          if (data[1] == '+') {
+            inverter.starteBatterie("Websockets");
+          } else if (data[1] == '-') {
+            inverter.starteNetzvorrang("Websockets");
+          } else if (data[1] == 's' && len > 3) {
+            //Solar charger s1 an / ausschalten
+            if (data[2] == '1') {
+              if (data[3] == '+') {
+                //s1 anschalten
+                sma.toggleCharger(1, true, true);
+                wc.sendClients("s1 an", false);
+              } else {
+                //s1 abschalten
+                sma.toggleCharger(1, false, true);
+                wc.sendClients("s1 aus", false);
+              }
+            } else {
+              if (data[3] == '+') {
+                //s2 anschalten
+                sma.toggleCharger(2, true, true);
+                wc.sendClients("s2 an", false);
+              } else {
+                //s2 abschalten
+                sma.toggleCharger(2, false, true);
+                wc.sendClients("s2 aus", false);
+              }
+            }
+          }
+          if (data[1] == 'd' && len > 4) { 
+            toggleDebug(data);
+          }
+      }
+      break;
+    }
+}
