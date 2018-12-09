@@ -1,10 +1,8 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <WebServer.h>
+#include "ESPAsyncWebServer.h"
 #include <WiFiUdp.h>
-#include "OTA.h"
-#include "Vars.h"
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "Battery.h"
@@ -12,16 +10,24 @@
 #include "SBMS.h"
 #include "SMA.h"
 
-extern Vars vars; //Global definierte Variablen
-extern SMA sma;  //read SMA energy meter broadcast messages
-extern MyWifi myWifi;
-extern WebCom wc;
+extern bool debug;
+extern bool debug2;
+extern int RELAY_S1;
+extern int RELAY_S2;    
+extern int RELAY_PIN;
+extern int LED_S1;
+extern int LED_S2;
+extern int TASTER; //manuelle Inverterumschaltung
+
 extern Battery battery;
-extern WebServer server;
-extern ESP32OTA updater;
-extern OTA ota;  //Over-the-air updater
-extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+extern MyWifi myWifi;
+extern SMA sma;  //read SMA energy meter broadcast messages
+extern WebCom wc;
+extern AsyncWebServer server;   
+extern AsyncWebSocket ws;
+extern ESP32OTA updater; //Over-the-air updater
 extern WiFiUDP udp;
+extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 
 #endif

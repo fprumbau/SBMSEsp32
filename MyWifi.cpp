@@ -4,21 +4,26 @@
 void MyWifi::connect() {
 
   //This is here to force the ESP32 to reset the WiFi and initialize correctly.
+  WiFi.disconnect(true);
+  WiFi.setSleep(false);
   WiFi.enableSTA(true);
   Serial.print("WIFI status = ");
   Serial.println(WiFi.getMode());
-  WiFi.disconnect(true);
-  delay(1000);
   WiFi.mode(WIFI_STA);
-  delay(1000);
-  Serial.print("WIFI status = ");
-  Serial.println(WiFi.getMode());
   //Ende silly mode 
  
-  WiFi.begin(_ssid, _password);
-  WiFi.setSleep(false);
-  
+  WiFi.begin(_ssid, _password); 
+
+  int ct = 0;
   while(WiFi.status() != WL_CONNECTED) {
+      ct++;
+      if(ct>10) {
+        Serial.println("Second attempt");
+        ct=0;
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(_ssid, _password);
+      }
       Serial.print(".");
       delay(500); 
   }

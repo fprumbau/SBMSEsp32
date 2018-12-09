@@ -49,7 +49,7 @@ void SMA::read() {
     float bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
     float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
-    if(vars.debug2) {
+    if(debug2) {
       String msg;
       msg = "\nWirkleistung (Bezug/Lieferung): ";
       msg += bezug;
@@ -131,9 +131,9 @@ void SMA::toggleCharger(byte nr, bool onOff, bool override) {
 
 bool SMA::isChargerOn(byte nr) {
   if(nr == 1) {
-    return !digitalRead(vars.RELAY_S1);
+    return !digitalRead(RELAY_S1);
   } else {
-    return !digitalRead(vars.RELAY_S2);
+    return !digitalRead(RELAY_S2);
   }
 }
 
@@ -142,16 +142,16 @@ void SMA::enableCharger(byte nr, bool override) {
       if(override) {
         s1override = true;
       }
-      digitalWrite(vars.RELAY_S1, LOW);
-      digitalWrite(vars.LED_S1, HIGH);
+      digitalWrite(RELAY_S1, LOW);
+      digitalWrite(LED_S1, HIGH);
   } else {
       if(override) {
         s2override = true;
       }    
-      digitalWrite(vars.RELAY_S2, LOW);
-      digitalWrite(vars.LED_S2, HIGH);
+      digitalWrite(RELAY_S2, LOW);
+      digitalWrite(LED_S2, HIGH);
   }
-  wc.updateUi(0);
+  wc.updateUi(NULL, true);
 }
 
 void SMA::disableCharger(byte nr, bool override) {
@@ -160,17 +160,17 @@ void SMA::disableCharger(byte nr, bool override) {
         s1override = false;
       }
       if(override || !s1override) {
-        digitalWrite(vars.RELAY_S1, HIGH);
-        digitalWrite(vars.LED_S1, LOW);
+        digitalWrite(RELAY_S1, HIGH);
+        digitalWrite(LED_S1, LOW);
       }  
   } else {
       if(override) {
         s2override = false;
       }    
       if(override || !s2override) {
-        digitalWrite(vars.RELAY_S2, HIGH);
-        digitalWrite(vars.LED_S2, LOW);
+        digitalWrite(RELAY_S2, HIGH);
+        digitalWrite(LED_S2, LOW);
       } 
   }
-  wc.updateUi(0);
+  wc.updateUi(NULL, true);
 }

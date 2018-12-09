@@ -1,23 +1,28 @@
 #include "global.h"
 
-#include "OTA.h"
-#include "Vars.h"
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "Battery.h"
 #include "ESP32OTA.h"
 
 #include <WiFiUdp.h>
-#include <WebServer.h>
 
-Vars vars; 
-SMA sma;
+bool debug = false;
+bool debug2 = false;
+int RELAY_S1 = 33;
+int RELAY_S2 = 32;    
+int RELAY_PIN = 21;    
+int LED_S1 = 25;
+int LED_S2 = 26;
+int TASTER = 19; //manuelle Inverterumschaltung
+
 MyWifi myWifi;
+SMA sma;
 WebCom wc;
 Battery battery;
-WebServer server(80);
+AsyncWebServer server(80);
 ESP32OTA updater;
-OTA ota;  //Over-the-air updater
 SBMS sbms;
 WiFiUDP udp;
 long lastUdpRead = -1;
+AsyncWebSocket ws("/ws");

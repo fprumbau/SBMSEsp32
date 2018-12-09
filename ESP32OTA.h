@@ -2,7 +2,7 @@
 #define __ESP32_OTA_H
 
 #include "global.h"
-#include "UpdaterUI.h"
+#include <ESPmDNS.h>
 
 class ESP32OTA
 {
@@ -17,13 +17,15 @@ class ESP32OTA
     String _branch = "Branch : ";
     String _deviceInfo = "ChipId : " + String(ESP.getChipRevision());
     String _footer = "ESP32 OTA Updater";
-
-  public:
     void setup(const char *path, String username, String password);
+    
+  public:
+    void init(const char* host);
 
     //setup web UI
     void setUpdaterUi(String title,String banner,String build,String branch,String deviceInfo,String footer);
     //setup web UI , with chip ID auto generated
     void setUpdaterUi(String title,String banner,String build,String branch,String footer);
+    bool restartRequired = false; // Set this flag in the callbacks to restart ESP in the main loop
 };
 #endif
