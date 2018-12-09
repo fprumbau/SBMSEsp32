@@ -33,4 +33,10 @@ extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen
 
+//nicht auf Serial1 warten, Feste Werte annehmen
+extern bool testFixed;
+extern const char* hostName;
+extern unsigned long lastReceivedMillis;
+extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Batterie abgeschaltet werden )
+
 #endif

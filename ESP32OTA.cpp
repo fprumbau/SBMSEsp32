@@ -46,7 +46,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Websocket-Eventhandler ueber Wrappermethode in WebCom verschoben";
      changes += "<li>SOC-Variable und cv (cell voltages) in global.h/.cpp übernommen";
      changes += "<li>OTA mit Reporting und Abschlusseite (OK/Failed) geht jetzt";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.14", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Funktion readSBMS nun in SBMS.h/.cpp";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.15", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
