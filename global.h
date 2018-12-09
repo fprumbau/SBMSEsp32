@@ -5,7 +5,7 @@
 #include <WiFiUdp.h>
 #include "MyWifi.h"
 #include "WebCom.h"
-#include "Battery.h"
+#include "wechselrichter.h"
 #include "ESP32OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
@@ -19,7 +19,7 @@ extern int LED_S1;
 extern int LED_S2;
 extern int TASTER; //manuelle Inverterumschaltung
 
-extern Battery battery;
+extern Inverter inverter;
 extern MyWifi myWifi;
 extern SMA sma;  //read SMA energy meter broadcast messages
 extern WebCom wc;

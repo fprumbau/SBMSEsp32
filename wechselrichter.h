@@ -1,7 +1,7 @@
-#ifndef BATTERY_H
-#define BATTERY_H
+#ifndef INVERTER_H
+#define INVERTER_H
 
-class Battery {
+class Inverter {
   public:
     bool stopBattery;
     int LOW_VOLTAGE_MILLIS = 2850;

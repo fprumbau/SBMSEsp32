@@ -238,7 +238,7 @@ void readSbms() {
           soc = sbms.dcmp(6, 2, txt, len);
           outString += soc;
           outString += " ( Limit: ";
-          outString += battery.SOC_LIMIT;
+          outString += inverter.SOC_LIMIT;
           outString += " ) \n";
         }
         if (len >= 24) {
@@ -257,7 +257,7 @@ void readSbms() {
         if (debug) {
           Serial.println(outString);
           Serial.print("StopBattery: ");
-          Serial.println(battery.stopBattery);
+          Serial.println(inverter.stopBattery);
           Serial.println("_______________________________________");
         }
 
@@ -315,15 +315,15 @@ void checkValues()  {
 
   boolean stop = false;
   String message = "";
-  if (soc < battery.SOC_LIMIT) {
+  if (soc < inverter.SOC_LIMIT) {
     message = "State of charge below ";
-    message += battery.SOC_LIMIT;
+    message += inverter.SOC_LIMIT;
     message += "%";
     stop = true;
   }
   if (!stop) {
     for (int k = 0; k < 7; k++) {
-      if (cv[k] < battery.LOW_VOLTAGE_MILLIS) {
+      if (cv[k] < inverter.LOW_VOLTAGE_MILLIS) {
         message = "Undervoltage cell: ";
         message += k;
         stop = true;
@@ -340,12 +340,12 @@ void checkValues()  {
         Serial.println(failureCount);
       }
     } else {
-      if (!battery.stopBattery) {
+      if (!inverter.stopBattery) {
         if (debug) {
-          Serial.println("Error limit reached, stopping battery...");
+          Serial.println("Error limit reached, stopping inverter...");
         }
       }
-      battery.stopBattery = true;
+      inverter.stopBattery = true;
       starteNetzvorrang("Interrupt(NZV); " + message);
       setRed();
     }
@@ -354,7 +354,7 @@ void checkValues()  {
       failureCount = 0;
     }
     //Hier sollte nicht die Batterie gestartet, sondern nur freigeschaltet werden!!!
-    battery.stopBattery = false;
+    inverter.stopBattery = false;
     setGreen();
   }
 }
@@ -386,7 +386,7 @@ void starteNetzvorrang(String reason) {
 */
 void starteBatterie(String reason) {
   String msg = "";
-  if (!battery.stopBattery) {
+  if (!inverter.stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
       wc.sendClients("Toggle battery HIGH", false);
@@ -417,7 +417,7 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
         // starte Netzvorrang
         starteNetzvorrang("Buttonaction");
       } else {
-        if (!battery.stopBattery) {
+        if (!inverter.stopBattery) {
           starteBatterie("Buttonaction");
         } else {
           if (debug) {

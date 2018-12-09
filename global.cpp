@@ -2,7 +2,7 @@
 
 #include "MyWifi.h"
 #include "WebCom.h"
-#include "Battery.h"
+#include "wechselrichter.h"
 #include "ESP32OTA.h"
 
 #include <WiFiUdp.h>
@@ -19,7 +19,7 @@ int TASTER = 19; //manuelle Inverterumschaltung
 MyWifi myWifi;
 SMA sma;
 WebCom wc;
-Battery battery;
+Inverter inverter;
 AsyncWebServer server(80);
 ESP32OTA updater;
 SBMS sbms;

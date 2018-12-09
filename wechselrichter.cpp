@@ -1,5 +1,5 @@
 #include "global.h"
 
-bool Battery::isBatteryOn() {
+bool Inverter::isBatteryOn() {
     return digitalRead(RELAY_PIN);
 }

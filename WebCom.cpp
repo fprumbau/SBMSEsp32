@@ -24,7 +24,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         root["d2"]=debug2;
         root["s1"]=sma.isChargerOn(1);
         root["s2"]=sma.isChargerOn(2);
-        root["battery"]=battery.isBatteryOn();
+        root["battery"]=inverter.isBatteryOn();
         char jsonChar[512];
         root.printTo(jsonChar);
         String str(jsonChar);
