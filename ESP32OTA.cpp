@@ -41,9 +41,11 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>OTA.h/OTA.cpp mit ESP32OTA.h/ESP32OTA.cpp verschmolzen";
      changes += "<li>Vars.h in global.h ueberfuehrt, updaterui.h und webpage.h in html.h konsolidiert";
      changes += "<li>Eigene IP in JavaScript mit location.host auslesen und verwenden";
-     changes += "<li>Battery.h/.cpp in wechselrichter.h/.cpp überführt";
-     changes += "<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse übernommen";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.6", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Battery.h/.cpp in wechselrichter.h/.cpp ueberfuehrt";
+     changes += "<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse uebernommen";
+     changes += "<li>Websocket-Eventhandler ueber Wrappermethode in WebCom verschoben";
+     changes += "<li>SOC-Variable und cv (cell voltages) in global.h/.cpp übernommen";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.12", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
@@ -59,7 +61,8 @@ void ESP32OTA::setup(const char *path, String username, String password) {
     _username = username;
     _password = password;
     uint32_t t_start,t_stop;
-    uint32_t fileSize;
+    size_t fileSize;
+    uint16_t ct = 0;
     
 
     // handler for the /update form page
@@ -81,9 +84,8 @@ void ESP32OTA::setup(const char *path, String username, String password) {
 
     // handler for the /update form POST (once file upload finishes)
    server.on(path, HTTP_POST, [&](AsyncWebServerRequest *request){
-      // the request handler is triggered after the upload has finished... 
-      // create the response, add header, and send response
-
+        // the request handler is triggered after the upload has finished... 
+        // create the response, add header, and send response
         String pageIndex = String(update);
         pageIndex.replace("{title}",_title);
         if(Update.hasError()){
@@ -103,6 +105,9 @@ void ESP32OTA::setup(const char *path, String username, String password) {
     },[&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
       //Upload handler chunks in data     
       if(!index){ // if index == 0 then this is the first frame of data
+        stopForOTA = true; //stoppt alle Aktionen im loop()
+
+        delay(3000); //geht das hier?? unsicher!!!
         udp.stop(); //koennte helfen
         
         Serial.printf("UploadStart: %s\n", filename.c_str());
@@ -117,6 +122,8 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         }
         //Update.runAsync(true); // tell the updaterClass to run in async mode (nicht da fuer ESP32)
       } else {
+        ct++;
+        if(ct%50==0) Serial.println("");
         Serial.print(".");
         fileSize += len;
       }
@@ -127,12 +134,11 @@ void ESP32OTA::setup(const char *path, String username, String password) {
       
       if(final){ // if the final flag is set then this is the last frame of data
         if(Update.end(true)){ //true to set the size to the current progress
-          t_stop = millis();
-          Serial.println(ESP.getSdkVersion());
-          Serial.print("Time UPLOAD: "); Serial.print((t_stop - t_start) / 1000.0); Serial.println(" sec.");
-          Serial.print("Speed UPLOAD: "); Serial.print(calcSpeed(t_stop - t_start, len)); Serial.println(" Kbit/s");
-          Serial.printf("Upload Success, Rebooting: %u bytes\n", len);
-          restartRequired = true;  // Tell the main loop to restart the ESP
+            t_stop = millis();
+            Serial.print("\nTime UPLOAD: "); Serial.print((t_stop - t_start) / 1000.0); Serial.println(" sec.");
+            Serial.print("Speed UPLOAD: "); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(" Kbit/s");
+            Serial.printf("Upload Success, Rebooting: %u bytes\n", fileSize);
+            restartRequired = true;  // Tell the main loop to restart the ESP
         } else {
             Update.printError(Serial);
         }

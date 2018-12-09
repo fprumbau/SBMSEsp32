@@ -30,4 +30,7 @@ extern WiFiUDP udp;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 
+extern long soc; //aktueller Wert State Of Charge
+extern int cv[]; //aktuelle Zellspannungen
+
 #endif

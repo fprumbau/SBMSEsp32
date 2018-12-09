@@ -20,6 +20,7 @@ class ESP32OTA
     void setup(const char *path, String username, String password);
     
   public:
+    volatile bool stopForOTA = false;
     void init(const char* host);
 
     //setup web UI

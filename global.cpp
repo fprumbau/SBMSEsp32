@@ -26,3 +26,6 @@ SBMS sbms;
 WiFiUDP udp;
 long lastUdpRead = -1;
 AsyncWebSocket ws("/ws");
+
+long soc = -1; //aktueller Wert State Of Charge
+int cv[8]; //aktuelle Zellspannungen

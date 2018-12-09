@@ -13,9 +13,6 @@ AceButton taster(&tasterConfig);
 //Ticker ticker;
 int counter = 0;
 
-long soc = -1; //aktueller Wert State Of Charge
-int cv[8]; //aktuelle Zellspannungen
-
 //Empfangstimeout ( wird 10s nichts empfangen, muss die Batterie abgeschaltet werden )
 long timeout = 10000;
 unsigned long lastReceivedMillis = -1;
@@ -140,24 +137,25 @@ void setup() {
 /*                                                                    */
 /**********************************************************************/
 void loop() {
-  taster.check(); //AceButton
-  yield();
-  readSbms();
-  yield();
-  if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
-    Serial.print("Check...  ; failureCount: ");
-    Serial.println(failureCount);
-    lastCheckedMillis = millis();
-    checkValues();
+  if(!updater.stopForOTA) {
+    taster.check(); //AceButton
+    yield();
+    readSbms();
+    yield();
+    if (( millis() - lastCheckedMillis ) > 3000) { //Pruefung hoechstens alle 3 Sekunden
+      Serial.print("Check...  ; failureCount: ");
+      Serial.println(failureCount);
+      lastCheckedMillis = millis();
+      checkValues();
+    }
+    yield();
+    sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
+    yield();
+    commandLine();
   }
-  yield();
-  sma.read(); //energymeter lesen, wenn upd-Paket vorhanden
-  yield();
-  commandLine();
   
   //Restart erforderlich
   if(updater.restartRequired) {
-    Serial.println("Updater requests restart, doing so now...");
     delay(2000);
     ESP.restart();
   }
