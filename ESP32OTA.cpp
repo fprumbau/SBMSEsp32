@@ -45,7 +45,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse uebernommen";
      changes += "<li>Websocket-Eventhandler ueber Wrappermethode in WebCom verschoben";
      changes += "<li>SOC-Variable und cv (cell voltages) in global.h/.cpp übernommen";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.12", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>OTA mit Reporting und Abschlusseite (OK/Failed) geht jetzt";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.14", "SBMS120 Solar Charger", "Branch : master", changes);
      updater.setup("/update", "", "");
   } else {
      Serial.println("Flash OTA programming only possible with 4Mb Flash size!!!");
@@ -91,14 +92,14 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         if(Update.hasError()){
           pageIndex.replace("{banner}","<b><font color=red>Update gescheitert</font></b>");
         } else {
-          pageIndex.replace("{banner}","<b><font color=darkgreen>Update erfolgreich</font></b>");
+          pageIndex.replace("{banner}","<b><font color=green>Update erfolgreich</font></b>");
         }
         pageIndex.replace("{build}",_build);
         pageIndex.replace("{branch}",_branch);
         pageIndex.replace("{deviceInfo}",_deviceInfo);
         pageIndex.replace("{footer}",_footer);
       
-      AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", pageIndex);
+      AsyncWebServerResponse *response = request->beginResponse(200, "text/html", pageIndex);
       response->addHeader("Connection", "close");
       response->addHeader("Access-Control-Allow-Origin", "*");
       request->send(response);
@@ -123,7 +124,7 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         //Update.runAsync(true); // tell the updaterClass to run in async mode (nicht da fuer ESP32)
       } else {
         ct++;
-        if(ct%50==0) Serial.println("");
+        if(ct%70==0) Serial.println("");
         Serial.print(".");
         fileSize += len;
       }
