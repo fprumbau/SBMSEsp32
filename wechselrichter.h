@@ -2,13 +2,18 @@
 #define INVERTER_H
 
 class Inverter {
+  private: 
+    unsigned long lastCheckedMillis = -1; 
   public:
+    void setBlue();
+    void setGreen();
+    void setRed();   
+    void check(); //Pruefe Werte fuer SOC und cell voltages
     bool stopBattery; //Stopflag, verhindert ein manuelles Anschalten der Batterie
-    int LOW_VOLTAGE_MILLIS = 2850;
-    int SOC_LIMIT = 30; //wird aus Config ueberschrieben
     bool isBatteryOn();
     void starteNetzvorrang(String reason); //Netzbetrieb aktivieren
-    void starteBatterie(String reason); //Batteriebetrieb aktivieren
+    void starteBatterie(String reason); //Batteriebetrieb aktivieren   
+    void handleButtonPressed(); //Tastersteuerung, um Inverterstatus zu toggeln 
 };
 
 #endif

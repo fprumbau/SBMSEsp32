@@ -10,6 +10,17 @@
 #include "SBMS.h"
 #include "SMA.h"
 
+//findet die Checkmethode falsche Werte vor, so wird noch einmal
+//(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
+extern int SOC_LIMIT; 
+extern int LOW_VOLTAGE_MILLIS; 
+extern int failureCount;
+extern const int errLimit;   
+ 
+extern int LED_RED;
+extern int LED_GREEN;
+extern int LED_BLUE;    
+
 extern bool debug;
 extern bool debug2;
 extern int RELAY_S1;

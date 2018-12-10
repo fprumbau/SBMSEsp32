@@ -49,7 +49,9 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Funktion readSBMS nun in SBMS.h/.cpp";
      changes += "<li>Authentifizierung fuer ESPOTA und AsyncWebserver (auskommentiert), Zugriff ueber / statt /sbms";
      changes += "<li>Ein Schaltvorgang auf s1 und s2 sollte maximal alle 60s erlaubt werden.";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.17", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>checkValues mit led-Methoden in Inverterklasse verlegt.";
+     changes += "<li>Code zum behandeln des Inverter-Toggle-Tasters in Inverterklasse verlegt";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.19", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

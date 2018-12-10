@@ -95,7 +95,7 @@ void SBMS::readSbms() {
           soc = sbms.dcmp(6, 2, txt, len);
           outString += soc;
           outString += " ( Limit: ";
-          outString += inverter.SOC_LIMIT;
+          outString += SOC_LIMIT;
           outString += " ) \n";
         }
         if (len >= 24) {

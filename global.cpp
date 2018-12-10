@@ -7,6 +7,17 @@
 
 #include <WiFiUdp.h>
 
+//findet die Checkmethode falsche Werte vor, so wird noch einmal
+//(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
+int failureCount = 0;
+const int errLimit = 5;   
+int SOC_LIMIT = 30; //wird aus Config ueberschrieben
+int LOW_VOLTAGE_MILLIS = 2850;  
+
+int LED_RED = 12;
+int LED_GREEN = 14;
+int LED_BLUE = 27;    
+
 bool debug = false;
 bool debug2 = false;
 int RELAY_S1 = 33;
