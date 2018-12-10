@@ -61,36 +61,40 @@ void SMA::read() {
 
     /**
      * Ist der Charger2 aus UND ist der letzte Schaltvorgang
-     * mehr als 10s her UND gibt es einen Energieüberschuss von 
+     * mehr als 60s her UND gibt es einen Energieüberschuss von 
      * mindestens 200W, dann aktiviere S2.  
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
-    if(!isChargerOn(2) && ( millis() - s2_switched ) > 10000) {
-      if (lieferung > 200) {
-        Serial.println("Aktiviere Solarcharger 2");
-        toggleCharger(2,true,false);
-      } 
-    } else if(lieferung <= 0 && bezug > 100 && !s2override) {
-        Serial.println("Deaktiviere Solarcharger 2");
-        toggleCharger(2,false,false);
+    if(( millis() - s2_switched ) > 60000) {
+      if(!isChargerOn(2)) {
+        if (lieferung > 200) {
+          Serial.println("Aktiviere Solarcharger 2");
+          toggleCharger(2,true,false);
+        } 
+      } else if(lieferung <= 0 && bezug > 100 && !s2override) {
+          Serial.println("Deaktiviere Solarcharger 2");
+          toggleCharger(2,false,false);
+      }
     }
 
     /**
      * Ist der Charger1 aus UND ist der letzte Schaltvorgang
-     * mehr als 10s her UND gibt es einen Energieüberschuss von 
+     * mehr als 60s her UND gibt es einen Energieüberschuss von 
      * mindestens 600W, dann aktiviere S2.  
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
-    if(!isChargerOn(1) && ( millis() - s1_switched ) > 10000) {
-      if(lieferung > 600){
-        Serial.println("Aktiviere Solarcharger 1");
-        toggleCharger(1,true,false);
+    if(( millis() - s1_switched ) > 60000) {
+      if(!isChargerOn(1)) {
+        if(lieferung > 600){
+          Serial.println("Aktiviere Solarcharger 1");
+          toggleCharger(1,true,false);
+        }
+      } else if(lieferung <= 0 && bezug > 300 && !s1override) {
+          Serial.println("Deaktiviere Solarcharger 2");
+          toggleCharger(1,false,false);
       }
-    } else if(lieferung <= 0 && bezug > 300 && !s1override) {
-        Serial.println("Deaktiviere Solarcharger 2");
-        toggleCharger(1,false,false);
     }
    
   } else {

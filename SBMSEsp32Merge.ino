@@ -102,8 +102,13 @@ void setup() {
   myWifi.connect();
 
   // start Webserver
-  //server.on("/", sbmsPage);
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", html);
+  });
+  // Zugriff von aussen
   server.on("/sbms", HTTP_GET, [](AsyncWebServerRequest *request){
+    //if(!request->authenticate("admin", "Go8319!"))
+    //    request->redirect("/login");
     request->send(200, "text/html", html);
   });
 
