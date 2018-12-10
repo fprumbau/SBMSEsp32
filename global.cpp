@@ -31,7 +31,7 @@ long soc = -1; //aktueller Wert State Of Charge
 int cv[8]; //aktuelle Zellspannungen
 
 //nicht auf Serial1 warten, Feste Werte annehmen
-bool testFixed = true;
-const char* hostName = "esp32b";
+bool testFixed = false;
+const char* hostName = "esp32a";
 unsigned long lastReceivedMillis = -1;
 long timeout = 10000;
