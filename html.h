@@ -22,7 +22,7 @@ color:#545147;}h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bot
 <p>{build}</p><p>{branch}</p><p>{deviceInfo}</p></div> 
 <div id="body"><form method='POST' action='' enctype='multipart/form-data'><input type='file' name='update'><br/>
 <br/><input type='submit' value='Update'></form><br>{footer}</div><div id="footer"><p>SBMS120 / LiFeOP4 2,7kWh</p>
-</div> </body></html>";
+</div> </body></html>
 )=====";
 
 const char html[] PROGMEM = R"=====(

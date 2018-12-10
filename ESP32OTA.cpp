@@ -44,7 +44,7 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Battery.h/.cpp in wechselrichter.h/.cpp ueberfuehrt";
      changes += "<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse uebernommen";
      changes += "<li>Websocket-Eventhandler ueber Wrappermethode in WebCom verschoben";
-     changes += "<li>SOC-Variable und cv (cell voltages) in global.h/.cpp übernommen";
+     changes += "<li>SOC-Variable und cv (cell voltages) in global.h/.cpp uebernommen";
      changes += "<li>OTA mit Reporting und Abschlusseite (OK/Failed) geht jetzt";
      changes += "<li>Funktion readSBMS nun in SBMS.h/.cpp";
      changes += "<li>Authentifizierung fuer ESPOTA und AsyncWebserver (auskommentiert), Zugriff ueber / statt /sbms";
