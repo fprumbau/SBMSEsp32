@@ -16,6 +16,7 @@ extern int SOC_LIMIT;
 extern int LOW_VOLTAGE_MILLIS; 
 extern int failureCount;
 extern const int errLimit;   
+extern const int smaMeasurementsBeforSwitchoff;
  
 extern int LED_RED;
 extern int LED_GREEN;

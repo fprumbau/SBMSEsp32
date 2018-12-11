@@ -71,10 +71,15 @@ void SMA::read() {
         if (lieferung > 200) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
+          s2_countBeforeOff = -1;
         } 
       } else if(lieferung <= 0 && bezug > 100 && !s2override) {
-          Serial.println("Deaktiviere Solarcharger 2");
-          toggleCharger(2,false,false);
+          if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
+            s2_countBeforeOff++; 
+          } else {        
+            Serial.println("Deaktiviere Solarcharger 2");
+            toggleCharger(2,false,false);
+          }
       }
     }
 
@@ -90,10 +95,15 @@ void SMA::read() {
         if(lieferung > 600){
           Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
+          s1_countBeforeOff = -1;
         }
       } else if(lieferung <= 0 && bezug > 300 && !s1override) {
-          Serial.println("Deaktiviere Solarcharger 2");
-          toggleCharger(1,false,false);
+          if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
+            s1_countBeforeOff++;
+          } else {
+            Serial.println("Deaktiviere Solarcharger 1");
+            toggleCharger(1,false,false);
+          }
       }
     }
    

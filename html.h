@@ -115,7 +115,7 @@ function log(msg) {
 var xsbms="01d&u%u$#'G";
 var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
 var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
-var s1=['110Ah','nnnW','SBMS120 '];
+var s1=['100Ah','nnnW','SBMS120 '];
 var s2=[0,0,0,0,0,0,0,0,3,7,1,1];
 
 localStorage['cap']=s1[0];

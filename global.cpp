@@ -11,6 +11,7 @@
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
 int failureCount = 0;
 const int errLimit = 5;   
+const int smaMeasurementsBeforSwitchoff = 10;
 int SOC_LIMIT = 30; //wird aus Config ueberschrieben
 int LOW_VOLTAGE_MILLIS = 2850;  
 
