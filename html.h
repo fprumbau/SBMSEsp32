@@ -74,7 +74,7 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div3 style='height: 135px;'>
 <canvas id='Lg' width='70' height='120' style='position:relative; top:11px; left:12px; z-index:2; float: left;'></canvas>
 <div2 style="top:12px; left:360px; color:#d92;text-shadow:-1px -2px 1px #fd4,1px 2px 2px #fea;font-size:40px;" id="id">SBMS120
-<div2 style="top:0px;left:200px;top:-6px;width:135px;font: Courier;font-size:30px;color:darkgreen;background-color:#505050;border:1px solid darkgreen;padding:5px;text-align:right" id="lieferung">0.0 W</div2>
+<div2 style="top:0px;left:200px;top:-6px;width:138px;font: Courier;font-size:30px;color:darkgreen;background-color:#505050;border:1px solid darkgreen;padding:5px;text-align:right" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'><div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
