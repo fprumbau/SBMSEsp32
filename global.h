@@ -51,4 +51,8 @@ extern const char* hostName;
 extern unsigned long lastReceivedMillis;
 extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Batterie abgeschaltet werden )
 
+extern String sbmsData;
+extern float bezug;
+extern float lieferung;
+
 #endif

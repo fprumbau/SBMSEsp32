@@ -24,7 +24,10 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         root["d2"]=debug2;
         root["s1"]=sma.isChargerOn(1);
         root["s2"]=sma.isChargerOn(2);
-        root["battery"]=inverter.isBatteryOn();
+        root["b"]=inverter.isBatteryOn();
+        root["l"]=lieferung;
+        root["z"]=bezug;
+        root["d"]=sbmsData;
         char jsonChar[512];
         root.printTo(jsonChar);
         String str(jsonChar);

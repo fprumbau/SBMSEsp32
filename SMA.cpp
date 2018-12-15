@@ -46,8 +46,8 @@ void SMA::read() {
           wll[v]=hex[v+104];
     }
 
-    float bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
-    float lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
+    bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
+    lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
     if(debug2) {
       String msg;

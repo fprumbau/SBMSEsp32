@@ -67,7 +67,9 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <body style='background: #000;'>
 <div3 style='height: 135px;'>
 <canvas id='Lg' width='70' height='120' style='position:relative; top:11px; left:12px; z-index:2; float: left;'></canvas>
-<div2 style='top:12px; left:360px; color:#d92;text-shadow:-1px -2px 1px #fd4,1px 2px 2px #fea;font-size:40px;' id='id'></div2>
+<div2 style="top:12px; left:360px; color:#d92;text-shadow:-1px -2px 1px #fd4,1px 2px 2px #fea;font-size:40px;" id="id">SBMS120
+<div2 style="top:0px;left:200px;top:-6px;width:135px;font: Courier;font-size:30px;color:darkgreen;background-color:#505050;border:1px solid darkgreen;padding:5px;text-align:right" id="lieferung">0.0 W</div2>
+</div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'><div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
@@ -117,10 +119,6 @@ var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
 var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
 var s1=['100Ah','nnnW','SBMS120 '];
 var s2=[0,0,0,0,0,0,0,0,3,7,1,1];
-
-localStorage['cap']=s1[0];
-localStorage['WA']=s1[1];
-localStorage['model']=s1[2];
 
 //Reconnecting-websocket
 !function(a,b){"function"==typeof define&&define.amd?define([],b):"undefined"!=typeof module&&module.exports?module.exports=b():a.ReconnectingWebSocket=b()}(this,function(){function a(b,c,d){function l(a,b){var c=document.createEvent("CustomEvent");
@@ -193,14 +191,14 @@ connection.onmessage = function (e) {
             console.log('JSon: ', data);
             json = JSON.parse(data); 
             updateUiFromData();  
+            data = json.d;
+            all();
           break;
       default:
             if(debug) {
               console.log('Non-Daten: ', data);
               log('Daten: ' + data);
             }
-            sbms=data
-            localStorage['sbmsb']=sbms;
             all();
     }
   }
@@ -213,17 +211,14 @@ log('End trying to open webclient socket');
  */
 function updateUiFromData() {
   var debug1 = json.d1;
-  console.log("Debug1: " + debug1);
   if(null != debug1) {
     document.getElementById("dbg1").checked = debug1;
   }
   var debug2 = json.d2;
-  console.log("Debug2: " + debug2);
   if(null != debug2) {
     document.getElementById("dbg2").checked = debug2;
   }
   var s1 = json.s1;
-  console.log("Solar1: " + s1);
   if(null != s1) {
     b1 = document.getElementById("b1");
     if(s1) {   
@@ -237,7 +232,6 @@ function updateUiFromData() {
     }
   }
   var s2 = json.s2;
-  console.log("Solar2: " + s2);
   if(null != s2) {
     b2 = document.getElementById("b2");
     if(s2) {   
@@ -250,8 +244,7 @@ function updateUiFromData() {
       b2.innerHTML='S2off';
     }
   }
-  var batt = json.battery;
-  console.log("Batterie: " + batt);
+  var batt = json.b;
   if(null != batt) {
     bb = document.getElementById("bb");
     if(batt) {
@@ -264,6 +257,16 @@ function updateUiFromData() {
         bb.innerHTML='Netzvorrang';
       }
   }  
+  var lieferung = json.l;
+  var bezug = json.z;
+  var sum = lieferung - bezug;
+  var elem = document.getElementById("lieferung");
+  if(sum > 0) {
+    elem.style.color='darkgreen';    
+  } else {
+    elem.style.color='red';
+  }
+  elem.innerHTML=''+sum+' W';
 }
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
@@ -309,7 +312,10 @@ function all(){
   function pad(n, width, z) {z=z || '0';n=n+'';return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;}
   function dcmp(p,s,d){xx=0; for (z=0;z<s;z++){xx = xx + ((d.charCodeAt((p+s-1)-z)-35)*Math.pow(91,z));}return xx;}
   function fN(nm){return nm.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 , ')}
-  htm('id',sbms1[10]);
+
+//TODO Uebermittlung sbms1[10]=SBMS120 aus Datenstrom entfernen
+//htm('id',sbms1[10]);
+
   var SOC='';
   SOC =dcmp(6,2,sbms);
   htm('SOC','<b>'+SOC+'%</b>');

@@ -51,7 +51,10 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Ein Schaltvorgang auf s1 und s2 sollte maximal alle 60s erlaubt werden.";
      changes += "<li>checkValues mit led-Methoden in Inverterklasse verlegt.";
      changes += "<li>Code zum behandeln des Inverter-Toggle-Tasters in Inverterklasse verlegt";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.19", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Nun 60s, bis WiFi wieder aufgebaut wird (UDP miss)";
+     changes += "<li>Feld fuer Lieferung / Bezug anzeigen";
+     changes += "<li>SBMS-Daten werden nun auch per JSon uebermittelt";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.22", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

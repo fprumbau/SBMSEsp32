@@ -85,8 +85,12 @@ void SBMS::readSbms() {
 
       //Werte nun lesen
       if (len > 0) {
+        
         //Wert zu Clients publishen (wird dort in Webseite visualisiert oder gelisted)
-        wc.sendClients(sread, true);
+        //wc.sendClients(sread, true);
+
+        sbmsData = sread;
+        wc.updateUi(NULL, true); //ab 0.9.9.22 wird data per JSon uebermittelt
 
         const char* txt = sread.c_str();
 
