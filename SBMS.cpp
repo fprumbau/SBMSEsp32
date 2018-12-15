@@ -125,7 +125,7 @@ void SBMS::readSbms() {
         if (debug) {
           String mem = " Heap (free): ";
           mem += ESP.getFreeHeap();
-          wc.sendClients(mem , false);
+          wc.sendClients(mem);
         }
 
         //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde

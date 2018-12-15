@@ -15,6 +15,12 @@ body{
 #body{text-align:left;display:inline-block;min-width:260px;min-height: calc(100% - 186px);
 color:#545147;}h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bottom: 0px;margin-left: 10px;}
 </style>
+<script>var redirect = false;
+{redirect};
+if(redirect) {
+  setTimeout('document.location.href="/sbms";', 3000);
+}
+</script>
 </head>
 <body>
 <div id="header">
@@ -77,8 +83,8 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;Dbg1</input>
-<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;Dbg2</input>
+<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;<span ondblclick='document.location.href="/update";'>Dbg1</span></input>
+<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;<span ondblclick='document.location.href="/update";'>Dbg2</span></input>
 </div2>
 </div3>
 <div3>
@@ -106,19 +112,14 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 </div>
 <script id='smain2'>
 
-var debug = false;
+var debug1 = false;
+var debug2 = false;
 
 function log(msg) {
   cs = document.getElementById('console');
   cs.innerHTML = cs.innerHTML + '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
   cs.scrollTop = cs.scrollHeight;
 }
-
-var xsbms="01d&u%u$#'G";
-var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
-var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
-var s1=['100Ah','nnnW','SBMS120 '];
-var s2=[0,0,0,0,0,0,0,0,3,7,1,1];
 
 //Reconnecting-websocket
 !function(a,b){"function"==typeof define&&define.amd?define([],b):"undefined"!=typeof module&&module.exports?module.exports=b():a.ReconnectingWebSocket=b()}(this,function(){function a(b,c,d){function l(a,b){var c=document.createEvent("CustomEvent");
@@ -155,7 +156,6 @@ connection.onclose = function(){
 
 //vom Server empfangen
 var server = '';
-var data = '';
 var json = null;
 connection.onmessage = function (e) { 
   if(server == '') {
@@ -165,41 +165,18 @@ connection.onmessage = function (e) {
   } else {
     data = e.data;
     switch(data[0]) {
-      case '@':
-            console.log('Daten: ', data);
-            log(data);      
-            bb = document.getElementById('bb')
-            if(data.indexOf('LOW')!==-1) {
-              bb.style.background='#D8BFD8';
-              bb.style.color='#b50';
-              bb.innerHTML='Netzvorrang';
-            } else if(data.indexOf('HIGH')!==-1) {
-              bb.style.background='#f00';
-              bb.style.color='#ff0';
-              bb.innerHTML='Batterie&nbsp;&nbsp;&nbsp;&nbsp;';
-            } else if(data.indexOf('debug1 to true')!==-1) {
-              document.getElementById("dbg1").checked=true
-            } else if(data.indexOf('debug1 to false')!==-1) {
-              document.getElementById("dbg1").checked=false
-            } else if(data.indexOf('debug2 to true')!==-1) {
-              document.getElementById("dbg2").checked=true
-            } else if(data.indexOf('debug2 to false')!==-1) {
-              document.getElementById("dbg2").checked=false
-            } 
-          break;
        case '{':
-            console.log('JSon: ', data);
+            if(debug1) {
+              log(data);
+            }
             json = JSON.parse(data); 
-            updateUiFromData();  
-            data = json.d;
-            all();
+            updateSbmsData();
+            updateUi();              
           break;
       default:
-            if(debug) {
-              console.log('Non-Daten: ', data);
-              log('Daten: ' + data);
-            }
-            all();
+            console.log('Nachricht: ', data);
+            log(data);      
+          break;          
     }
   }
 };
@@ -209,8 +186,8 @@ log('End trying to open webclient socket');
 /**
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
-function updateUiFromData() {
-  var debug1 = json.d1;
+function updateUi() {
+  debug1 = json.d1; //debug ist global
   if(null != debug1) {
     document.getElementById("dbg1").checked = debug1;
   }
@@ -266,7 +243,7 @@ function updateUiFromData() {
   } else {
     elem.style.color='red';
   }
-  elem.innerHTML=''+sum+' W';
+  elem.innerHTML=''+sum.toFixed(1)+' W';
 }
 
 //Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
@@ -292,32 +269,35 @@ function toggleS2(txt) {
     }
 }
 function toggleDebug(nr) {
-    debug=document.getElementById("dbg"+nr).checked;
-    connection.send("@d"+nr+"-"+debug);
+    if(nr==1) {
+      debug1=document.getElementById("dbg1").checked;
+      connection.send("@d1-"+debug1);
+    } else {
+      debug2=document.getElementById("dbg2").checked;
+      connection.send("@d2-"+debug2);
+    }    
 }
 
-function all(){
-  
-  var sbms=localStorage['sbmsb'];
-  var sbms2=JSON.parse(JSON.stringify(s2));
-  
-  var sbms1=['','Batt','PV1','PV2','ExtLd','PV1+PV2','Load','ExtLd',s1[0],s1[1],s1[2]];
-  var lg1="#B33A33B##333333B##B33A33B##B33333B##B''''''##A44A544##B44444B##;75444A##144B444##B33333B##444444B##2331$$A##B8:B:8B#";
-  
+function htm(id,s){document.getElementById(id).innerHTML =s;};
+function pad(n, width, z) {z=z || '0';n=n+'';return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;}
+function dcmp(p,s,d){xx=0; for (z=0;z<s;z++){xx = xx + ((d.charCodeAt((p+s-1)-z)-35)*Math.pow(91,z));}return xx;}
+function fN(nm){return nm.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 , ')}
+
+var lg1="#B33A33B##333333B##B33A33B##B33333B##B''''''##A44A544##B44444B##;75444A##144B444##B33333B##444444B##2331$$A##B8:B:8B#";
+var xsbms="01d&u%u$#'G";
+var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
+var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
+var sbms1=['','Batt','PV1','PV2','ExtLd','PV1+PV2','Load','ExtLd'];
+var sbms2=[0,0,0,0,0,0,0,0,3,7,1,1];
+
+function updateSbmsData(){
+   
   var c = document.getElementById('Lg');
   var ctx = c.getContext('2d');
   var r ='</br>'
-  
-  function htm(id,s){document.getElementById(id).innerHTML =s;};
-  function pad(n, width, z) {z=z || '0';n=n+'';return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;}
-  function dcmp(p,s,d){xx=0; for (z=0;z<s;z++){xx = xx + ((d.charCodeAt((p+s-1)-z)-35)*Math.pow(91,z));}return xx;}
-  function fN(nm){return nm.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 , ')}
+  var data = json.d;
 
-//TODO Uebermittlung sbms1[10]=SBMS120 aus Datenstrom entfernen
-//htm('id',sbms1[10]);
-
-  var SOC='';
-  SOC =dcmp(6,2,sbms);
+  var SOC = dcmp(6,2,data);
   htm('SOC','<b>'+SOC+'%</b>');
   if(!isNaN(SOC)) {
     document.getElementById('bat').value=SOC;
@@ -356,7 +336,7 @@ function all(){
     var bv=pv3=sv=max1=min1=0;
     for (x1=0;x1<8;x1++) {
       var n=n1='';   
-      var cv=dcmp((x1*2)+8,2,sbms)/1000;
+      var cv=dcmp((x1*2)+8,2,data)/1000;
       if (sbms2[9]==x1+1){min1=cv;n='<mn1>';n1='</mn1>';};
       if (sbms2[8]==x1+1){max1=cv;n='<mx1>';n1='</mx1>';};
       w[0] +=n+'Cell. '+ (x1+1)+n1+r ;
@@ -382,11 +362,11 @@ function all(){
       col = sbms1[x1+1];
       if(col == 'Load') continue; //Load nicht mehr benoetigt
       var n2=w[8]=w[9]=w[10]=w[11]='';
-      var cv=dcmp((x1*3)+29,3,sbms)/1000;
+      var cv=dcmp((x1*3)+29,3,data)/1000;
       var enW=dcmp(x1*6,6,eW);
       var enA=dcmp(x1*6,6,eA);
       if (x1==0){
-        n2=sbms.charAt(28);
+        n2=data.charAt(28);
         w[8]='[A]'+r;
         w[9]='[W]'+r;
         w[10]='[MAh][kAh][Ah][mAh]'+r;
@@ -409,10 +389,10 @@ function all(){
     for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
       htm('d'+i,w[i-3]);
     }
-    htm('d'+12,'Typ: LiIon Kap: 110Ah Status: '+dcmp(56,3,sbms)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,sbms)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,sbms)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
+    htm('d'+12,'Typ: LiIon Kap: 110Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
   }
 
-} //end all
+}
 
 //anfangs sollten die Checkboxen nicht selektiert sein 
 document.getElementById("dbg1").checked=false;

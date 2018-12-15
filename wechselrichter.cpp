@@ -11,7 +11,7 @@ void Inverter::starteNetzvorrang(String reason) {
   String msg = "";
   if (digitalRead(RELAY_PIN) == HIGH) {
     digitalWrite(RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
-    wc.sendClients("Toggle battery LOW", false);
+    wc.sendClients("Toggle battery LOW");
     msg += "Starte Netzvorrang :: ";
     msg += reason;
     msg += '\n';
@@ -22,7 +22,7 @@ void Inverter::starteNetzvorrang(String reason) {
     if (debug) {
       Serial.println(msg);
     }
-    wc.sendClients(msg, false);
+    wc.sendClients(msg);
   }
 }
 
@@ -34,7 +34,7 @@ void Inverter::starteBatterie(String reason) {
   if (!stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
-      wc.sendClients("Toggle battery HIGH", false);
+      wc.sendClients("Toggle battery HIGH");
       msg += "Starte Netzvorrang :: ";
       msg += reason;
       msg += '\n';
@@ -48,7 +48,7 @@ void Inverter::starteBatterie(String reason) {
     if (debug) {
       Serial.println(msg);
     }
-    wc.sendClients(msg, false);
+    wc.sendClients(msg);
   }
 }
 
@@ -77,7 +77,7 @@ void Inverter::setRed() {
 void Inverter::check()  {
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
-  if (( millis() - lastCheckedMillis ) < 3000) { //Pruefung hoechstens alle 3 Sekunden
+  if (( millis() - lastCheckedMillis ) < checkMillis) { //Pruefung hoechstens alle 3 Sekunden
     return;
   }
   

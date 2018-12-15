@@ -18,7 +18,7 @@ class WebCom {
      * - @d2-false
     */
     void toggleDebug(unsigned char* payload);
-    void sendClients(String msg, bool data);
+    void sendClients(String msg);
     void updateUi(AsyncWebSocketClient *client, bool all);
     void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
    

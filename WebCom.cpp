@@ -3,16 +3,9 @@
 
 /**
    Sende Daten zu allen über Websockets verbundenen
-   Clients. Alles, was NICHT SBMS-Daten sind, also
-   Fehler- bzw. Statusmeldungen MUSS mit einem '@'
-   eingeleitet werden, sonst wird es von der Webseite
-   falsch interpretiert und führt zu wilden Werten
-   z.B. beim Batteriestatus.
+   Clients. 
 */
-void WebCom::sendClients(String msg, bool data) { 
-  if(!data) {
-    msg = "@ " + msg;
-  }
+void WebCom::sendClients(String msg) { 
   ws.textAll(msg.c_str());
 }
 
@@ -70,7 +63,7 @@ void WebCom::toggleDebug(unsigned char* payload) {
   if (debug2) {
     Serial.println(msg);
   }
-  wc.sendClients(msg, false);
+  wc.sendClients(msg);
 }
 
 void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len){
@@ -97,21 +90,21 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               if (data[3] == '+') {
                 //s1 anschalten
                 sma.toggleCharger(1, true, true);
-                wc.sendClients("s1 an", false);
+                wc.sendClients("s1 an");
               } else {
                 //s1 abschalten
                 sma.toggleCharger(1, false, true);
-                wc.sendClients("s1 aus", false);
+                wc.sendClients("s1 aus");
               }
             } else {
               if (data[3] == '+') {
                 //s2 anschalten
                 sma.toggleCharger(2, true, true);
-                wc.sendClients("s2 an", false);
+                wc.sendClients("s2 an");
               } else {
                 //s2 abschalten
                 sma.toggleCharger(2, false, true);
-                wc.sendClients("s2 aus", false);
+                wc.sendClients("s2 aus");
               }
             }
           }

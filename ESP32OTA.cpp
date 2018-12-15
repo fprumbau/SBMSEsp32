@@ -54,7 +54,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Nun 60s, bis WiFi wieder aufgebaut wird (UDP miss)";
      changes += "<li>Feld fuer Lieferung / Bezug anzeigen";
      changes += "<li>SBMS-Daten werden nun auch per JSon uebermittelt";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.22", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Webseite aufraeumen. Doppelklick auf Dbg1/Dbg2 leitet auf Updateseite, erfolgr. Update nach 3s zur SBMS-Seite";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.25", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
@@ -103,6 +104,7 @@ void ESP32OTA::setup(const char *path, String username, String password) {
           pageIndex.replace("{banner}","<b><font color=red>Update gescheitert</font></b>");
         } else {
           pageIndex.replace("{banner}","<b><font color=green>Update erfolgreich</font></b>");
+          pageIndex.replace("{redirect}", "redirect=true;");
         }
         pageIndex.replace("{build}",_build);
         pageIndex.replace("{branch}",_branch);

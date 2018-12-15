@@ -14,6 +14,7 @@ const int errLimit = 5;
 const int smaMeasurementsBeforSwitchoff = 10;
 int SOC_LIMIT = 30; //wird aus Config ueberschrieben
 int LOW_VOLTAGE_MILLIS = 2850;  
+const int checkMillis = 3000;
 
 int LED_RED = 12;
 int LED_GREEN = 14;
