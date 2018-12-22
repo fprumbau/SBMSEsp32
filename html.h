@@ -73,8 +73,8 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <body style='background: #000;'>
 <div3 style='height: 135px;'>
 <canvas id='Lg' width='70' height='120' style='position:relative; top:11px; left:12px; z-index:2; float: left;'></canvas>
-<div2 style="top:12px; left:360px; color:#d92;text-shadow:-1px -2px 1px #fd4,1px 2px 2px #fea;font-size:40px;" id="id">SBMS120
-<div2 style="top:0px;left:200px;top:-6px;width:138px;font: Courier;font-size:30px;color:darkgreen;background-color:#505050;border:1px solid darkgreen;padding:5px;text-align:right" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
+<div2 style="top:12px; left:360px;" id="id">SBMS120
+<div2 style="top:0px;left:200px;top:-6px;width:138px;font-family:'digital-clock-font', sans-serif;font-size:28px;color:lightgreen;background-color:#505050;border:1px solid darkgreen;padding:5px;text-align:right" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'><div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
@@ -88,7 +88,7 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 </div2>
 </div3>
 <div3>
-<meter id='bat' style='height: 70px; width: 320px; top: 9px;' min='0' low='20' max='100'></meter>
+<meter id='bat' style='height: 70px; width: 320px; top: 9px;' min='0' low='30' max='100'></meter>
 <meter style='height: 50px; left: 332px; top:18px; width: 15px;' min='2' max='8' value='0'></meter>
 <div2 style='color:#030;font-size:48px;top:35px;left:120px;text-shadow: -2px -2px 2px #efc;' id='SOC' ></div2>
 <div2 style='left:360px;color:#ea8;' id='d2'></div2>
@@ -239,9 +239,9 @@ function updateUi() {
   var sum = lieferung - bezug;
   var elem = document.getElementById("lieferung");
   if(sum > 0) {
-    elem.style.color='darkgreen';    
+    elem.style.color='lightgreen';    
   } else {
-    elem.style.color='red';
+    elem.style.color='lightred';
   }
   elem.innerHTML=''+sum.toFixed(1)+' W';
 }
@@ -389,7 +389,7 @@ function updateSbmsData(){
     for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
       htm('d'+i,w[i-3]);
     }
-    htm('d'+12,'Typ: LiIon Kap: 110Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
+    htm('d'+12,'Typ: LiIon Kap: 100Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
   }
 
 }
