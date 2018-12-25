@@ -133,6 +133,40 @@ void Inverter::check()  {
     stopBattery = false;
     setGreen();
   }
+  //ab v.0.9.9.28 NTPClient mit Zeit
+  while(!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
+  int hours = timeClient.getHours();
+  int mins = timeClient.getMinutes();
+  int secs = timeClient.getSeconds();
+  Serial.print(hours);
+  Serial.print(":");
+  Serial.print(mins);
+  Serial.print(":");
+  Serial.println(secs);
+  if (debug) {
+      wc.sendClients(timeClient.getFormattedDate());
+  }
+  //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten
+  if(hours>=20 || hours < 5) {
+    wc.sendClients(timeClient.getFormattedDate());
+    if(!nacht) {
+      if(!isBatteryOn() && soc > SOC_LIMIT) { //Vorraussetzung: SOC_LIMIT nicht unterschritten)
+          starteBatterie("Batteriezeit");    
+      }
+      nacht = true;    
+    } 
+
+  } else {
+    if(nacht) {
+      wc.sendClients(timeClient.getFormattedDate());
+      nacht = false;
+      if(isBatteryOn()) {
+          starteNetzvorrang("Schalte wieder auf Netz zurück");    
+      }
+    }
+  }
 }
 
 /**

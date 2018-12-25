@@ -3,6 +3,7 @@
 
 class Inverter {
   private: 
+    bool nacht = false;
     unsigned long lastCheckedMillis = -1; 
   public:
     void setBlue();

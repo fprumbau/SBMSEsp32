@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 #include "ESPAsyncWebServer.h"
+#include <NTPClient.h>
 #include <WiFiUdp.h>
 #include "MyWifi.h"
 #include "WebCom.h"
@@ -40,6 +41,8 @@ extern AsyncWebServer server;
 extern AsyncWebSocket ws;
 extern ESP32OTA updater; //Over-the-air updater
 extern WiFiUDP udp;
+extern WiFiUDP ntpUdp;
+extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 

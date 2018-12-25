@@ -37,6 +37,8 @@ AsyncWebServer server(80);
 ESP32OTA updater;
 SBMS sbms;
 WiFiUDP udp;
+WiFiUDP ntpUdp;
+NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
 AsyncWebSocket ws("/ws");
 
