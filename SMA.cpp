@@ -49,6 +49,8 @@ void SMA::read() {
     bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
     lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
 
+    float netto = lieferung - bezug;
+
     if(debug2) {
       String msg;
       msg = "\nWirkleistung (Bezug/Lieferung): ";
@@ -68,12 +70,12 @@ void SMA::read() {
      */
     if(( millis() - s2_switched ) > 60000) {
       if(!isChargerOn(2)) {
-        if (lieferung > 200) {
+        if (netto > 200) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;
         } 
-      } else if(lieferung <= 0 && bezug > 100 && !s2override) {
+      } else if(netto < -100 && !s2override) {
           if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s2_countBeforeOff++; 
           } else {        
@@ -92,12 +94,12 @@ void SMA::read() {
      */
     if(( millis() - s1_switched ) > 60000) {
       if(!isChargerOn(1)) {
-        if(lieferung > 600){
+        if(netto > 400){
           Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;
         }
-      } else if(lieferung <= 0 && bezug > 300 && !s1override) {
+      } else if(netto> -200 && !s1override) {
           if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
