@@ -54,3 +54,4 @@ long timeout = 10000;
 String sbmsData="";
 float bezug=0.0;
 float lieferung=0.0;
+String datetime;

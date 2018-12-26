@@ -58,7 +58,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Low-Meter von 20% auf 30% geaendert, statt 110AH nun 100AH, Lieferung Schriftformatierung";
      changes += "<li>NTPClient zugefuegt, um im inverter.check() ein automatische Schaltung des Verbrauchs zu ermoeglichen";
      changes += "<li>Zwischen 20 Uhr und 5 Uhr morgens Batteriebetrieb versuchen (nur wenn state of charge > limit)";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.29", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Staendige Datumsanzeige in der Webseite";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.30", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

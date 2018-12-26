@@ -94,6 +94,11 @@ void setup() {
     
   server.addHandler(&ws);
   server.begin();
+
+  timeClient.begin();
+  // Set offset time in seconds to adjust for your timezone, for example:
+  // GMT +1 = 3600
+  timeClient.setTimeOffset(3600);
   
   // initialize other the air updates
   updater.init(hostName);

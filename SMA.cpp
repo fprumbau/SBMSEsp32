@@ -70,7 +70,7 @@ void SMA::read() {
      */
     if(( millis() - s2_switched ) > 60000) {
       if(!isChargerOn(2)) {
-        if (netto > 200) {
+        if (netto > 100) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;

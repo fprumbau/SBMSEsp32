@@ -145,8 +145,9 @@ void Inverter::check()  {
   Serial.print(mins);
   Serial.print(":");
   Serial.println(secs);
+  datetime = timeClient.getFormattedDate();
   if (debug) {
-      wc.sendClients(timeClient.getFormattedDate());
+      wc.sendClients(datetime);
   }
   //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten
   if(hours>=20 || hours < 5) {
@@ -160,10 +161,11 @@ void Inverter::check()  {
 
   } else {
     if(nacht) {
-      wc.sendClients(timeClient.getFormattedDate());
       nacht = false;
       if(isBatteryOn()) {
           starteNetzvorrang("Schalte wieder auf Netz zurück");    
+      } else {
+          wc.sendClients(timeClient.getFormattedDate());
       }
     }
   }

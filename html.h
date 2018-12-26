@@ -76,7 +76,9 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div2 style="top:12px; left:360px;" id="id">SBMS120
 <div2 style="top:0px;left:200px;top:-6px;width:138px;font-family:'Arial';font-size:28px;color:lightgreen;background-color:#505050;border:1px solid white;padding:5px;text-align:right;white-space:pre" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
-<div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'><div >www.ElectroDacus.com</div>
+<div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'>
+<div2 style='margin-top:-20px' id="datetime">2018-12-27</div2>
+<div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
 <div2 style='width:350px; top:82px; left:520px;'>
@@ -194,6 +196,10 @@ function updateUi() {
   var debug2 = json.d2;
   if(null != debug2) {
     document.getElementById("dbg2").checked = debug2;
+  }
+  var dt = json.dt;
+  if(null != dt) {
+    document.getElementById("datetime").innerHTML=dt;
   }
   var s1 = json.s1;
   if(null != s1) {

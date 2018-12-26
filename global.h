@@ -58,5 +58,6 @@ extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Bat
 extern String sbmsData;
 extern float bezug;
 extern float lieferung;
+extern String datetime;
 
 #endif
