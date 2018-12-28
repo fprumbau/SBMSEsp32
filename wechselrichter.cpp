@@ -151,9 +151,9 @@ void Inverter::check()  {
   }
   //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten
   if(hours>=20 || hours < 5) {
-    wc.sendClients(timeClient.getFormattedDate());
     if(!nacht) {
       if(!isBatteryOn() && soc > SOC_LIMIT) { //Vorraussetzung: SOC_LIMIT nicht unterschritten)
+          wc.sendClients(datetime);
           starteBatterie("Batteriezeit");    
       }
       nacht = true;    
@@ -165,7 +165,7 @@ void Inverter::check()  {
       if(isBatteryOn()) {
           starteNetzvorrang("Schalte wieder auf Netz zurück");    
       } else {
-          wc.sendClients(timeClient.getFormattedDate());
+          wc.sendClients(datetime);
       }
     }
   }

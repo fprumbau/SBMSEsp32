@@ -99,7 +99,7 @@ void SMA::read() {
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;
         }
-      } else if(netto> -200 && !s1override) {
+      } else if(netto < -200 && !s1override) {
           if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
