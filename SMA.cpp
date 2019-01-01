@@ -111,12 +111,19 @@ void SMA::read() {
    
   } else {
       //Wird 60s kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
-      if((millis() - lastUdpRead) > 60000) {
-          Serial.println("Restarting WiFi, last successfull sma udp packet more than 60s ago...");
+      long lastUdp = millis() - lastUdpRead;
+      if(lastUdp > 60000) {
+          String msg = "Last WiFi UPD-Packet read ";
+          msg += lastUdp;
+          msg += "ms ago";
+          Serial.println(msg);
+          wc.sendClients(msg);
+          /*Serial.println("Restarting WiFi, last successfull sma udp packet more than 60s ago...");
           wc.sendClients("Restarting WiFi, last successfull sma udp packet more than 60s ago...");
           delay(500);
           lastUdpRead = millis();
           myWifi.reconnect();
+          */
       }
   }
 }

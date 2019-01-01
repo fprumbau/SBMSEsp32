@@ -59,8 +59,9 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>NTPClient zugefuegt, um im inverter.check() ein automatische Schaltung des Verbrauchs zu ermoeglichen";
      changes += "<li>Zwischen 20 Uhr und 5 Uhr morgens Batteriebetrieb versuchen (nur wenn state of charge > limit)";
      changes += "<li>Staendige Datumsanzeige in der Webseite";
-     changes += "<li>Fehler in 0.9.9.31 saugte Batterie leer, solange SOC_LIMIT OK, ignorierte aber Zelleinzelspannungen";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.30", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>Fehler in 0.9.9.30 saugte Batterie leer, solange SOC_LIMIT OK, ignorierte aber Zelleinzelspannungen";
+     changes += "<li>Aut. WiFi reconnect ging nicht, darum erstmal herausgenommen (SMA.cpp); Update-Site aus Location beruecksichtigt ";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.32", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

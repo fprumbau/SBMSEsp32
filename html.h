@@ -79,14 +79,14 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'>
 <div2 style='margin-top:-20px' id="datetime">2018-12-27</div2>
 <div >www.ElectroDacus.com</div>
-<div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="document.location.href='/update'">www.ElectroDacus.com</div></div2>
+<div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="updatePage();">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
 <div2 style='width:350px; top:82px; left:520px;'>
 <button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;<span ondblclick='document.location.href="/update";'>Dbg1</span></input>
-<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;<span ondblclick='document.location.href="/update";'>Dbg2</span></input>
+<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;<span ondblclick='updatePage();'>Dbg1</span></input>
+<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;<span ondblclick='updatePage();'>Dbg2</span></input>
 </div2>
 </div3>
 <div3>
@@ -121,6 +121,15 @@ function log(msg) {
   cs = document.getElementById('console');
   cs.innerHTML = cs.innerHTML + '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
   cs.scrollTop = cs.scrollHeight;
+}
+
+function updatePage() {
+  var origin = document.location.origin;
+  if(origin.indexOf("prumbaum") !== -1) {
+    origin = "http://192.168.178.106";
+  }
+  var url = origin + '/update';
+  document.location.href=url;
 }
 
 //Reconnecting-websocket
