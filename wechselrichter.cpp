@@ -149,23 +149,25 @@ void Inverter::check()  {
   if (debug) {
       wc.sendClients(datetime);
   }
-  //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten
-  if(hours>=20 || hours < 5) {
-    if(!nacht) {
-      if(!isBatteryOn() && soc > SOC_LIMIT) { //Vorraussetzung: SOC_LIMIT nicht unterschritten)
-          wc.sendClients(datetime);
-          starteBatterie("Batteriezeit");    
-      }
-      nacht = true;    
-    } 
-
-  } else {
-    if(nacht) {
-      nacht = false;
-      if(isBatteryOn()) {
-          starteNetzvorrang("Schalte wieder auf Netz zurück");    
-      } else {
-          wc.sendClients(datetime);
+  //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
+  if(!stop) {
+    if(hours>=20 || hours < 5) {
+      if(!nacht) {
+        if(!isBatteryOn()) { 
+            wc.sendClients(datetime);
+            starteBatterie("Batteriezeit");    
+        }
+        nacht = true;    
+      } 
+  
+    } else {
+      if(nacht) {
+        nacht = false;
+        if(isBatteryOn()) {
+            starteNetzvorrang("Schalte wieder auf Netz zurück");    
+        } else {
+            wc.sendClients(datetime);
+        }
       }
     }
   }
