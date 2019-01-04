@@ -15,8 +15,8 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         JsonObject& root = jsonBuffer.createObject();
         root["d1"]=debug;
         root["d2"]=debug2;
-        root["s1"]=sma.isChargerOn(1);
-        root["s2"]=sma.isChargerOn(2);
+        root["s1"]=charger.isChargerOn(1);
+        root["s2"]=charger.isChargerOn(2);
         root["b"]=inverter.isBatteryOn();
         root["l"]=lieferung;
         root["z"]=bezug;
@@ -90,21 +90,21 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             if (data[2] == '1') {
               if (data[3] == '+') {
                 //s1 anschalten
-                sma.toggleCharger(1, true, true);
+                charger.toggleCharger(1, true, true);
                 wc.sendClients("s1 an");
               } else {
                 //s1 abschalten
-                sma.toggleCharger(1, false, true);
+                charger.toggleCharger(1, false, true);
                 wc.sendClients("s1 aus");
               }
             } else {
               if (data[3] == '+') {
                 //s2 anschalten
-                sma.toggleCharger(2, true, true);
+                charger.toggleCharger(2, true, true);
                 wc.sendClients("s2 an");
               } else {
                 //s2 abschalten
-                sma.toggleCharger(2, false, true);
+                charger.toggleCharger(2, false, true);
                 wc.sendClients("s2 aus");
               }
             }

@@ -2,8 +2,6 @@
 
 void SMA::init() {
 
-  IPAddress ip = myWifi.localIP();
-
   // Multicast
   IPAddress ipMulti(239,12,255,254);
   unsigned int portMulti = 9522;      
@@ -14,6 +12,15 @@ void SMA::init() {
   wlb[8]='\0';
   wll[8]='\0';
   initialized = true;
+}
+
+void SMA::reset() {
+  udp.stop();
+  IPAddress ipMulti(239,12,255,254);
+  unsigned int portMulti = 9522;      
+  
+  udp.beginMulticast(ipMulti, portMulti);
+  wc.sendClients("UDP reinitialized");
 }
 
 void SMA::read() {
@@ -60,59 +67,15 @@ void SMA::read() {
       wc.sendClients(msg);
       Serial.println(msg);
     }
-
-    /**
-     * Ist der Charger2 aus UND ist der letzte Schaltvorgang
-     * mehr als 60s her UND gibt es einen Energieüberschuss von 
-     * mindestens 200W, dann aktiviere S2.  
-     * 
-     * Wird nichts eingespeist, dann stoppe den Charger.
-     */
-    if(( millis() - s2_switched ) > 60000) {
-      if(!isChargerOn(2)) {
-        if (netto > 100) {
-          Serial.println("Aktiviere Solarcharger 2");
-          toggleCharger(2,true,false);
-          s2_countBeforeOff = -1;
-        } 
-      } else if(netto < -100 && !s2override) {
-          if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
-            s2_countBeforeOff++; 
-          } else {        
-            Serial.println("Deaktiviere Solarcharger 2");
-            toggleCharger(2,false,false);
-          }
-      }
-    }
-
-    /**
-     * Ist der Charger1 aus UND ist der letzte Schaltvorgang
-     * mehr als 60s her UND gibt es einen Energieüberschuss von 
-     * mindestens 600W, dann aktiviere S2.  
-     * 
-     * Wird nichts eingespeist, dann stoppe den Charger.
-     */
-    if(( millis() - s1_switched ) > 60000) {
-      if(!isChargerOn(1)) {
-        if(netto > 400){
-          Serial.println("Aktiviere Solarcharger 1");
-          toggleCharger(1,true,false);
-          s1_countBeforeOff = -1;
-        }
-      } else if(netto < -200 && !s1override) {
-          if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
-            s1_countBeforeOff++;
-          } else {
-            Serial.println("Deaktiviere Solarcharger 1");
-            toggleCharger(1,false,false);
-          }
-      }
-    }
+    //v. 0.9.9.38 charger-Klasse regelt Aktivierung
+    charger.checkOnIncome(netto);
    
   } else {
       //Wird 60s kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
-      long lastUdp = millis() - lastUdpRead;
-      if(lastUdp > 60000) {
+      long now = millis();
+      long lastUdp = now - lastUdpRead;
+      if(lastUdp > 60000 && (now - lastUdpNotification) > 10000) {
+          lastUdpNotification = now;
           String msg = "Last WiFi UPD-Packet read ";
           msg += lastUdp;
           msg += "ms ago";
@@ -124,76 +87,7 @@ void SMA::read() {
           lastUdpRead = millis();
           myWifi.reconnect();
           */
+          reset();
       }
   }
-}
-
-/**
- * An-/Ausschalten der Solarcharger S1 und S2.
- * Erfolgt die Schaltung manuell, dann wird beim
- * Anschalten ein Sperrflag gesetzt, welcher ein
- * automatisches Ausschalten verhindert ( Der 
- * Charger MUSS manuell wieder ausgeschaltet werden)
- */
-void SMA::toggleCharger(byte nr, bool onOff, bool override) {
-  bool isOn = isChargerOn(nr);
-  if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
-    if(isOn) {
-      disableCharger(nr, override);
-    } else {     
-      enableCharger(nr, override);
-    }
-    if(nr == 1) {
-      s1_switched = millis();
-    } else {
-      s2_switched = millis();
-    }
-  }
-  Serial.printf("SMA::toggleCharger(%d, %d, %d); s1override: %d, s2override: %d, isOn: %s\n", nr, onOff, override, s1override, s2override, isOn?"true":"false");
-}
-
-bool SMA::isChargerOn(byte nr) {
-  if(nr == 1) {
-    return !digitalRead(RELAY_S1);
-  } else {
-    return !digitalRead(RELAY_S2);
-  }
-}
-
-void SMA::enableCharger(byte nr, bool override) {
-  if(nr == 1) {
-      if(override) {
-        s1override = true;
-      }
-      digitalWrite(RELAY_S1, LOW);
-      digitalWrite(LED_S1, HIGH);
-  } else {
-      if(override) {
-        s2override = true;
-      }    
-      digitalWrite(RELAY_S2, LOW);
-      digitalWrite(LED_S2, HIGH);
-  }
-  wc.updateUi(NULL, true);
-}
-
-void SMA::disableCharger(byte nr, bool override) {
-  if(nr == 1) {
-      if(override) {
-        s1override = false;
-      }
-      if(override || !s1override) {
-        digitalWrite(RELAY_S1, HIGH);
-        digitalWrite(LED_S1, LOW);
-      }  
-  } else {
-      if(override) {
-        s2override = false;
-      }    
-      if(override || !s2override) {
-        digitalWrite(RELAY_S2, HIGH);
-        digitalWrite(LED_S2, LOW);
-      } 
-  }
-  wc.updateUi(NULL, true);
 }

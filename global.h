@@ -10,11 +10,15 @@
 #include "ESP32OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
+#include "battery.h"
+#include "charger.h"
 
 //findet die Checkmethode falsche Werte vor, so wird noch einmal
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
 extern int SOC_LIMIT; 
+extern int SOC_HYST;
 extern int LOW_VOLTAGE_MILLIS; 
+extern int LOW_MINIMAL_CV_MILLIS;
 extern int failureCount;
 extern const int errLimit;   
 extern const int smaMeasurementsBeforSwitchoff;
@@ -33,6 +37,8 @@ extern int LED_S1;
 extern int LED_S2;
 extern int TASTER; //manuelle Inverterumschaltung
 
+extern Battery battery;
+extern Charger charger;
 extern Inverter inverter;
 extern MyWifi myWifi;
 extern SMA sma;  //read SMA energy meter broadcast messages
@@ -45,6 +51,7 @@ extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
+extern long lastUdpNotification; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen

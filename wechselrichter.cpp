@@ -75,35 +75,55 @@ void Inverter::setRed() {
  * CellVoltages (cv)
  */
 void Inverter::check()  {
+
+  //Zur weiteren Pruefung sollte die soc vorliegen
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
   if (( millis() - lastCheckedMillis ) < checkMillis) { //Pruefung hoechstens alle 3 Sekunden
     return;
   }
+  lastCheckedMillis = millis();
+    
+  //v. 0.9.9.38 faellt die CV zu sehr, sollte S1 (Charger 1) aktiviert werden
+  battery.checkCellVoltages();
   
   Serial.print("Check...  ; failureCount: ");
   Serial.println(failureCount);
-  lastCheckedMillis = millis();
 
   if (testFixed) {
     return; //keine Auswertung, wenn Testwerte
   }
-
+  
+  boolean isBatOn = isBatteryOn();
+  int limit;
+  if(isBatOn) {
+    limit = SOC_LIMIT;
+  } else {
+    //v.0.9.9.36 ist die Batterie aus, dann muss um SOC_HYST (z.B. 5%) hoehere Ladung zur Verfuegung stehen
+    limit = SOC_LIMIT + SOC_HYST;
+  }
+  //a) Teste State-Of-Charge
   boolean stop = false;
   String message = "";
-  if (soc < SOC_LIMIT) {
+  if (soc < limit) {
     message = "State of charge below ";
-    message += SOC_LIMIT;
+    message += limit;
     message += "%";
     stop = true;
   }
+  //b) Ist jetzt noch kein Stopflag aktiv, teste die einzelnen Zellspannungen
   if (!stop) {
-    for (int k = 0; k < 7; k++) {
-      if (cv[k] < LOW_VOLTAGE_MILLIS) {
+    int limit = LOW_VOLTAGE_MILLIS;   
+    if(!isBatteryOn()) {
+      limit += 100; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um 100mV hoeher
+    }
+    for (int k = 0; k < 8; k++) {
+      if (cv[k] < limit) {
         message = "Undervoltage cell: ";
         message += k;
         stop = true;
-      }
+        break;
+      }    
     }
   }
   if (stop) {
@@ -153,7 +173,7 @@ void Inverter::check()  {
   if(!stop) {
     if(hours>=20 || hours < 5) {
       if(!nacht) {
-        if(!isBatteryOn()) { 
+        if(!isBatOn) { 
             wc.sendClients(datetime);
             starteBatterie("Batteriezeit");    
         }

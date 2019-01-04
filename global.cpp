@@ -13,7 +13,9 @@ int failureCount = 0;
 const int errLimit = 5;   
 const int smaMeasurementsBeforSwitchoff = 10;
 int SOC_LIMIT = 30; //wird aus Config ueberschrieben
-int LOW_VOLTAGE_MILLIS = 2850;  
+int SOC_HYST = 5; //5% Hysterese
+int LOW_VOLTAGE_MILLIS = 3100; //darunter wird die Batterie abgeschaltet  
+int LOW_MINIMAL_CV_MILLIS = 2700; //darunter wird Charger S2 für 5Min aktiviert
 const int checkMillis = 3000;
 
 int LED_RED = 12;
@@ -29,6 +31,8 @@ int LED_S1 = 25;
 int LED_S2 = 26;
 int TASTER = 19; //manuelle Inverterumschaltung
 
+Battery battery;
+Charger charger;
 MyWifi myWifi;
 SMA sma;
 WebCom wc;
@@ -40,6 +44,7 @@ WiFiUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
+long lastUdpNotification = -1;
 AsyncWebSocket ws("/ws");
 
 long soc = -1; //aktueller Wert State Of Charge
