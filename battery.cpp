@@ -36,3 +36,43 @@ void Battery::checkCellVoltages() {
       }
   }  
 }
+
+bool Battery::isOn() {
+    return digitalRead(RELAY_PIN);
+}
+
+//v. 0.9.9.40 laeuft weder die Batterie noch ein Charger, schalte die Luefter ueber Relais 4 ab
+void Battery::controlFans() {
+  bool fansRunning = !digitalRead(RELAY_4);
+  if(debug2) {
+    String m = "Luefterstatus: ";
+    m += fansRunning;
+    m += "; Batterie: ";
+    m += isOn();
+    m += "; Charger: ";
+    m += charger.isOn();
+    wc.sendClients(m);
+  }
+  if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
+    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
+      String msg = "Schalte Luefter an, da der Batteriebetrieb aktiv ist";
+      Serial.println(msg);
+      wc.sendClients(msg);
+      digitalWrite(RELAY_4, LOW);
+    }
+ } else if(charger.isOn()){ //Ladebetrieb, Lader brauchen Kuehlung
+    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
+      String msg = "Schalte Luefter an, da gerade geladen wird";
+      Serial.println(msg);
+      wc.sendClients(msg);
+      digitalWrite(RELAY_4, LOW);
+    } 
+ } else {
+    if(fansRunning) { //Versuche, die Luefter auszuschalten nur dann, wenn sie schon laufen
+      String msg = "Schalte Luefter ab, da weder Batterie noch Charger laufen";
+      Serial.println(msg);
+      wc.sendClients(msg);
+      digitalWrite(RELAY_4, HIGH);
+    }
+  }
+}

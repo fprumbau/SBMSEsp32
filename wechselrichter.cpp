@@ -1,9 +1,5 @@
 #include "global.h"
 
-bool Inverter::isBatteryOn() {
-    return digitalRead(RELAY_PIN);
-}
-
 /**
    Netzvorrang starten
 */
@@ -86,6 +82,9 @@ void Inverter::check()  {
     
   //v. 0.9.9.38 faellt die CV zu sehr, sollte S1 (Charger 1) aktiviert werden
   battery.checkCellVoltages();
+
+  //v. 0.9.9.40 ggfls. Luefer abschalten (es laeuft weder ein Charger noch der Inverter)
+  battery.controlFans();
   
   Serial.print("Check...  ; failureCount: ");
   Serial.println(failureCount);
@@ -94,7 +93,7 @@ void Inverter::check()  {
     return; //keine Auswertung, wenn Testwerte
   }
   
-  boolean isBatOn = isBatteryOn();
+  boolean isBatOn = battery.isOn();
   int limit;
   if(isBatOn) {
     limit = SOC_LIMIT;
@@ -114,7 +113,7 @@ void Inverter::check()  {
   //b) Ist jetzt noch kein Stopflag aktiv, teste die einzelnen Zellspannungen
   if (!stop) {
     int limit = LOW_VOLTAGE_MILLIS;   
-    if(!isBatteryOn()) {
+    if(!isBatOn) {
       limit += 100; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um 100mV hoeher
     }
     for (int k = 0; k < 8; k++) {
@@ -183,7 +182,7 @@ void Inverter::check()  {
     } else {
       if(nacht) {
         nacht = false;
-        if(isBatteryOn()) {
+        if(isBatOn) {
             starteNetzvorrang("Schalte wieder auf Netz zurück");    
         } else {
             wc.sendClients(datetime);

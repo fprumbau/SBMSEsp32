@@ -33,6 +33,10 @@ bool Charger::isChargerOn(uint8_t nr) {
   }
 }
 
+bool Charger::isOn() {
+  return !digitalRead(RELAY_S1) || !digitalRead(RELAY_S2);
+}
+
 void Charger::enableCharger(byte nr, bool override) {
   if(nr == 1) {
       if(override) {

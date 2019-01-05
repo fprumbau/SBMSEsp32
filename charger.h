@@ -18,6 +18,7 @@ class Charger {
     void disableCharger(uint8_t nr, bool active);
     
   public:
+    bool isOn();
     void toggleCharger(uint8_t nr, bool onOff, bool override);
     bool isChargerOn(uint8_t nr);
     void checkOnIncome(float netto); //pruefe, ob Solarstrom konsumiert werden kann

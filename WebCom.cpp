@@ -17,7 +17,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         root["d2"]=debug2;
         root["s1"]=charger.isChargerOn(1);
         root["s2"]=charger.isChargerOn(2);
-        root["b"]=inverter.isBatteryOn();
+        root["b"]=battery.isOn();
         root["l"]=lieferung;
         root["z"]=bezug;
         root["d"]=sbmsData;

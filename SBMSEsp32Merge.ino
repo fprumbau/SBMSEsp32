@@ -46,6 +46,10 @@ void setup() {
   pinMode(RELAY_S1, OUTPUT);
   pinMode(RELAY_S2, OUTPUT);
 
+  //v.0.9.9.40
+  pinMode(RELAY_3, OUTPUT);
+  pinMode(RELAY_4, OUTPUT);
+
   //manuell Invertersteuerung
   pinMode(TASTER, INPUT_PULLUP);
   tasterConfig.setEventHandler(handleButton);
@@ -53,6 +57,9 @@ void setup() {
 
   digitalWrite(RELAY_S1, HIGH);
   digitalWrite(RELAY_S2, HIGH);
+
+  digitalWrite(RELAY_3, HIGH);
+  digitalWrite(RELAY_4, HIGH);
 
   //Leds
   pinMode(LED_RED, OUTPUT);
