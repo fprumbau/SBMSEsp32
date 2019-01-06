@@ -27,8 +27,9 @@ bool debug2 = false;
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
 
-int RELAY_3 = 34; //Schalten des Luefters, v.0.9.9.40
-int RELAY_4 = 13; //Frei
+//Achtung IO34 und IO35 haben keine Outputdriver, sie sind nur als Input zu gebrauchen!!!
+int RELAY_3 = 13; //Frei
+int RELAY_4 = 23; //Schalten des Luefters, v.0.9.9.40
 
 int RELAY_PIN = 21;    
 int LED_S1 = 25;

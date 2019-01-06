@@ -51,6 +51,14 @@ void Battery::controlFans() {
     m += isOn();
     m += "; Charger: ";
     m += charger.isOn();
+    m += "; Relay3: ";
+    if(digitalRead(RELAY_3)) {
+      m+= "off";    //HIGH
+      digitalWrite(RELAY_3, HIGH);
+    } else {
+      m+= "on";     //Low
+      digitalWrite(RELAY_3, LOW);
+    }
     wc.sendClients(m);
   }
   if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
