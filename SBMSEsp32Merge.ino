@@ -120,7 +120,7 @@ void loop() {
   if(!updater.stopForOTA) {
     taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
     yield();
-    sbms.readSbms();  //SMBS-Werte auslesen (State of Charge, Cell voltages
+    sbms.readSbms();  //SMBS-Werte auslesen (State of Charge, Cell voltages)
     yield();
     inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
     yield();
