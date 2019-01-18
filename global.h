@@ -18,6 +18,7 @@
 extern int SOC_LIMIT; 
 extern int SOC_HYST;
 extern int LOW_VOLTAGE_MILLIS; 
+extern int CV_HYST;
 extern int LOW_MINIMAL_CV_MILLIS;
 extern int failureCount;
 extern const int errLimit;   
@@ -57,6 +58,7 @@ extern long lastUdpNotification; //verhindert Stackoverflow, senden von zu viele
 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen
+extern float temp; //SBMS Temperatur
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 extern bool testFixed;

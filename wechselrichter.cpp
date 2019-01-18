@@ -114,7 +114,7 @@ void Inverter::check()  {
   if (!stop) {
     int limit = LOW_VOLTAGE_MILLIS;   
     if(!isBatOn) {
-      limit += 100; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um 100mV hoeher
+      limit += CV_HYST; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um CV_HYST mV hoeher
     }
     for (int k = 0; k < 8; k++) {
       if (cv[k] < limit) {

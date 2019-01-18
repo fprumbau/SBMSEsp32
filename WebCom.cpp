@@ -22,6 +22,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         root["z"]=bezug;
         root["d"]=sbmsData;
         root["dt"]=datetime;
+        root["t"]=temp;
         char jsonChar[512];
         root.printTo(jsonChar);
         String str(jsonChar);

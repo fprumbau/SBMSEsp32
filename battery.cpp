@@ -77,10 +77,15 @@ void Battery::controlFans() {
     } 
  } else {
     if(fansRunning) { //Versuche, die Luefter auszuschalten nur dann, wenn sie schon laufen
-      String msg = "Schalte Luefter ab, da weder Batterie noch Charger laufen";
-      Serial.println(msg);
-      wc.sendClients(msg);
-      digitalWrite(RELAY_4, HIGH);
+      if(temp<40) {
+        String msg = "Schalte Luefter ab, da weder Batterie noch Charger laufen";
+        Serial.println(msg);
+        wc.sendClients(msg);
+        digitalWrite(RELAY_4, HIGH);
+      } else {
+        Serial.print("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): ");
+        Serial.println(temp);
+      }
     }
   }
 }

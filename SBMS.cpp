@@ -113,6 +113,10 @@ void SBMS::readSbms() {
             outString += cv[k];
           }
         }
+        if (len >=26) {
+          //((dcmp(24,2,data)/10)-45)
+          temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
+        }
 
         //Werte
         if (debug) {
