@@ -83,7 +83,7 @@ void Battery::controlFans() {
         wc.sendClients(msg);
         digitalWrite(RELAY_4, HIGH);
       } else {
-        Serial.print("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): ");
+        Serial.println("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): ");
         Serial.println(temp);
       }
     }

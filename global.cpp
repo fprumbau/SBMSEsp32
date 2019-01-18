@@ -68,3 +68,5 @@ String sbmsData="";
 float bezug=0.0;
 float lieferung=0.0;
 String datetime;
+
+int lastHourRestart = -1; //Wann wurde der ESP zum letzten Mal neu gestartet?

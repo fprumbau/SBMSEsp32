@@ -71,4 +71,6 @@ extern float bezug;
 extern float lieferung;
 extern String datetime;
 
+extern int lastHourRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
+
 #endif

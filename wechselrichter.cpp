@@ -190,6 +190,14 @@ void Inverter::check()  {
       }
     }
   }
+  //v. 0.9.9.42 alle 6h versuchen, neu zu starten, wenn weder Charger noch Inverter laufen
+  if(!(charger.isChargerOn(1) || charger.isChargerOn(2) || battery.isOn())) {
+    if(lastHourRestart > 0 && hours - lastHourRestart > 5) {
+      wc.sendClients("Restarting ESP every 6 hours");
+      delay(200); //Warte, bis Nachricht verschickt ist
+      ESP.restart();
+    }
+  }
 }
 
 /**
