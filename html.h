@@ -390,7 +390,7 @@ function updateSbmsData(){
       col = sbms1[x1+1];
       if(col == 'Load') continue; //Load nicht mehr benoetigt
       var n2=w[8]=w[9]=w[10]=w[11]='';
-      var cv=dcmp((x1*3)+29,3,sbms)/1000;
+      var cv=dcmp((x1*3)+29,3,data)/1000;
       var enW=dcmp(x1*6,6,eW);
       var enA=dcmp(x1*6,6,eA);
       if (x1==0){
