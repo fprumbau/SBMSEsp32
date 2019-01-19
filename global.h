@@ -72,5 +72,6 @@ extern float lieferung;
 extern String datetime;
 
 extern int lastHourRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
+extern bool s2ActForLowCV;  //0.9.9.46
 
 #endif

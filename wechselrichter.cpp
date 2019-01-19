@@ -7,7 +7,7 @@ void Inverter::starteNetzvorrang(String reason) {
   String msg = "";
   if (digitalRead(RELAY_PIN) == HIGH) {
     digitalWrite(RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
-    wc.sendClients("Toggle battery LOW");
+    wc.sendClients("Netz -> An, Batterie -> Aus");
     msg += "Starte Netzvorrang :: ";
     msg += reason;
     msg += '\n';
@@ -30,7 +30,7 @@ void Inverter::starteBatterie(String reason) {
   if (!stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
-      wc.sendClients("Toggle battery HIGH");
+      wc.sendClients("Batterie -> An, Netz -> Aus");
       msg += "Starte Netzvorrang :: ";
       msg += reason;
       msg += '\n';

@@ -385,7 +385,7 @@ function updateSbmsData(){
       mt.appendChild(x);
     } 
     for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
-    for (x1=0;x1<7;x1++) {
+    for (x1=0;x1<8;x1++) {
       col = sbms1[x1+1];
       if(col == 'Load') continue; //Load nicht mehr benoetigt
       var n2=w[8]=w[9]=w[10]=w[11]='';

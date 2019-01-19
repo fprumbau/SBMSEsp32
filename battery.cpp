@@ -18,21 +18,23 @@ void Battery::checkCellVoltages() {
         d+=LOW_MINIMAL_CV_MILLIS;
         wc.sendClients(d);
       }      
-      if (cv[k] < LOW_MINIMAL_CV_MILLIS) {
+      if (cv[k] < LOW_MINIMAL_CV_MILLIS) {            
             String m = "Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ";
             m+=k;
             Serial.println(m);
             wc.sendClients(m);
             charger.toggleCharger(2,true,true);
+            s2ActForLowCV = true;
             break;            
       }
     }
   } else {
-      if(charger.getRunningMillis(2) > 300000) { //nachdem S2 5 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
+      if(s2ActForLowCV && charger.getRunningMillis(2) > 300000) { //nachdem S2 5 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
           String m = "Deaktiviere Solarcharger 2 nach 5 Minuten Laufzeit jetzt...";
           Serial.println(m);
           wc.sendClients(m);
           charger.toggleCharger(2,false,true);
+          s2ActForLowCV = false;
       }
   }  
 }

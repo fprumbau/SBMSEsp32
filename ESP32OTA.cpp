@@ -73,7 +73,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.43: Immer, wenn seit dem letzten Restart mehr als 5h vergangen sind (Ausnahme: 0Uhr-Uebergang), wird ESP.resta  rt() ausgeloest";
      changes += "<li>0.9.9.44: Da das Relais zum Charger S1 (HLG600, 600W) ausgewechselt werden musste, wird S1 nun seltener geschaltet (10min statt 60s)";
      changes += "<li>0.9.9.45: Zellspannungsdifferenzen Min-Max werden wieder richtig angezeigt";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.45", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.46: Auswertung Webseite ging nur bis Zelle 7, Notladungsautomatik in battery.cpp schaltete S2 nach 5 Minuten immer wieder ab";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.46", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
