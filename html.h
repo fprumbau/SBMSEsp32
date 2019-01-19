@@ -344,20 +344,21 @@ function updateSbmsData(){
     if(y>=6){ctx.fillStyle =col2+(((y*2)-2)-8)+')';ctx.fillRect(x*10, (17.3-y)*10, 8, 8);}
   }}}
   
-  mt8('#mt1');
-  function mt8(m1) {
+  mt8();
+  
+  function mt8() {
     var w = new Array();
     for (i=0;i<20;i++){w[i]='';}
     var bv=pv3=sv=max1=min1=0;
     var cvs = new Array(8)
     var minInd = 0;
     var maxInd = 0;
-    for (i=0;i<8;i++) {
-      cvs[i]=dcmp((i*2)+8,2,data)/1000;       
-      if (cvs[i] < cvs[minInd]) minInd = i;
-      if (cvs[i] > cvs[maxInd]) maxInd = i;
+    for (a=0;a<8;a++) {
+      cvs[a]=dcmp((a*2)+8,2,data)/1000;       
+      if (cvs[a] < cvs[minInd]) minInd = a;
+      if (cvs[a] > cvs[maxInd]) maxInd = a;
       if(debug1) 
-        log("Index " + i + "; cvs[i] " + cvs[i] + "; minInd: " + minInd + "; maxInd: " + maxInd);
+        log("Index " + a + "; cvs["+a+"] " + cvs[a] + "; minInd: " + minInd + "; maxInd: " + maxInd);
     }     
     sbms2[9]=minInd+1;
     sbms2[8]=maxInd+1;   
@@ -371,7 +372,7 @@ function updateSbmsData(){
       if (sbms2[x1]!=1){w[2] +='<txt>V</txt>'+r;}
       else {w[2] +='<lt><</lt>'+r;};
       bv +=cv;
-      var mt = document.querySelector(m1);
+      var mt = document.querySelector('#mt1');
       var x = document.createElement('meter');
       //Frank: Divisor von 1000 auf 100 geaendert
       x.setAttribute('min',dcmp(5,2,xsbms)/100);
@@ -389,7 +390,7 @@ function updateSbmsData(){
       col = sbms1[x1+1];
       if(col == 'Load') continue; //Load nicht mehr benoetigt
       var n2=w[8]=w[9]=w[10]=w[11]='';
-      var cv=cvs[x1];
+      var cv=dcmp((x1*3)+29,3,sbms)/1000;
       var enW=dcmp(x1*6,6,eW);
       var enA=dcmp(x1*6,6,eA);
       if (x1==0){
