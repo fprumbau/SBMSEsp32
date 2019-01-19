@@ -70,9 +70,10 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.40: Relais 3+4 verdrahtet, Umstrukturierung, mit Relais 4 werden nun die Luefter geschaltet";
      changes += "<li>0.9.9.41: Batterie erst wieder moeglich, wenn Zellspannungen LOW_VOLTAGE_MILLIS + CV_HYST (3150mV) betragen";
      changes += "<li>0.9.9.42: SBMS-Temperatur wird ausgelesen und verhindert ab 40 Grad Celsius ein Abschalten der Luefter";
-     changes += "<li>0.9.9.43: Immer, wenn seit dem letzten Restart mehr als 5h vergangen sind (Ausnahme: 0Uhr-Uebergang), wird ESP.restart() ausgeloest";
-     changes += "<li>0.9.9.44: ";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.44", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.43: Immer, wenn seit dem letzten Restart mehr als 5h vergangen sind (Ausnahme: 0Uhr-Uebergang), wird ESP.resta  rt() ausgeloest";
+     changes += "<li>0.9.9.44: Da das Relais zum Charger S1 (HLG600, 600W) ausgewechselt werden musste, wird S1 nun seltener geschaltet (10min statt 60s)";
+     changes += "<li>0.9.9.45: Zellspannungsdifferenzen Min-Max werden wieder richtig angezeigt";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.45", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

@@ -103,12 +103,12 @@ void Charger::checkOnIncome(float netto) {
 
     /**
      * Ist der Charger1 aus UND ist der letzte Schaltvorgang
-     * mehr als 60s her UND gibt es einen Energieüberschuss von 
+     * mehr als 300s (10min) her UND gibt es einen Energieüberschuss von 
      * mindestens 600W, dann aktiviere S2.  
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
-    if(( millis() - s1_switched ) > 60000) {
+    if(( millis() - s1_switched ) > 600000) {
       if(!isChargerOn(1)) {
         if(netto > 400){
           Serial.println("Aktiviere Solarcharger 1");

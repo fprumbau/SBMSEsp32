@@ -303,7 +303,7 @@ var xsbms="01d&u%u$#'G";
 var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
 var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
 var sbms1=['','Batt','PV1','PV2','ExtLd','PV1+PV2','Load','ExtLd'];
-var sbms2=[0,0,0,0,0,0,0,0,3,7,1,1];
+var sbms2=[0,0,0,0,0,0,0,0,1,7,1,1];
 
 function updateSbmsData(){
    
@@ -349,6 +349,18 @@ function updateSbmsData(){
     var w = new Array();
     for (i=0;i<20;i++){w[i]='';}
     var bv=pv3=sv=max1=min1=0;
+    var cvs = new Array(8)
+    var minInd = 0;
+    var maxInd = 0;
+    for (i=0;i<8;i++) {
+      cvs[i]=dcmp((i*2)+8,2,data)/1000;
+      if (cvs[i] < cvs[minInd]) minInd = i;
+      if (cvs[i] > cvs[maxInd]) maxInd = i;
+      if(debug1) 
+        log("Index " + i + "; cvs[i] " + cvs[i] + "; minInd: " + minInd + "; maxInd: " + maxInd);
+    }     
+    sbms2[9]=minInd;
+    sbms2[8]=maxInd;   
     for (x1=0;x1<8;x1++) {
       var n=n1='';   
       var cv=dcmp((x1*2)+8,2,data)/1000;
@@ -372,12 +384,12 @@ function updateSbmsData(){
       x.style.top=((x1*21)+3)+'px'
       mt.appendChild(x);
     } 
-    for (i=2;i<5;i++){htm('d'+i,w[i-2]);}
+    for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
     for (x1=0;x1<7;x1++) {
       col = sbms1[x1+1];
       if(col == 'Load') continue; //Load nicht mehr benoetigt
       var n2=w[8]=w[9]=w[10]=w[11]='';
-      var cv=dcmp((x1*3)+29,3,data)/1000;
+      var cv=cvs[x1];
       var enW=dcmp(x1*6,6,eW);
       var enA=dcmp(x1*6,6,eA);
       if (x1==0){
