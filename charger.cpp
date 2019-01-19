@@ -27,7 +27,9 @@ void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
 
 bool Charger::isChargerOn(uint8_t nr) {
   if(nr == 1) {
-    return !digitalRead(RELAY_S1);
+    //0.9.9.48 Remote ON/OFF berücksichtigen; ( R3 ist das einzige auf NC laufende Relais, darum muss nicht negierend gefragt werden )
+    
+    return !digitalRead(RELAY_S1) && digitalRead(RELAY_3);
   } else {
     return !digitalRead(RELAY_S2);
   }
@@ -42,7 +44,9 @@ void Charger::enableCharger(byte nr, bool override) {
       if(override) {
         s1override = true;
       }
-      digitalWrite(RELAY_S1, LOW);
+      digitalWrite(RELAY_S1, LOW); //schaltet nur Power an, Charger bleibt aus
+      delay(1000);
+      digitalWrite(RELAY_3, LOW); //schaltet Charger ueber Remote an (oeffnet R3)
       digitalWrite(LED_S1, HIGH);
   } else {
       if(override) {
@@ -60,7 +64,8 @@ void Charger::disableCharger(uint8_t nr, bool override) {
         s1override = false;
       }
       if(override || !s1override) {
-        digitalWrite(RELAY_S1, HIGH);
+        digitalWrite(RELAY_3, LOW); //schaltet R3 nur noch über Remote aus (schliesst R3)
+        //digitalWrite(RELAY_S1, HIGH);        
         digitalWrite(LED_S1, LOW);
       }  
   } else {

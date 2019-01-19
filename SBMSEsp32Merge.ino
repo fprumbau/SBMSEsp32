@@ -151,15 +151,47 @@ void commandLine() {
       String cmd = Serial.readString();
       Serial.print("Echo: ");
       Serial.println(cmd);
+      String msg = "-";
       if(cmd.startsWith("restart wifi")) {      
         myWifi.reconnect();
       } else if(cmd.startsWith("restart esp")) {      
-        Serial.println("Restarting ESP...");
+        msg = "Restarting ESP...";
+        Serial.println(msg);
+        wc.sendClients(msg);
         ESP.restart();
-      } else {
+      } else if(cmd.startsWith("start RELAY_S1")) {      
+        msg = "Starting RELAY_S1...";
+        digitalWrite(RELAY_S1, LOW);        
+      } else if(cmd.startsWith("stop RELAY_S1")) {      
+        msg = "Stopping RELAY_S1...";
+        digitalWrite(RELAY_S1, HIGH);
+      } else if(cmd.startsWith("start RELAY_S2")) {      
+        msg = "Starting RELAY_S2...";
+        digitalWrite(RELAY_S2, LOW);        
+      } else if(cmd.startsWith("stop RELAY_S2")) {      
+        msg = "Stopping RELAY_S2...";
+        digitalWrite(RELAY_S2, HIGH);
+      } else if(cmd.startsWith("start RELAY_3")) {      
+        msg = "Starting RELAY_3...";
+        digitalWrite(RELAY_3, LOW);        
+      } else if(cmd.startsWith("stop RELAY_3")) {      
+        msg = "Stopping RELAY_3...";
+        digitalWrite(RELAY_3, HIGH);
+      } else if(cmd.startsWith("start RELAY_4")) {      
+        msg = "Starting RELAY_4...";
+        digitalWrite(RELAY_4, LOW);        
+      } else if(cmd.startsWith("stop RELAY_4")) {      
+        msg = "Stopping RELAY_4...";
+        digitalWrite(RELAY_4, HIGH);
+      }else {
         Serial.println("Available commands:");
         Serial.println(" - restart wifi  :: restarting Wifi connection");
         Serial.println(" - restart esp   :: restarting whole ESP32");
+        Serial.println(" - start RELAY_S1|_S2|_3|_4 :: start relays S1,S2,3 und 4");
+        Serial.println(" - stop  RELAY_S1|_S2|_3|_4 :: stop relays S1,S2,3 und 4");
+        return;
       }
+      Serial.println(msg);
+      wc.sendClients(msg);
     }  
 }

@@ -30,7 +30,7 @@ int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
 
 //Achtung IO34 und IO35 haben keine Outputdriver, sie sind nur als Input zu gebrauchen!!!
-int RELAY_3 = 13; //Frei
+int RELAY_3 = 13; //Schalten von S1 (Remote), v.0.9.9.47 (R3 ist das einzige auf NC laufende Relais, d.h. Shorted == HLG600 ist aus)
 int RELAY_4 = 23; //Schalten des Luefters, v.0.9.9.40
 
 int RELAY_PIN = 21;    

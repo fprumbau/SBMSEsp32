@@ -75,6 +75,7 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.45: Zellspannungsdifferenzen Min-Max werden wieder richtig angezeigt";
      changes += "<li>0.9.9.46: Auswertung Webseite ging nur bis Zelle 7, Notladungsautomatik in battery.cpp schaltete S2 nach 5 Minuten immer wieder ab";
      changes += "<li>0.9.9.47: Min-/Maxzellspannung um einen Index versetzt; Seit 0.9.9.45 Fehler bei PV1 und PV2 Poweranzeige (weil eigentlich Zellspannungen 2/3)";
+     changes += "<li>0.9.9.48: Ueber das freie Relais RELAY_3 zum Remote ON/OFF von S1";
      updater.setUpdaterUi("Title", "Build : 0.9.9.47", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
