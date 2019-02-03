@@ -1,4 +1,4 @@
-#include "charger.h"
+ #include "charger.h"
 #include "global.h"
 
 /**
@@ -27,9 +27,8 @@ void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
 
 bool Charger::isChargerOn(uint8_t nr) {
   if(nr == 1) {
-    //0.9.9.48 Remote ON/OFF berücksichtigen; ( R3 ist das einzige auf NC laufende Relais, darum muss nicht negierend gefragt werden )
-    
-    return !digitalRead(RELAY_S1) && digitalRead(RELAY_3);
+    //0.9.9.48 Remote ON/OFF berücksichtigen;   
+    return !digitalRead(RELAY_S1) && !digitalRead(RELAY_3);
   } else {
     return !digitalRead(RELAY_S2);
   }
