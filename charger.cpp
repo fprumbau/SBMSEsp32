@@ -9,7 +9,7 @@
  * Charger MUSS manuell wieder ausgeschaltet werden)
  */
 void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
-  bool isOn = isChargerOn(nr);
+  bool isOn = (nr);
   if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
     if(isOn) {
       disableCharger(nr, override);
@@ -27,7 +27,11 @@ void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
 
 bool Charger::isChargerOn(uint8_t nr) {
   if(nr == 1) {
-    //0.9.9.48 Remote ON/OFF berücksichtigen;   
+    //0.9.9.48 Remote ON/OFF berücksichtigen; ( R3 ist das einzige auf NC laufende Relais, darum muss nicht negierend gefragt werden )
+    //HLG600 ist AN, wenn NC-CO geschlossen sind, das ist der Default, also HIGH zustand. Wird auf LOW gestellt, öffnet sich NC-CO und der Charger ist ON
+    //Ergo ist das Ergebnis von digitalRead(RELAY_3) im Anfangsstadium HIGH -> Aus; Der Charger ist dann an, wenn RELAY_S1 LOW UND RELAY_3 LOW sind.
+    //(alle Relais, also S1,S3,3 und 4 sind mit HIGH initialisiert, schalten also zum Start nicht); 
+    //Anders gesagt: HLG_600 verhaelt sich an RELAY_3 andersherum, ist aber auch anders angeschlossen, das hebt sich wieder auf!!!
     return !digitalRead(RELAY_S1) && !digitalRead(RELAY_3);
   } else {
     return !digitalRead(RELAY_S2);
@@ -35,7 +39,7 @@ bool Charger::isChargerOn(uint8_t nr) {
 }
 
 bool Charger::isOn() {
-  return !digitalRead(RELAY_S1) || !digitalRead(RELAY_S2);
+  return (!digitalRead(RELAY_S1) && !digitalRead(RELAY_3)) || !digitalRead(RELAY_S2);
 }
 
 void Charger::enableCharger(byte nr, bool override) {
@@ -63,7 +67,7 @@ void Charger::disableCharger(uint8_t nr, bool override) {
         s1override = false;
       }
       if(override || !s1override) {
-        digitalWrite(RELAY_3, LOW); //schaltet R3 nur noch über Remote aus (schliesst R3)
+        digitalWrite(RELAY_3, HIGH); //schaltet R3 nur noch über Remote aus (schliesst CO-NC von R3)
         //digitalWrite(RELAY_S1, HIGH);        
         digitalWrite(LED_S1, LOW);
       }  
@@ -89,7 +93,7 @@ void Charger::checkOnIncome(float netto) {
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
     if(( millis() - s2_switched ) > 60000) {
-      if(!isChargerOn(2)) {
+      if(!(2)) {
         if (netto > 100) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
@@ -113,7 +117,7 @@ void Charger::checkOnIncome(float netto) {
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
     if(( millis() - s1_switched ) > 600000) {
-      if(!isChargerOn(1)) {
+      if(!(1)) {
         if(netto > 400){
           Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
@@ -132,7 +136,7 @@ void Charger::checkOnIncome(float netto) {
 
 //liefere die Millisekunden, die der Charger schon laeuft
 int Charger::getRunningMillis(uint8_t nr) {
-   if(!isChargerOn(nr)) {
+   if(!(nr)) {
       return 0;
    }
    if(nr == 1) {
