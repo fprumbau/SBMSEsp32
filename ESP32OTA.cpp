@@ -79,7 +79,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.49: Charger S1 isChargerOn wurde nicht korrekt abgefragt. Hier wurde nach erstmaligem einschalten immer isOn gemeldet, obwohl S1 off war. Temp Limit Luefter 40->35";
      changes += "<li>0.9.9.50: (1) Die fuer beide Lader zustaendige Methode charger.isOn hat Relais_3 (HLG600 nicht beruecksichtigt), der Charger S1 (R3) konnte nicht abgeschaltet werden, da R3 auf LOW statt auf HIGH geschaltet wurde.";
      changes += "<li>0.9.9.50: (2) Ist noch ein Lader an, aber der StateOfCharge >=99% und die Temperatur <35 Grad, schalte die Luefter ab";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.50", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.51: Statt wie bei S1 mind. 60s Idle zu bleiben, kann S2 nun schon nach 30s wieder aktiv geschaltet werden";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.51", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
