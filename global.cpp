@@ -38,6 +38,11 @@ int LED_S1 = 25;
 int LED_S2 = 26;
 int TASTER = 19; //manuelle Inverterumschaltung
 
+//Vorbereitung Board rev.2.8
+int PWM_L1 = 25; //Luefter Charger GPIO25
+int PWM_L2 = 26; //Luefter Inverter GPIO26
+int PWM_S2 = 5; //HLG600-30B, GPIO05
+
 Battery battery;
 Charger charger;
 MyWifi myWifi;

@@ -3,6 +3,13 @@
 
 #include <Arduino.h>
 
+/**
+ * Ein Charger wird aktiviert ueber
+ * a) battery.cpp: falls eine Zelle Unterspannung hat, wird S2 (der kleine Charger) eingeschaltet
+ * b) WebCom.cpp: falls aus der GUI die Schaltung aktiviert wird
+ * c) charger.cpp: In der Methode checkOnIncome, aufgrund des gelieferten Solarstroms
+ */
+
 class Charger {
 
   private:

@@ -39,6 +39,9 @@ extern int RELAY_PIN;
 extern int LED_S1;
 extern int LED_S2;
 extern int TASTER; //manuelle Inverterumschaltung
+extern int PWM_L1; //Luefter Charger
+extern int PWM_L2; //Luefter Inverter
+extern int PWM_S2; //HLG600-30B
 
 extern Battery battery;
 extern Charger charger;

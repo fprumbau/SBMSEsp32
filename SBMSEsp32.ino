@@ -61,6 +61,11 @@ void setup() {
   digitalWrite(RELAY_3, HIGH);
   digitalWrite(RELAY_4, HIGH);
 
+  //v.0.9.9.51 ff
+  pinMode(PWM_L1, OUTPUT); //Luefter Charger GPIO25
+  pinMode(PWM_L2, OUTPUT); //Luefter Inverter GPIO26
+  pinMode(PWM_S2, OUTPUT); //HLG600-30B, GPIO05
+
   //Leds
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
