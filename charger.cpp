@@ -83,6 +83,9 @@ void Charger::disableCharger(uint8_t nr, bool override) {
   wc.updateUi(NULL, true);
 }
 
+/**
+ * Achtung: millis() beginnt bei 0 mit Start des Arduino!          
+ */
 void Charger::checkOnIncome(float netto) {
 
     /**
@@ -92,12 +95,15 @@ void Charger::checkOnIncome(float netto) {
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
-    if(( millis() - s2_switched ) > 30000) {
+    unsigned long now = millis();
+    unsigned long s2Last = now - s2_switched;
+    if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!isChargerOn(2)) {
         if (netto > 100) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;
+          netto-=200;
         } 
       } else if(netto < -100 && !s2override) {
           if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
@@ -109,29 +115,56 @@ void Charger::checkOnIncome(float netto) {
       }
     }
 
+    //s1_switched > -1 && 
+
     /**
      * Ist der Charger1 aus UND ist der letzte Schaltvorgang
-     * mehr als 300s (10min) her UND gibt es einen Energieüberschuss von 
+     * mehr als 60s her UND gibt es einen Energieüberschuss von 
      * mindestens 600W, dann aktiviere S2.  
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
-     */
-    if(( millis() - s1_switched ) > 600000) {
+     */     
+    unsigned long s1Last = now - s1_switched;
+    if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
       if(!isChargerOn(1)) {
-        if(netto > 400){
-          Serial.println("Aktiviere Solarcharger 1");
+        if(netto > 400){         
+          //Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
-          s1_countBeforeOff = -1;
+          s1_countBeforeOff = -1;      
         }
-      } else if(netto < -200 && !s1override) {
+      } else if(netto < -200 && !s1override) {        
           if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
-            Serial.println("Deaktiviere Solarcharger 1");
+            //Serial.println("Deaktiviere Solarcharger 1");
             toggleCharger(1,false,false);
           }
       }
     }  
+
+   if(debug2) {
+     String m1 = "; Netto: ";
+     m1+=netto;
+     m1+="; now: ";
+     m1+=now;
+     m1+="; s1Last: ";
+     m1+=s1Last;
+     m1+="; s1_switched: ";
+     m1+=s1_switched;
+     m1+="; s1_countBeforeOff: ";
+     m1+=s1_countBeforeOff;
+     m1+="; s1override: ";
+     m1+=s1override;       
+     m1+="; s2Last: ";
+     m1+=s2Last;
+     m1+="; s2_switched: ";
+     m1+=s2_switched;
+     m1+="; s2_countBeforeOff: ";
+     m1+=s2_countBeforeOff;
+     m1+="; s2override: ";
+     m1+=s2override;
+     wc.sendClients(m1);
+   }
 }
 
 //liefere die Millisekunden, die der Charger schon laeuft
