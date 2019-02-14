@@ -9,7 +9,7 @@
  * Charger MUSS manuell wieder ausgeschaltet werden)
  */
 void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
-  bool isOn = (nr);
+  bool isOn = isChargerOn(nr);
   if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
     if(isOn) {
       disableCharger(nr, override);
@@ -93,7 +93,7 @@ void Charger::checkOnIncome(float netto) {
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
     if(( millis() - s2_switched ) > 30000) {
-      if(!(2)) {
+      if(!isChargerOn(2)) {
         if (netto > 100) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
@@ -117,7 +117,7 @@ void Charger::checkOnIncome(float netto) {
      * Wird nichts eingespeist, dann stoppe den Charger.
      */
     if(( millis() - s1_switched ) > 600000) {
-      if(!(1)) {
+      if(!isChargerOn(1)) {
         if(netto > 400){
           Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
@@ -136,7 +136,7 @@ void Charger::checkOnIncome(float netto) {
 
 //liefere die Millisekunden, die der Charger schon laeuft
 int Charger::getRunningMillis(uint8_t nr) {
-   if(!(nr)) {
+   if(!isChargerOn(nr)) {
       return 0;
    }
    if(nr == 1) {

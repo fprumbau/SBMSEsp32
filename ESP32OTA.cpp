@@ -81,7 +81,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.50: (2) Ist noch ein Lader an, aber der StateOfCharge >=99% und die Temperatur <35 Grad, schalte die Luefter ab";
      changes += "<li>0.9.9.51: Statt wie bei S1 mind. 60s Idle zu bleiben, kann S2 nun schon nach 30s wieder aktiv geschaltet werden";
      changes += "<li>0.9.9.52: Wird Luefter wegen Soc und Temp abgeschaltet, dann sollte dies nur einmal erfolgen und danach das Flag fansRunning beachtet werden";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.52", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.53: Version 51,52 (nach .48) haben Charger nicht mehr geschaltet; in charger.cpp war an 3 Stellen die statt isChargerOn(nr) nur (nr) verblieben; Debug2 ueberarbeitet.";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.53", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

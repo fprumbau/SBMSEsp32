@@ -47,20 +47,26 @@ bool Battery::isOn() {
 void Battery::controlFans() {
   bool fansRunning = !digitalRead(RELAY_4);
   if(debug2) {
-    String m = "Luefterstatus: ";
+    String m = "Lueft.: ";
     m += fansRunning;
-    m += "; Batterie: ";
+    m += "; Batt: ";
     m += isOn();
-    m += "; Charger: ";
+    m += "; Chrg: ";
     m += charger.isOn();
-    m += "; Relay3: ";
-    if(digitalRead(RELAY_3)) {
-      m+= "off";    //HIGH
-      digitalWrite(RELAY_3, HIGH);
-    } else {
-      m+= "on";     //Low
-      digitalWrite(RELAY_3, LOW);
-    }
+    m+="; RS1: ";
+    m+=digitalRead(RELAY_S1);
+    m+="; RS2: ";
+    m+=digitalRead(RELAY_S2);
+    m+="; R3: ";
+    m+=digitalRead(RELAY_3);
+    m+="; isOnS1: ";
+    m+= charger.isChargerOn(1);
+    m+="; isOnS2: ";
+    m+= charger.isChargerOn(2);
+    m+= "\nBez/Lief: ";
+    m+= bezug;
+    m+= " / ";
+    m+= lieferung;
     wc.sendClients(m);
   }
   if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung

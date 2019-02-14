@@ -58,15 +58,6 @@ void SMA::read() {
 
     float netto = lieferung - bezug;
 
-    if(debug2) {
-      String msg;
-      msg = "\nWirkleistung (Bezug/Lieferung): ";
-      msg += bezug;
-      msg += " / ";
-      msg += lieferung;
-      wc.sendClients(msg);
-      Serial.println(msg);
-    }
     //v. 0.9.9.38 charger-Klasse regelt Aktivierung
     charger.checkOnIncome(netto);
    
