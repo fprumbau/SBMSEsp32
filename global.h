@@ -4,6 +4,7 @@
 #include "ESPAsyncWebServer.h"
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <esp32-hal-ledc.h>
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "wechselrichter.h"
@@ -42,6 +43,9 @@ extern int TASTER; //manuelle Inverterumschaltung
 extern int PWM_L1; //Luefter Charger
 extern int PWM_L2; //Luefter Inverter
 extern int PWM_S2; //HLG600-30B
+extern int GPIO25; //Channel Lueft. Charger
+extern int GPIO26; //Channel Lueferter Inverter
+extern int GPIO05; //Channel HLG600-30B
 
 extern Battery battery;
 extern Charger charger;
@@ -65,6 +69,7 @@ extern float temp; //SBMS Temperatur
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 extern bool testFixed;
+extern String testData;
 extern const char* hostName;
 extern unsigned long lastReceivedMillis;
 extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Batterie abgeschaltet werden )
@@ -78,5 +83,7 @@ extern int lastHourRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
 extern bool s2ActForLowCV;  //0.9.9.46
 extern long s1MinRestMillis; //0.9.9.53
 extern long s2MinRestMillis; //0.9.9.53
+
+//PWM
 
 #endif

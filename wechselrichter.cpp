@@ -86,8 +86,10 @@ void Inverter::check()  {
   //v. 0.9.9.40 ggfls. Luefer abschalten (es laeuft weder ein Charger noch der Inverter)
   battery.controlFans();
   
-  Serial.print("Check...  ; failureCount: ");
-  Serial.println(failureCount);
+  if(debug) {
+    Serial.print("Check...  ; failureCount: ");
+    Serial.println(failureCount);
+  }
 
   if (testFixed) {
     return; //keine Auswertung, wenn Testwerte
@@ -159,13 +161,13 @@ void Inverter::check()  {
   int hours = timeClient.getHours();
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
-  Serial.print(hours);
-  Serial.print(":");
-  Serial.print(mins);
-  Serial.print(":");
-  Serial.println(secs);
   datetime = timeClient.getFormattedDate();
   if (debug) {
+      Serial.print(hours);
+      Serial.print(":");
+      Serial.print(mins);
+      Serial.print(":");
+      Serial.println(secs);    
       wc.sendClients(datetime);
   }
   //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)

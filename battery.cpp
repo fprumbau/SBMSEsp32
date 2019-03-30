@@ -30,7 +30,7 @@ void Battery::checkCellVoltages() {
     }
   } else {
       if(s2ActForLowCV && charger.getRunningMillis(2) > 300000) { //nachdem S2 5 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
-          String m = "Deaktiviere Solarcharger 2 nach 5 Minuten Laufzeit jetzt...";
+          String m = "Deaktiviere Solarcharger 2 nach 5 Minuten Ladezeit jetzt...";
           Serial.println(m);
           wc.sendClients(m);
           charger.toggleCharger(2,false,true);

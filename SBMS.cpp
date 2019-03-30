@@ -51,7 +51,8 @@ void SBMS::readSbms() {
     //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
     //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
     //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
-    sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";    
+    //sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
+    sread = testData;    
   } else {
     while (Serial1.available()) {
       sread = Serial1.readString();

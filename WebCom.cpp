@@ -11,20 +11,19 @@ void WebCom::sendClients(String msg) {
 
 void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         //mit JSON
-        StaticJsonBuffer<300> jsonBuffer; //letzte Zaehlung: 114
-        JsonObject& root = jsonBuffer.createObject();
-        root["d1"]=debug;
-        root["d2"]=debug2;
-        root["s1"]=charger.isChargerOn(1);
-        root["s2"]=charger.isChargerOn(2);
-        root["b"]=battery.isOn();
-        root["l"]=lieferung;
-        root["z"]=bezug;
-        root["d"]=sbmsData;
-        root["dt"]=datetime;
-        root["t"]=temp;
+        StaticJsonDocument<300> doc; //letzte Zaehlung: 114
+        doc["d1"]=debug;
+        doc["d2"]=debug2;
+        doc["s1"]=charger.isChargerOn(1);
+        doc["s2"]=charger.isChargerOn(2);
+        doc["b"]=battery.isOn();
+        doc["l"]=lieferung;
+        doc["z"]=bezug;
+        doc["d"]=sbmsData;
+        doc["dt"]=datetime;
+        doc["t"]=temp;
         char jsonChar[512];
-        root.printTo(jsonChar);
+        serializeJson(doc, jsonChar);
         String str(jsonChar);
         if(debug2) {
           Serial.println(str);

@@ -99,28 +99,27 @@ void Charger::checkOnIncome(float netto) {
     unsigned long s2Last = now - s2_switched;
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!isChargerOn(2)) {
-        if (netto > 100) {
+        if (netto > 300) {
           Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;
-          netto-=200;
+          netto-=600;
         } 
-      } else if(netto < -100 && !s2override) {
+      } else if(netto < -400 && !s2override) {
           if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s2_countBeforeOff++; 
           } else {        
             Serial.println("Deaktiviere Solarcharger 2");
             toggleCharger(2,false,false);
+            netto+=600; //0.9.9.55 frei werdende Energie für Berechnung S1 anpassen
           }
       }
     }
 
-    //s1_switched > -1 && 
-
     /**
      * Ist der Charger1 aus UND ist der letzte Schaltvorgang
      * mehr als 60s her UND gibt es einen Energieüberschuss von 
-     * mindestens 600W, dann aktiviere S2.  
+     * mindestens 400W, dann aktiviere S2.  
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      */     
@@ -132,7 +131,7 @@ void Charger::checkOnIncome(float netto) {
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;      
         }
-      } else if(netto < -200 && !s1override) {        
+      } else if(netto < -300 && !s1override) {        
           if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
@@ -141,6 +140,20 @@ void Charger::checkOnIncome(float netto) {
           }
       }
     }  
+
+    /*
+    TODO:
+    - GPIO05/GND mit Blau/weiss HLG600B verbinden
+    - ledcWrite(GPIO05, dutyCycle); //dutyCycle=0..255 ??
+    - S2 Relais kann staendig an sein
+    - s2MinRestMillis wird nicht mehr benötigt.
+    - S2 könnte zeitgesteuert morgens an- und abends ausgeschaltet werden
+    Angefangen wird immer mit S2/GPIO05, hier muss eine Tabelle
+    von Dutycycle zu Watt her (gibt es evtl. schon)
+
+    - Wenn S2 voll ausgesteuert und netto>0, dann S2 auf 0 und
+      S1 einschalten. s1MinRestMillis pruefen.
+    */
 
    if(debug2) {
      String m1 = "; Netto: ";

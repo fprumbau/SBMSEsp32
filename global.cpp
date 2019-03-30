@@ -42,6 +42,10 @@ int TASTER = 19; //manuelle Inverterumschaltung
 int PWM_L1 = 25; //Luefter Charger GPIO25
 int PWM_L2 = 26; //Luefter Inverter GPIO26
 int PWM_S2 = 5; //HLG600-30B, GPIO05
+//zug.Channels
+int GPIO25 = 0;
+int GPIO26 = 1;
+int GPIO05 = 2;
 
 Battery battery;
 Charger charger;
@@ -65,6 +69,7 @@ float temp = 0.0; //aktuelle Temperatur des SBMS120
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 bool testFixed = false;
+String testData = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
 const char* hostName = "esp32a";
 unsigned long lastReceivedMillis = -1;
 long timeout = 10000;

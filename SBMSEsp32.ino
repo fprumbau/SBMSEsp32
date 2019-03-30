@@ -66,6 +66,17 @@ void setup() {
   pinMode(PWM_L2, OUTPUT); //Luefter Inverter GPIO26
   pinMode(PWM_S2, OUTPUT); //HLG600-30B, GPIO05
 
+  int freq = 100;
+  int resolution = 12;
+  
+  ledcSetup(0, freq, resolution); 
+  ledcSetup(1, freq, resolution); 
+  ledcSetup(2, freq, resolution); 
+
+  ledcAttachPin(PWM_L1, 0);
+  ledcAttachPin(PWM_L2, 1);
+  ledcAttachPin(PWM_S2, 2);
+
   //Leds
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
@@ -187,13 +198,49 @@ void commandLine() {
         digitalWrite(RELAY_4, LOW);        
       } else if(cmd.startsWith("stop RELAY_4")) {      
         msg = "Stopping RELAY_4...";
-        digitalWrite(RELAY_4, HIGH);
-      }else {
+        digitalWrite(RELAY_4, HIGH);       
+      } else if(cmd.startsWith("start RELAY_W")) {      
+        msg = "Starting RELAY_W...";
+        digitalWrite(RELAY_PIN, LOW);        
+      } else if(cmd.startsWith("stop RELAY_W")) {      
+        msg = "Stopping RELAY_W...";
+        digitalWrite(RELAY_PIN, HIGH);       
+      } else if(cmd.startsWith("test on")) {      
+        msg = "test simulation on...";     
+        testFixed = true;        
+      } else if(cmd.startsWith("test off")) {      
+        msg = "test simulation off...";     
+        testFixed = false;        
+      } else if(cmd.startsWith("data ")) {      
+        msg = "setze Testdaten:";     
+        testData = cmd.substring(5); 
+        msg+=testData;     
+      } else if(cmd.startsWith("pwm ")) {      
+        msg = "setze PWM:";     
+        String pwm = cmd.substring(4); 
+        msg+=pwm; 
+        String val = pwm.substring(5);    
+        int dutyCycle = val.toInt();
+        if(testFixed) {
+          if(pwm.startsWith("io25")) {
+            ledcWrite(GPIO25, dutyCycle);
+          } else if(pwm.startsWith("io26")) {
+            ledcWrite(GPIO26, dutyCycle);
+          } else if(pwm.startsWith("io05")) {
+            ledcWrite(GPIO05, dutyCycle);          
+          }
+        } else {
+          msg = "please enable 'test on' first";
+        }
+      } else {
         Serial.println("Available commands:");
         Serial.println(" - restart wifi  :: restarting Wifi connection");
         Serial.println(" - restart esp   :: restarting whole ESP32");
-        Serial.println(" - start RELAY_S1|_S2|_3|_4 :: start relays S1,S2,3 und 4");
-        Serial.println(" - stop  RELAY_S1|_S2|_3|_4 :: stop relays S1,S2,3 und 4");
+        Serial.println(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W");
+        Serial.println(" - stop  RELAY_S1|_S2|_3|_4|_W :: stop relays S1,S2,3,4 und W");
+        Serial.println(" - test  on|off :: enable test simulation");
+        Serial.println(" - data  TESTDATA :: Testdaten setzen");
+        Serial.println(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)");
         return;
       }
       Serial.println(msg);

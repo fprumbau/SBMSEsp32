@@ -5,6 +5,12 @@
 
 //https://github.com/bbx10/WebServer_tng/issues/4 Anpassung ESP32
 
+/**
+ * TODO
+ * 
+ * - Wenn die Lader angeschaltet sind, aber der Ladestrom < 1A beträgt, können die Lüfter abgeschaltet werden / bleiben
+ */
+
 void ESP32OTA::init(const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
@@ -83,7 +89,10 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.52: Wird Luefter wegen Soc und Temp abgeschaltet, dann sollte dies nur einmal erfolgen und danach das Flag fansRunning beachtet werden";
      changes += "<li>0.9.9.53: (1) Version 51,52 (nach .48) haben Charger nicht mehr geschaltet; in charger.cpp war an 3 Stellen die statt isChargerOn(nr) nur (nr) verblieben; Debug2 ueberarbeitet.";
      changes += "<li>0.9.9.53: (2) Beide Charger wurden erst nach ihrerer minimalen Ruhezeit gestartet (S1==10min, S2==30s), dies wird beim ersten Mal umgangen. S1 Ruhezeit von 10min auf 60s verringert.";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.53", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.54: (1) Moeglichkeit testFixed (Datasimulation SBMS120) zu aktivieren.";
+     changes += "<li>0.9.9.54: (2) Moeglichkeit, bei test==on die pwm-Werte von gpio05/25/26 zu setzen.";
+     changes += "<li>0.9.9.55: Beruecksichtigen, dass S2 nun auch 600W liefert, Umschaltzeiten etwas dehnen; ArduinoJson6";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.55", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
