@@ -84,6 +84,9 @@ extern bool s2ActForLowCV;  //0.9.9.46
 extern long s1MinRestMillis; //0.9.9.53
 extern long s2MinRestMillis; //0.9.9.53
 
+extern int dutyCycle; //0.9.9.60
+extern float lastNetto; //0.9.9.60
+
 //PWM
 
 #endif

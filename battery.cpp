@@ -88,7 +88,7 @@ void Battery::controlFans() {
         digitalWrite(RELAY_4, LOW);
       }
     } else {
-      if(soc>=99) {
+      if(soc>=99 && temp<36) {
         msg = "Schalte Luefter ab, da fertig geladen wurde";
         Serial.println(msg);
         wc.sendClients(msg);

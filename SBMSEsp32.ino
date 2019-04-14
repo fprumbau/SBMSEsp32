@@ -66,11 +66,11 @@ void setup() {
   pinMode(PWM_S2, OUTPUT); //HLG600-30B, GPIO05
 
   int freq = 100;
-  int resolution = 12;
+  int resolution = 10; //0...1024
   
-  ledcSetup(0, freq, resolution); 
-  ledcSetup(1, freq, resolution); 
-  ledcSetup(2, freq, resolution); 
+  ledcSetup(GPIO25, freq, resolution); 
+  ledcSetup(GPIO26, freq, resolution); 
+  ledcSetup(GPIO05, freq, resolution); //HLG600B
 
   ledcAttachPin(PWM_L1, 0);
   ledcAttachPin(PWM_L2, 1);

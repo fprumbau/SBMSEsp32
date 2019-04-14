@@ -23,6 +23,7 @@ class Charger {
     bool s2override = false;
     void enableCharger(uint8_t nr, bool active);
     void disableCharger(uint8_t nr, bool active);
+    int calculateDc(float netto);
     
   public:
     bool isOn();
