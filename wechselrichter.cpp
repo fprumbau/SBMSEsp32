@@ -158,6 +158,7 @@ void Inverter::check()  {
   while(!timeClient.update()) {
     timeClient.forceUpdate();
   }
+  int day = timeClient.getDay();
   int hours = timeClient.getHours();
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
@@ -180,7 +181,6 @@ void Inverter::check()  {
         }
         nacht = true;    
       } 
-  
     } else {
       if(nacht) {
         nacht = false;
@@ -192,13 +192,12 @@ void Inverter::check()  {
       }
     }
   }
-  //v. 0.9.9.42 alle 6h versuchen, neu zu starten, wenn weder Charger noch Inverter laufen
-  if(!(charger.isChargerOn(1) || charger.isChargerOn(2) || battery.isOn())) {
-    if(lastHourRestart > 0 && hours - lastHourRestart > 5) {
-      wc.sendClients("Restarting ESP every 6 hours");
-      delay(200); //Warte, bis Nachricht verschickt ist
-      ESP.restart();
-    }
+  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten
+  if(hours == 6 && dayOfMonthLastRestart != day)  {
+     dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
+     wc.sendClients("Restarting ESP at 5 o'clock");
+     delay(200); //Warte, bis Nachricht verschickt ist
+     ESP.restart();
   }
 }
 

@@ -126,7 +126,7 @@ function log(msg) {
 function updatePage() {
   var origin = document.location.origin;
   if(origin.indexOf("prumbaum") !== -1) {
-    origin = "http://192.168.178.106";
+    origin = "http://192.168.178.47";
   }
   var url = origin + '/update';
   document.location.href=url;

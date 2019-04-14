@@ -31,7 +31,6 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 /*                                                                    */
 /*                Setup                                               */
 /*                                                                    */
-/*                                                                    */
 /**********************************************************************/
 void setup() {
 

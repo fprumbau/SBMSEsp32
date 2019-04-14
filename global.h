@@ -79,7 +79,7 @@ extern float bezug;
 extern float lieferung;
 extern String datetime;
 
-extern int lastHourRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
+extern int dayOfMonthLastRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
 extern bool s2ActForLowCV;  //0.9.9.46
 extern long s1MinRestMillis; //0.9.9.53
 extern long s2MinRestMillis; //0.9.9.53

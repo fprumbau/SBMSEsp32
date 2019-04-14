@@ -92,7 +92,11 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.54: (1) Moeglichkeit testFixed (Datasimulation SBMS120) zu aktivieren.";
      changes += "<li>0.9.9.54: (2) Moeglichkeit, bei test==on die pwm-Werte von gpio05/25/26 zu setzen.";
      changes += "<li>0.9.9.55: Beruecksichtigen, dass S2 nun auch 600W liefert, Umschaltzeiten etwas dehnen; ArduinoJson6";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.55", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.56: Sind die Lader aktiv, der Ladestand ist aber >=99%, schalte die Lüfter nicht ein (sondern ab)";
+     changes += "<li>0.9.9.57: LastHourRestart wurde nie verwendet, da immer -1 und damit <0, jetzt wird jeden Morgen gegen 5 neu gestartet";
+     changes += "<li>0.9.9.58: Restart um 6,";
+     changes += "<li>0.9.9.59: Schalte Lüfter NUR ein, wenn Temperatur über 35°C (battery.cpp)";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.59", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

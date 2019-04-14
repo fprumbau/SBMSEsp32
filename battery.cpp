@@ -69,25 +69,37 @@ void Battery::controlFans() {
     m+= lieferung;
     wc.sendClients(m);
   }
+  String msg;
   if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
     if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
-      String msg = "Schalte Luefter an, da der Batteriebetrieb aktiv ist";
+      msg = "Schalte Luefter an, da der Batteriebetrieb aktiv ist";
       Serial.println(msg);
       wc.sendClients(msg);
       digitalWrite(RELAY_4, LOW);
     }
- } else if(charger.isOn()){ //Ladebetrieb, Lader brauchen Kuehlung
-    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
-      String msg = "Schalte Luefter an, da gerade geladen wird";
-      Serial.println(msg);
-      wc.sendClients(msg);
-      digitalWrite(RELAY_4, LOW);
-    } 
+ } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
+    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen, aber nur wenn der Ladestand<99% UND die Temperatur>35°C ist, beim Balancing werden die Luefter nicht benutzt
+      if(soc<99 && temp>35) {
+        msg = "Schalte Luefter an, da gerade geladen wird; Temperatur: ";
+        msg+=temp;
+        msg+="°C";
+        Serial.println(msg);
+        wc.sendClients(msg);
+        digitalWrite(RELAY_4, LOW);
+      }
+    } else {
+      if(soc>=99) {
+        msg = "Schalte Luefter ab, da fertig geladen wurde";
+        Serial.println(msg);
+        wc.sendClients(msg);
+        digitalWrite(RELAY_4, HIGH);
+      }      
+    }
  } else {
     if(fansRunning) { //Versuche, die Luefter auszuschalten nur dann, wenn sie schon laufen
       if(temp<40) {
         if(fansRunning) {
-          String msg = "Schalte Luefter ab, da weder Batterie noch Charger laufen";
+          msg = "Schalte Luefter ab, da weder Batterie noch Charger laufen";
           Serial.println(msg);
           wc.sendClients(msg);
           digitalWrite(RELAY_4, HIGH);

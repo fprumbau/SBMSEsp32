@@ -79,7 +79,7 @@ float bezug=0.0;
 float lieferung=0.0;
 String datetime;
 
-int lastHourRestart = -1; //Wann wurde der ESP zum letzten Mal neu gestartet?
+int dayOfMonthLastRestart = -1; //Wann wurde der ESP zum letzten Mal neu gestartet?
 bool s2ActForLowCV = false; //Notladungsflag fuer S2, falls Zellspannungen unter LOW_MINIMAL_CV_MILLIS abfallen
 long s1MinRestMillis = 60000; //0.9.9.53
 long s2MinRestMillis = 30000; //0.9.9.53
