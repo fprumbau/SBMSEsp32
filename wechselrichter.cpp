@@ -192,8 +192,8 @@ void Inverter::check()  {
       }
     }
   }
-  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten
-  if(hours == 6 && dayOfMonthLastRestart != day)  {
+  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten (nur volle Minute)
+  if(hours == 6 && mins == 0 && dayOfMonthLastRestart != day)  {
      dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
      wc.sendClients("Restarting ESP at 5 o'clock");
      delay(200); //Warte, bis Nachricht verschickt ist

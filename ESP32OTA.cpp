@@ -97,7 +97,8 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.58: Restart um 6,";
      changes += "<li>0.9.9.59: Schalte Luefter NUR ein, wenn Temperatur über 35°C (battery.cpp), Git-Upd ESP32 Libs, Kompilat damit 844 statt 841 gross";
      changes += "<li>0.9.9.60: GIIO5 schaltet nun per PWM den HLG600B von 0..546W (charger.cpp, calculateDc)";
-     updater.setUpdaterUi("Title", "Build : 0.9.9.60", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.60: Der mit 0.9.9.58 eingerführte Restart muss auf die Stunde UND die Minute eingeschraenkt sein, da sonst eine Stunde neu gestartet wird";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.61", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
