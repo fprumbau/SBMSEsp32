@@ -9,7 +9,7 @@ void Battery::checkCellVoltages() {
     
     for (int k = 0; k < 8; k++) {
 
-      if(debug2) {
+      if(debug) {
         String d = "Cell: ";
         d+=k;
         d+="; Voltage: ";
@@ -46,7 +46,7 @@ bool Battery::isOn() {
 //v. 0.9.9.40 laeuft weder die Batterie noch ein Charger, schalte die Luefter ueber Relais 4 ab
 void Battery::controlFans() {
   bool fansRunning = !digitalRead(RELAY_4);
-  if(debug2) {
+  if(debug) {
     String m = "Lueft.: ";
     m += fansRunning;
     m += "; Batt: ";
