@@ -100,9 +100,11 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.61: Der mit 0.9.9.58 eingerführte Restart muss auf die Stunde UND die Minute eingeschraenkt sein, da sonst eine Stunde neu gestartet wird";
      changes += "<li>0.9.9.62: Die Methode charger.checkOnIncome() sollte nur noch maximal alle CHECK_INCOME_MIN_INTERVAL_MILLIS laufen";
      changes += "<li>0.9.9.63: Eine DC-Berchnung sollte auch den aktuellen Wert des Ladestroms mit inkludieren";
-     changes += "<li>0.9.9.64: Fuehre Schalter enableCountBeforeOff ein, um den Relais-Schonverfahren aus 0.9.9.44 abschaltbar zu machen (default: aus)"; 
+     changes += "<li>0.9.9.65: Ein favicon.ico wird nun über SPIFFS geserved";
+     changes += "<li>0.9.9.66: Fehler in charger.cpp verhinderte Abschaltung von S1 (HLG600A), wenn netto negativ";     
+     changes += "<li> "; 
      
-     updater.setUpdaterUi("Title", "Build : 0.9.9.64", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.66", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

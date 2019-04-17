@@ -13,6 +13,7 @@
 #include "SMA.h"
 #include "battery.h"
 #include "charger.h"
+#include "SPIFFS.h"
 
 //findet die Checkmethode falsche Werte vor, so wird noch einmal
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.

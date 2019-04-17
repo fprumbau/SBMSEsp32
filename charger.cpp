@@ -242,13 +242,13 @@ void Charger::checkOnIncome(float netto) {
     unsigned long s1Last = now - s1_switched;
     if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
       if(!isChargerOn(1)) {
-        if(netto > 400){         
+        if(netto > 100){         
           //Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;      
         }
-      } else if(enableCountBeforeOff && netto < -300 && !s1override) {        
-          if(s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
+      } else if(netto < -300 && !s1override) {        
+          if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
             if(debug) {

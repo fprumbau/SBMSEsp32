@@ -111,6 +111,10 @@ void setup() {
     request->send(200, "text/html", html);
   });
 
+  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/favicon.ico", "image/x-icon");
+  });
+
   //Registriere Eventhandler WebsocketEvents
   ws.onEvent(onWsEvent);
     
@@ -124,6 +128,12 @@ void setup() {
   
   // initialize other the air updates
   updater.init(hostName);
+
+  // v.0.9.9.65 favicon via SPIFFS
+  if(!SPIFFS.begin()){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
 }
 
 /**********************************************************************/
