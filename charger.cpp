@@ -188,7 +188,7 @@ void Charger::checkOnIncome(float netto) {
         msg+=checkOnIncomeMinIntervalMillis;
         msg+=" / ";
         msg+=now;            
-        wc.sendClients(msg);
+        Serial.println(msg);
       }
       return;
     }
