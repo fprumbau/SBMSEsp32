@@ -75,7 +75,7 @@ void Inverter::check()  {
   //Zur weiteren Pruefung sollte die soc vorliegen
   if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
-  if (( millis() - lastCheckedMillis ) < checkMillis) { //Pruefung hoechstens alle 3 Sekunden
+  if (( millis() - lastCheckedMillis ) < checkMillis) { //Pruefung hoechstens alle 10 Sekunden
     return;
   }
   lastCheckedMillis = millis();

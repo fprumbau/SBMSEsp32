@@ -18,7 +18,7 @@ int LOW_MINIMAL_CV_MILLIS = 2700; //darunter wird Charger S2 für 5Min aktiviert
 int LOW_VOLTAGE_MILLIS = 3100; //darunter wird die Batterie abgeschaltet  
 int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_VOLTAGE_MILLIS + CV_HYST ist
 
-const int checkMillis = 3000;
+const int checkMillis = 10000; //Pruefung der Kennwerte (SOC, Zellspannungen), minimales Interval in Millisekunden
 
 int LED_RED = 12;
 int LED_GREEN = 14;

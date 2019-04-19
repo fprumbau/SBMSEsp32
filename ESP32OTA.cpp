@@ -102,9 +102,10 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.63: Eine DC-Berchnung sollte auch den aktuellen Wert des Ladestroms mit inkludieren";
      changes += "<li>0.9.9.65: Ein favicon.ico wird nun über SPIFFS geserved";
      changes += "<li>0.9.9.66: Fehler in charger.cpp verhinderte Abschaltung von S1 (HLG600A), wenn netto negativ";     
+     changes += "<li>0.9.9.67: Pruefinterval SOC und Zellspannungen von 3 auf 10s erhoeht";      
      changes += "<li> "; 
      
-     updater.setUpdaterUi("Title", "Build : 0.9.9.66", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.67", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
