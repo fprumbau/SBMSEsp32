@@ -119,9 +119,8 @@ var debug2 = false;
 
 function log(msg) {
   cs = document.getElementById('console');
-  //cs.innerHTML += '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
-  var el = document.createElement('span');
-  el.innerText = '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
+  var el = document.createElement('div');
+  el.innerHTML = '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
   cs.appendChild(el);
   cs.scrollTop = cs.scrollHeight;
 }

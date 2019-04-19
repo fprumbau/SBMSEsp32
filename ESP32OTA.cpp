@@ -8,7 +8,7 @@
 /**
  * TODO
  * 
- * - Wenn die Lader angeschaltet sind, aber der Ladestrom < 1A beträgt, können die Lüfter abgeschaltet werden / bleiben
+ * - Wenn die Lader angeschaltet sind, aber der Ladestrom < 1A betr&auml;gt, k&ouml;nnen die L&uuml;fter abgeschaltet werden / bleiben
  */
 
 void ESP32OTA::init(const char* host) {
@@ -70,7 +70,7 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>Schaltschwelle CV low von 2850mV auf 3000mV erhoeht (spaeter weiter auf 3100 mit 0.9.9.38)";
      changes += "<li>Hysterese fuer SOC_LIMIT (SOC_HYST mit 5%) hinzugefuegt";
      changes += "<li>0.9.9.36: 100mV Hysterese bei Zellspannungen verhindert automatisches Anschalten bei Leerlauf";
-     changes += "<li>0.9.9.37: Faellt die Spannung einer Zelle auf <2,7V, dann wird der Lader S2 für 5Min aktiviert";     
+     changes += "<li>0.9.9.37: Faellt die Spannung einer Zelle auf <2,7V, dann wird der Lader S2 f&uuml;r 5Min aktiviert";     
      changes += "<li>0.9.9.38: Weitere Modularisierung mit Charger und Batteryklasse, bei niedriger CV nun start S2 fuer jeweils 5Min.";
      changes += "<li>0.9.9.39: Nun statt Wifi-Reset sma.reset (udp reinit); Fixed Fehler, es wurden nur 7 Zellen ueberwacht";
      changes += "<li>0.9.9.40: Relais 3+4 verdrahtet, Umstrukturierung, mit Relais 4 werden nun die Luefter geschaltet";
@@ -92,21 +92,21 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.54: (1) Moeglichkeit testFixed (Datasimulation SBMS120) zu aktivieren.";
      changes += "<li>0.9.9.54: (2) Moeglichkeit, bei test==on die pwm-Werte von gpio05/25/26 zu setzen.";
      changes += "<li>0.9.9.55: Beruecksichtigen, dass S2 nun auch 600W liefert, Umschaltzeiten etwas dehnen; ArduinoJson6";
-     changes += "<li>0.9.9.56: Sind die Lader aktiv, der Ladestand ist aber >=99%, schalte die Lüfter nicht ein (sondern ab)";
+     changes += "<li>0.9.9.56: Sind die Lader aktiv, der Ladestand ist aber >=99%, schalte die Luefter nicht ein (sondern ab)";
      changes += "<li>0.9.9.57: LastHourRestart wurde nie verwendet, da immer -1 und damit <0, jetzt wird jeden Morgen gegen 5 neu gestartet";
      changes += "<li>0.9.9.58: Restart um 6,";
-     changes += "<li>0.9.9.59: Schalte Luefter NUR ein, wenn Temperatur über 35°C (battery.cpp), Git-Upd ESP32 Libs, Kompilat damit 844 statt 841 gross";
+     changes += "<li>0.9.9.59: Schalte Luefter NUR ein, wenn Temperatur ueber 35°C (battery.cpp), Git-Upd ESP32 Libs, Kompilat damit 844 statt 841 gross";
      changes += "<li>0.9.9.60: GIIO5 schaltet nun per PWM den HLG600B von 0..546W (charger.cpp, calculateDc)";
-     changes += "<li>0.9.9.61: Der mit 0.9.9.58 eingerführte Restart muss auf die Stunde UND die Minute eingeschraenkt sein, da sonst eine Stunde neu gestartet wird";
+     changes += "<li>0.9.9.61: Der mit 0.9.9.58 eingerf&uuml;hrte Restart muss auf die Stunde UND die Minute eingeschraenkt sein, da sonst eine Stunde neu gestartet wird";
      changes += "<li>0.9.9.62: Die Methode charger.checkOnIncome() sollte nur noch maximal alle CHECK_INCOME_MIN_INTERVAL_MILLIS laufen";
      changes += "<li>0.9.9.63: Eine DC-Berchnung sollte auch den aktuellen Wert des Ladestroms mit inkludieren";
-     changes += "<li>0.9.9.65: Ein favicon.ico wird nun über SPIFFS geserved";
+     changes += "<li>0.9.9.65: Ein favicon.ico wird nun &uuml;ber SPIFFS geserved";
      changes += "<li>0.9.9.66: Fehler in charger.cpp verhinderte Abschaltung von S1 (HLG600A), wenn netto negativ";     
      changes += "<li>0.9.9.67: Pruefinterval SOC und Zellspannungen von 3 auf 10s erhoeht";    
      changes += "<li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)";        
      changes += "<li> "; 
      
-     updater.setUpdaterUi("Title", "Build : 0.9.9.67", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.68", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
