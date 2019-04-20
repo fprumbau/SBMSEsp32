@@ -103,10 +103,11 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.65: Ein favicon.ico wird nun &uuml;ber SPIFFS geserved";
      changes += "<li>0.9.9.66: Fehler in charger.cpp verhinderte Abschaltung von S1 (HLG600A), wenn netto negativ";     
      changes += "<li>0.9.9.67: Pruefinterval SOC und Zellspannungen von 3 auf 10s erhoeht";    
-     changes += "<li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)";        
+     changes += "<li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)";      
+     changes += "<li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden";  
      changes += "<li> "; 
      
-     updater.setUpdaterUi("Title", "Build : 0.9.9.68", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.69", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");

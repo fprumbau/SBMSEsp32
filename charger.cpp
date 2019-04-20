@@ -181,7 +181,7 @@ void Charger::checkOnIncome(float netto) {
     if(lastCheckDiff > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
       checkOnIncomeMinIntervalMillis = now; 
     } else {
-      if(debug) {
+      /*if(debug) {
         String msg = "Skipping checkonIncome for now... ( CHECK_INCOME_MIN_INTERVAL_MILLIS ); now / last / diff: ";
         msg+=lastCheckDiff;
         msg+=" / ";
@@ -189,15 +189,22 @@ void Charger::checkOnIncome(float netto) {
         msg+=" / ";
         msg+=now;            
         Serial.println(msg);
-      }
+      }*/
       return;
     }
+
+    //0.9.9.69
     
     unsigned long s2Last = now - s2_switched;
     bool s2on = isChargerOn(2); 
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!s2on) {
         if (netto > 30) {
+          //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft
+          if(battery.isOn()) {
+              inverter.starteNetzvorrang("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)");
+              return;
+          }
           //Serial.println("Aktiviere Solarcharger 2");
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;
@@ -243,6 +250,11 @@ void Charger::checkOnIncome(float netto) {
     if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
       if(!isChargerOn(1)) {
         if(netto > 100){         
+          //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft
+          if(battery.isOn()) {
+              inverter.starteNetzvorrang("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S1 Bewertung)");
+              return;
+          }
           //Serial.println("Aktiviere Solarcharger 1");
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;      

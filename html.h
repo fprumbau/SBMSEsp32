@@ -119,9 +119,18 @@ var debug2 = false;
 
 function log(msg) {
   cs = document.getElementById('console');
-  var el = document.createElement('div');
-  el.innerHTML = '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
+  cs.appendChild(document.createElement('br'));
+  var el = document.createElement('b');  
+  el.className = 'date';
+  el.innerText = new Date().toLocaleString() + ':   ';
   cs.appendChild(el);
+  var t = document.createTextNode(msg);
+  cs.appendChild(t);
+  
+  //var el = document.createElement('div');
+  //el.innerHTML = '<br><b class=date>' + new Date().toLocaleString() + ':</b>&nbsp;&nbsp;' + msg;
+  //cs.appendChild(el);
+ 
   cs.scrollTop = cs.scrollHeight;
 }
 
