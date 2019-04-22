@@ -140,8 +140,6 @@ int Charger::calculateDc(float netto) {
  */
 void Charger::checkOnIncome(float netto) {
 
-  
-
     /**
      * Ist Charger2 aus UND ist der letzte Schaltvorgang
      * mehr als 30s her UND gibt es einen Energieüberschuss von 
@@ -151,28 +149,6 @@ void Charger::checkOnIncome(float netto) {
      * 
      * ledcWrite(GPIO05, dutyCycle);  ;dutyCycle 0-1023
      * 
-     * ALT:
-     * 
-      unsigned long now = millis();
-      unsigned long s2Last = now - s2_switched;
-      if(s2_switched == -1 || s2Last > s2MinRestMillis) {
-        if(!isChargerOn(2)) {
-          if (netto > 300) {
-            //Serial.println("Aktiviere Solarcharger 2");
-            toggleCharger(2,true,false);
-            s2_countBeforeOff = -1;
-            netto-=600;
-          } 
-        } else if(netto < -400 && !s2override) {
-            if(s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
-              s2_countBeforeOff++; 
-            } else {        
-              //Serial.println("Deaktiviere Solarcharger 2");
-              toggleCharger(2,false,false);
-              netto+=600; //0.9.9.55 frei werdende Energie für Berechnung S1 anpassen
-            }
-        }
-      }
      */
     unsigned long now = millis();
 
@@ -193,15 +169,41 @@ void Charger::checkOnIncome(float netto) {
       return;
     }
 
-    //0.9.9.69
+    /**
+     * 0.9.9.71 Zuerst S1 bewerten
+     */     
+    unsigned long s1Last = now - s1_switched;
+    if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
+      if(!isChargerOn(1)) {
+        if(netto > 600){         
+          netto-=600;
+          //Serial.println("Aktiviere Solarcharger 1");
+          toggleCharger(1,true,false);
+          s1_countBeforeOff = -1;      
+        }
+      } else if(netto < -300 && !s1override) {        
+          if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
+            s1_countBeforeOff++;
+          } else {
+            if(debug) {
+               wc.sendClients("Deaktiviere Solarcharger 1");
+            }
+            netto+=600;
+            toggleCharger(1,false,false);
+          }
+      }
+    }  
+
     
     unsigned long s2Last = now - s2_switched;
     bool s2on = isChargerOn(2); 
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!s2on) {
         if (netto > 30) {
-          //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft
-          if(battery.isOn()) {
+          //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft         
+          // (und der Solarertrag groesser als 100W ist, da sonst abends bei z.B. netto = -400 eingeschaltet wird und dann +500 erzeugt wird, also netto>30 wird )
+          // Die 100 entprechen dem, was Mama&Papa verbrauchen
+          if(battery.isOn() && lieferung > 100) {
               inverter.starteNetzvorrang("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)");
               return;
           }
@@ -217,7 +219,6 @@ void Charger::checkOnIncome(float netto) {
                  wc.sendClients("Deaktiviere Solarcharger 2");
               }
               toggleCharger(2,false,false);
-              netto+=lastNettoAbzug; //0.9.9.55 frei werdende Energie 
             }
       }
     }
@@ -226,64 +227,14 @@ void Charger::checkOnIncome(float netto) {
       dutyCycle = calculateDc(netto);
       ledcWrite(GPIO05, dutyCycle);
       //Grobe Naeherung: dutycycle von 500 entspricht 250W (0.5)
-      lastNettoAbzug = 0.5 * dutyCycle;
       if(debug2) {
-          String ms = "Regulating Dutycycle: ( netto / dutyCycle / Abzug in Watt ) | ";
+          String ms = "Regulating Dutycycle: ( netto / dutyCycle ) | ";
           ms+=netto;
           ms+=" / ";
           ms+=dutyCycle;
-          ms+=" / ";
-          ms+=lastNettoAbzug;
           wc.sendClients(ms); 
-      }    
-      netto-=lastNettoAbzug; //abziehen, damit S1 korrekt abzieht  
+      }     
     } 
-
-    /**
-     * Ist der Charger1 aus UND ist der letzte Schaltvorgang
-     * mehr als 60s her UND gibt es einen Energieüberschuss von 
-     * mindestens 400W, dann aktiviere S2.  
-     * 
-     * Wird nichts eingespeist, dann stoppe den Charger.
-     */     
-    unsigned long s1Last = now - s1_switched;
-    if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
-      if(!isChargerOn(1)) {
-        if(netto > 100){         
-          //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft
-          if(battery.isOn()) {
-              inverter.starteNetzvorrang("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S1 Bewertung)");
-              return;
-          }
-          //Serial.println("Aktiviere Solarcharger 1");
-          toggleCharger(1,true,false);
-          s1_countBeforeOff = -1;      
-        }
-      } else if(netto < -300 && !s1override) {        
-          if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
-            s1_countBeforeOff++;
-          } else {
-            if(debug) {
-               wc.sendClients("Deaktiviere Solarcharger 1");
-            }
-            toggleCharger(1,false,false);
-          }
-      }
-    }  
-
-    /*
-    TODO:
-    - GPIO05/GND mit Blau/weiss HLG600B verbinden
-    - ledcWrite(GPIO05, dutyCycle); //dutyCycle=0..255 ??
-    - S2 Relais kann staendig an sein
-    - s2MinRestMillis wird nicht mehr benötigt.
-    - S2 könnte zeitgesteuert morgens an- und abends ausgeschaltet werden
-    Angefangen wird immer mit S2/GPIO05, hier muss eine Tabelle
-    von Dutycycle zu Watt her (gibt es evtl. schon)
-
-    - Wenn S2 voll ausgesteuert und netto>0, dann S2 auf 0 und
-      S1 einschalten. s1MinRestMillis pruefen.
-    */
 
    if(debug) {
      String m1 = "; Netto: ";

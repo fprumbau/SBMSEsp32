@@ -105,9 +105,10 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.67: Pruefinterval SOC und Zellspannungen von 3 auf 10s erhoeht";    
      changes += "<li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)";      
      changes += "<li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden";  
-     changes += "<li> "; 
+     changes += "<li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)";       
+     changes += "<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit lässt muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.";
      
-     updater.setUpdaterUi("Title", "Build : 0.9.9.69", "SBMS120 Solar Charger", "Branch : master", changes);
+     updater.setUpdaterUi("Title", "Build : 0.9.9.71", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
