@@ -107,6 +107,7 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden";  
      changes += "<li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)";       
      changes += "<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit lässt muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.";
+     changes += "<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) für S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird";
      
      updater.setUpdaterUi("Title", "Build : 0.9.9.71", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
