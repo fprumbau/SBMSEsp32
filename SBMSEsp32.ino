@@ -34,8 +34,14 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 /**********************************************************************/
 void setup() {
 
-  Serial.begin(115200);  //USB
-  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial1 Pins 4,2, Serial2 Pins 16,17
+  Serial.begin(115200);  //USB Serial1 Pins 4,2, 
+  
+  //WROOM hat 16/17 auf RX2/TX2 verbunden
+  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
+
+  //WROVER-B hier sind die Pins 16+17 disabled, 
+  //Serial1.begin(9600, SERIAL_8N1, 15, 17); //TX2 wird nicht gebraucht (Kommunikation -> SBMS), RX2 auf GPIO15, hierfür muss dann in der Schaltung GPIO16 auf GPIO15 gebrückt werden!
+  
   Serial2.begin(115200); //wegen Restart
 
   Serial.println("Starting...");
@@ -54,16 +60,16 @@ void setup() {
   tasterConfig.setEventHandler(handleButton);
   taster.init(TASTER, HIGH, 0 /* id */);
 
-  digitalWrite(RELAY_S1, HIGH);
-  digitalWrite(RELAY_S2, HIGH);
+  digitalWrite(RELAY_S1, HIGH); //Schaltet S1 (HLG600B, regelbar) an/aus (240V!)
+  digitalWrite(RELAY_S2, HIGH); //Schaltet S2 (HLG600A, fest) an/aus (Remoteeingang des Laders)
 
-  digitalWrite(RELAY_3, HIGH);
-  digitalWrite(RELAY_4, HIGH);
+  digitalWrite(RELAY_3, HIGH); //Schaltet S2 (s.o.) an/aus (Remoteeingang des Laders)
+  digitalWrite(RELAY_4, HIGH); //Schaltet die Luefter an/aus (24V)
 
   //v.0.9.9.51 ff
-  pinMode(PWM_L1, OUTPUT); //Luefter Charger GPIO25
-  pinMode(PWM_L2, OUTPUT); //Luefter Inverter GPIO26
-  pinMode(PWM_S2, OUTPUT); //HLG600-30B, GPIO05
+  pinMode(PWM_L1, OUTPUT); //Luefter Charger GPIO25 (noch nicht in Gebrauch)
+  pinMode(PWM_L2, OUTPUT); //Luefter Inverter GPIO26 (noch nicht in Gebrauch)
+  pinMode(PWM_S2, OUTPUT); //HLG600-30B, GPIO05 (steuert den Ladestrom von S2 über PWM)
 
   int freq = 100;
   int resolution = 10; //0...1024
@@ -109,6 +115,10 @@ void setup() {
     //if(!request->authenticate("admin", "Go8319!"))
     //    request->redirect("/login");
     request->send(200, "text/html", html);
+  });
+
+  server.on("/lbprobe", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", "online");
   });
 
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){

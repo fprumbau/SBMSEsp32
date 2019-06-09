@@ -170,9 +170,9 @@ void Charger::checkOnIncome(float netto) {
     }
 
     //0.9.9.72 VOR dem Schalten der Charger, schauen, ob die Battery läuft.
-    if(battery.isOn()) {
-      return;
-    }
+    //if(battery.isOn()) {
+    //  return;
+    //}
 
     /**
      * 0.9.9.71 Zuerst S1 bewerten

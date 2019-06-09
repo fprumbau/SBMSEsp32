@@ -108,8 +108,9 @@ void ESP32OTA::init(const char* host) {
      changes += "<li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)";       
      changes += "<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit lässt muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.";
      changes += "<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) für S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird";
-     
-     updater.setUpdaterUi("Title", "Build : 0.9.9.71", "SBMS120 Solar Charger", "Branch : master", changes);
+     changes += "<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenrückseite auf GPIO15 umgelegt werden muss. Wird da eine Brücke zwischen GPIO15 und GPIO16 gelegt, müssten beide Chips arbeiten.";
+     changes += "<li>0.9.9.74: <Wroom> isAlive Url geschaltet: /lbprobe liefert 'online', Rollback 0.9.9.72 (charger.cpp), es darf auch im Batterieberieb geladen werden";
+     updater.setUpdaterUi("Title", "Build : 0.9.9.74", "SBMS120 Solar Charger", "Branch : master", changes);
      //Optional: Authentifizieren
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
