@@ -4,6 +4,7 @@
 #include "WebCom.h"
 #include "wechselrichter.h"
 #include "ESP32OTA.h"
+#include "Tesla.h"
 
 #include <WiFiUdp.h>
 
@@ -88,3 +89,6 @@ int dutyCycle = 0; //0.9.9.60
 long checkOnIncomeMinIntervalMillis = 0;
 long CHECK_INCOME_MIN_INTERVAL_MILLIS = 10000; //0.9.9.62
 bool enableCountBeforeOff = false; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
+
+Tesla perry;
+CFG config;

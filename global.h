@@ -2,9 +2,13 @@
 #define GLOBAL_H
 
 #include "ESPAsyncWebServer.h"
+#include <esp32-hal-ledc.h>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <esp32-hal-ledc.h>
+#include <FS.h>
+
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "wechselrichter.h"
@@ -14,6 +18,8 @@
 #include "battery.h"
 #include "charger.h"
 #include "SPIFFS.h"
+#include "Tesla.h"
+#include "CFG.h"
 
 //findet die Checkmethode falsche Werte vor, so wird noch einmal
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
@@ -89,6 +95,9 @@ extern int dutyCycle; //0.9.9.60
 extern long checkOnIncomeMinIntervalMillis; //0.9.9.62
 extern long CHECK_INCOME_MIN_INTERVAL_MILLIS; //0.9.9.62
 extern bool enableCountBeforeOff; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
+
+extern Tesla perry;
+extern CFG config;
 
 //PWM
 

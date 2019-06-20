@@ -1,3 +1,99 @@
+const char changelog[] PROGMEM = R"=====(
+<b>Device info</b>: Frank's Solar Charger Monitor
+<li> Integrierte Schaltung der beiden Solarlader, WebSocketServer als WebCom gekapselt
+<li> Errormodus wird bei fehlenden SBMS-Paketen nun wieder aktiviert.    
+<li> Interruptbehandlung (Taster) wieder akiviert.  
+<li> Wenn debug sread nur ausgeben, wenn Inhalt vorhanden.  
+<li> Fix input Pullup fuer Taster auf GPIO19.
+<li> Acebutton und ButtonConfig zur Entprellung einsetzen.
+<li> ToggleCharger-Methoden.
+<li> S1 / S2 nun manuell zu schalten.     
+<li> Initmeldungen, wenn neuer Client connected sollte nicht an alle gehen. 
+<li> Initmeldungen fuer debug/debug2 an neue Clients. 
+<li> Einbinden von JSON zwischen Server -> Client.
+<li> Automatisches Ein-/Ausschalten der Charger.
+<li> OTA-Updaterklasse uebernommen, Hauptklasse aufgeraeumt.
+<li> Debugausgabe Wirkleistung/Lieferung in Webbrowser (d2).
+<li> OTAUpdater mit Debugsettings ueber d2.
+<li> ESP32OTA kann nun auf vars (debug2 und udp) zugreifen, update geht (vorher Reset empfehlenswert!).
+<li> Werden S1 oder S2 ueber SMA.cpp geschaltet, muss s1 an, s2 aus etc. uebermittelt werden.
+<li> Globale Objekte mit global.h.
+<li> Variablenupdats nun nur noch mittels JSon
+<li> Moeglichkeit, WiFi mittels 'restart wifi' ueber serielle Schnittstelle zu restarten     
+<li> Wifi restartet, wenn 10s kein UDP-Paket des SMA-Energymeters empfangen wurde
+<li> Umstellung auf AsyncWebserver inkl. Async OTA
+<li>OTA.h/OTA.cpp mit ESP32OTA.h/ESP32OTA.cpp verschmolzen
+<li>Vars.h in global.h ueberfuehrt, updaterui.h und webpage.h in html.h konsolidiert
+<li>Eigene IP in JavaScript mit location.host auslesen und verwenden
+<li>Battery.h/.cpp in wechselrichter.h/.cpp ueberfuehrt
+<li>Methoden starteBatterie und starteWechselrichter in inverter-Klasse uebernommen
+<li>Websocket-Eventhandler ueber Wrappermethode in WebCom verschoben
+<li>SOC-Variable und cv (cell voltages) in global.h/.cpp uebernommen
+<li>OTA mit Reporting und Abschlusseite (OK/Failed) geht jetzt
+<li>Funktion readSBMS nun in SBMS.h/.cpp
+<li>Authentifizierung fuer ESPOTA und AsyncWebserver (auskommentiert), Zugriff ueber / statt /sbms
+<li>Ein Schaltvorgang auf s1 und s2 sollte maximal alle 60s erlaubt werden.
+<li>checkValues mit led-Methoden in Inverterklasse verlegt.
+<li>Code zum behandeln des Inverter-Toggle-Tasters in Inverterklasse verlegt
+<li>Nun 60s, bis WiFi wieder aufgebaut wird (UDP miss)
+<li>Feld fuer Lieferung / Bezug anzeigen
+<li>SBMS-Daten werden nun auch per JSon uebermittelt
+<li>Webseite aufraeumen. Doppelklick auf Dbg1/Dbg2 leitet auf Updateseite, erfolgr. Update nach 3s zur SBMS-Seite
+<li>Low-Meter von 20% auf 30% geaendert, statt 110AH nun 100AH, Lieferung Schriftformatierung
+<li>NTPClient zugefuegt, um im inverter.check() ein automatische Schaltung des Verbrauchs zu ermoeglichen
+<li>Zwischen 20 Uhr und 5 Uhr morgens Batteriebetrieb versuchen (nur wenn state of charge > limit)
+<li>Staendige Datumsanzeige in der Webseite
+<li>Fehler in 0.9.9.30 saugte Batterie leer, solange SOC_LIMIT OK, ignorierte aber Zelleinzelspannungen
+<li>Aut. WiFi reconnect ging nicht, darum erstmal herausgenommen (SMA.cpp); Update-Site aus Location beruecksichtigt 
+<li>Schaltschwelle CV low von 2850mV auf 3000mV erhoeht (spaeter weiter auf 3100 mit 0.9.9.38)
+<li>Hysterese fuer SOC_LIMIT (SOC_HYST mit 5%) hinzugefuegt
+<li>0.9.9.36: 100mV Hysterese bei Zellspannungen verhindert automatisches Anschalten bei Leerlauf
+<li>0.9.9.37: Faellt die Spannung einer Zelle auf <2,7V, dann wird der Lader S2 f&uuml;r 5Min aktiviert     
+<li>0.9.9.38: Weitere Modularisierung mit Charger und Batteryklasse, bei niedriger CV nun start S2 fuer jeweils 5Min.
+<li>0.9.9.39: Nun statt Wifi-Reset sma.reset (udp reinit); Fixed Fehler, es wurden nur 7 Zellen ueberwacht
+<li>0.9.9.40: Relais 3+4 verdrahtet, Umstrukturierung, mit Relais 4 werden nun die Luefter geschaltet
+<li>0.9.9.41: Batterie erst wieder moeglich, wenn Zellspannungen LOW_VOLTAGE_MILLIS + CV_HYST (3150mV) betragen
+<li>0.9.9.42: SBMS-Temperatur wird ausgelesen und verhindert ab 40 Grad Celsius ein Abschalten der Luefter
+<li>0.9.9.43: Immer, wenn seit dem letzten Restart mehr als 5h vergangen sind (Ausnahme: 0Uhr-Uebergang), wird ESP.resta  rt() ausgeloest
+<li>0.9.9.44: Da das Relais zum Charger S1 (HLG600, 600W) ausgewechselt werden musste, wird S1 nun seltener geschaltet (10min statt 60s)
+<li>0.9.9.45: Zellspannungsdifferenzen Min-Max werden wieder richtig angezeigt
+<li>0.9.9.46: Auswertung Webseite ging nur bis Zelle 7, Notladungsautomatik in battery.cpp schaltete S2 nach 5 Minuten immer wieder ab
+<li>0.9.9.47: Min-/Maxzellspannung um einen Index versetzt; Seit 0.9.9.45 Fehler bei PV1 und PV2 Poweranzeige (weil eigentlich Zellspannungen 2/3)
+<li>0.9.9.48: Ueber das freie Relais RELAY_3 zum Remote ON/OFF von S1
+<li>0.9.9.49: Charger S1 isChargerOn wurde nicht korrekt abgefragt. Hier wurde nach erstmaligem einschalten immer isOn gemeldet, obwohl S1 off war. Temp Limit Luefter 40->35
+<li>0.9.9.50: (1) Die fuer beide Lader zustaendige Methode charger.isOn hat Relais_3 (HLG600 nicht beruecksichtigt), der Charger S1 (R3) konnte nicht abgeschaltet werden, da R3 auf LOW statt auf HIGH geschaltet wurde.
+<li>0.9.9.50: (2) Ist noch ein Lader an, aber der StateOfCharge >=99% und die Temperatur <35 Grad, schalte die Luefter ab
+<li>0.9.9.51: Statt wie bei S1 mind. 60s Idle zu bleiben, kann S2 nun schon nach 30s wieder aktiv geschaltet werden
+<li>0.9.9.52: Wird Luefter wegen Soc und Temp abgeschaltet, dann sollte dies nur einmal erfolgen und danach das Flag fansRunning beachtet werden
+<li>0.9.9.53: (1) Version 51,52 (nach .48) haben Charger nicht mehr geschaltet; in charger.cpp war an 3 Stellen die statt isChargerOn(nr) nur (nr) verblieben; Debug2 ueberarbeitet.
+<li>0.9.9.53: (2) Beide Charger wurden erst nach ihrerer minimalen Ruhezeit gestartet (S1==10min, S2==30s), dies wird beim ersten Mal umgangen. S1 Ruhezeit von 10min auf 60s verringert.
+<li>0.9.9.54: (1) Moeglichkeit testFixed (Datasimulation SBMS120) zu aktivieren.
+<li>0.9.9.54: (2) Moeglichkeit, bei test==on die pwm-Werte von gpio05/25/26 zu setzen.
+<li>0.9.9.55: Beruecksichtigen, dass S2 nun auch 600W liefert, Umschaltzeiten etwas dehnen; ArduinoJson6
+<li>0.9.9.56: Sind die Lader aktiv, der Ladestand ist aber >=99%, schalte die Luefter nicht ein (sondern ab)
+<li>0.9.9.57: LastHourRestart wurde nie verwendet, da immer -1 und damit <0, jetzt wird jeden Morgen gegen 5 neu gestartet
+<li>0.9.9.58: Restart um 6,
+<li>0.9.9.59: Schalte Luefter NUR ein, wenn Temperatur ueber 35°C (battery.cpp), Git-Upd ESP32 Libs, Kompilat damit 844 statt 841 gross
+<li>0.9.9.60: GIIO5 schaltet nun per PWM den HLG600B von 0..546W (charger.cpp, calculateDc)
+<li>0.9.9.61: Der mit 0.9.9.58 eingerf&uuml;hrte Restart muss auf die Stunde UND die Minute eingeschraenkt sein, da sonst eine Stunde neu gestartet wird
+<li>0.9.9.62: Die Methode charger.checkOnIncome() sollte nur noch maximal alle CHECK_INCOME_MIN_INTERVAL_MILLIS laufen
+<li>0.9.9.63: Eine DC-Berchnung sollte auch den aktuellen Wert des Ladestroms mit inkludieren
+<li>0.9.9.65: Ein favicon.ico wird nun &uuml;ber SPIFFS geserved
+<li>0.9.9.66: Fehler in charger.cpp verhinderte Abschaltung von S1 (HLG600A), wenn netto negativ     
+<li>0.9.9.67: Pruefinterval SOC und Zellspannungen von 3 auf 10s erhoeht    
+<li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)      
+<li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden  
+<li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)       
+<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit lässt muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.
+<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) für S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird
+<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenrückseite auf GPIO15 umgelegt werden muss. Wird da eine Brücke zwischen GPIO15 und GPIO16 gelegt, müssten beide Chips arbeiten.
+<li>0.9.9.74: <Wroom> isAlive Url geschaltet: /lbprobe liefert 'online', Rollback 0.9.9.72 (charger.cpp), es darf auch im Batterieberieb geladen werden
+<li>0.9.9.75: Loop0-Taskmethode integriert, um bisher ungenutzten Code zu 
+<li>0.9.9.76: Beginn der Steuerung der Teslaladeregelung, Tesla.h und Tesla.cpp hinzugefuegt, Status, Wakeup, Ladestart und Ladestop
+)=====";
+
+#define VERSION "0.9.9.76"
+
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
