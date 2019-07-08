@@ -93,9 +93,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.77: Verschiedene Optimierungen wg. Stringnutzung, Changelog wurde in html.h verlegt; Anhebung des Uploadmaximums fuer OTA-Sketches von 1048576 auf 1248576. Das zul&auml;ssige Maximum sollte noch bestimmt werden.
 <li>0.9.9.78: Der mit 0.9.9.58 eingef&uuml;hrte ESP.restart() um 06:00 morgens wird wieder herausgenommen.
 <li>0.9.9.79: In charger.cpp wurde nun die Tesla-Ladesteuerung aktiviert, bei >500 und allen Ladern an wird nun versucht, den Ladevorgang zu starten, bei <-1000W wird gestoppt. Minimale Schaltzeit ist 5Min.
+<li>0.9.9.80: Beim startCharge wird nun zwischen Limitsetzung und Chartstart 8s statt 5s gewartet. Eine Schaltung bedingt nun ausserdem mindestens 10 positive Messungen.
 )=====";
 
-#define VERSION "0.9.9.79"
+#define VERSION "0.9.9.80"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>

@@ -94,4 +94,8 @@ Tesla perry;
 long lastTeslaLoadSwitch = -1;
 long TESLA_LOAD_SWITCH_MIN_MILLIS = 300000; //hoechstens alle 5 Minuten schalten
 bool teslaCharging = false;
+int teslaChargeStartThreshold = 500;
+int teslaChargeStopThreshold = -1000;
+int lowIncomeCount = 0; //Der Tesla sollte erst abgeschaltet werden, nachdem 10 Messpunkte 
+int highIncomeCount = 0;
 CFG config;

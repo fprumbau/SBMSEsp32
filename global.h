@@ -102,7 +102,9 @@ extern CFG config;
 extern long lastTeslaLoadSwitch;
 extern long TESLA_LOAD_SWITCH_MIN_MILLIS; //hoechstens alle 5 Minuten schalten
 extern bool teslaCharging;
-
-//PWM
+extern int teslaChargeStartThreshold; //0.9.9.80
+extern int teslaChargeStopThreshold; //0.9.9.80
+extern int lowIncomeCount; //0.9.9.80
+extern int highIncomeCount; //0.9.9.80
 
 #endif

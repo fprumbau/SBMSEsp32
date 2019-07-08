@@ -10,6 +10,7 @@ int Tesla::wakeup() {
     HTTPClient http;
 
     beginRequest(&http, _wakeup_url);
+    yield();
     
     int rc = http.POST("");
     Serial.print(F("Trying to issue wakeup: "));
@@ -38,7 +39,8 @@ int Tesla::readChargeState() {
   HTTPClient http;
 
   beginRequest(&http, _get_charge_state_url);
-    
+  yield();
+  
   int rc = http.GET();
   Serial.print(F("Trying to issue read charge state: "));
   Serial.println(rc);
@@ -65,7 +67,7 @@ int Tesla::startCharge() {
     HTTPClient http;
     
     beginRequest(&http, _set_charge_limit_url);
-    
+    yield();
     int rc = http.POST("{\"percent\":90}");
     Serial.print(F("Trying to issue charge start (through setting charge limit to 90%): "));
     Serial.println(rc);
@@ -83,9 +85,11 @@ int Tesla::startCharge() {
 
               //FIXME wird der Ladestart direkt nach dem Setzen des neuen Chargelimits versucht,
               //      misslingt der Zugriff (reason:complete). Erst einige Sekunden später geht das.
-              delay(5000);
+              yield();
+              delay(8000);
+              yield();
               beginRequest(&http, _charge_start_url);    
-              
+              yield();
               int rc = http.POST("");
               Serial.print(F("Trying to issue charge start: "));
               Serial.println(rc);
@@ -113,6 +117,7 @@ int Tesla::stopCharge() {
     HTTPClient http;
 
     beginRequest(&http, _charge_stop_url);
+    yield();
     
     int rc = http.POST("");
     Serial.print(F("Trying to issue charge stop: "));
@@ -131,6 +136,7 @@ int Tesla::stopCharge() {
         if(rc==200) {
           
                 beginRequest(&http, _set_charge_limit_url);
+                yield();
                 
                 int rc = http.POST("{\"percent\":50}");
                 Serial.print(F("Trying to issue set charge limit to 50%: "));

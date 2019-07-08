@@ -147,18 +147,28 @@ void Charger::checkOnIncome(float netto) {
     unsigned long now = millis() + TESLA_LOAD_SWITCH_MIN_MILLIS; //da millis() bei ESP-Start von 0 anfaengt, muss er diesen Offset erhalten
     if((now - lastTeslaLoadSwitch) > TESLA_LOAD_SWITCH_MIN_MILLIS) {
         //Wenn mehr als 500W bleibt, dann versuchen, den Tesla zu laden
-        if(s1on && s2on && dutyCycle==1023 && netto > 500) {
-            perry.wakeup();
-            perry.startCharge();
-            lastTeslaLoadSwitch = now;
-            teslaCharging = true;
-            wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu starten");
-        } else if(netto < -1000) { //wenn mehr als 1000W aus dem Netz gezogen wird, dann versuchen, den Tesla auszuschalten
-            perry.wakeup();
-            perry.stopCharge();
-            lastTeslaLoadSwitch = now;
-            teslaCharging = false;
-            wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu stoppen");
+        if(s1on && s2on && dutyCycle==1023 && netto > teslaChargeStartThreshold && !teslaCharging) {
+            if(highIncomeCount>=10) {              
+              perry.wakeup();
+              perry.startCharge();
+              lastTeslaLoadSwitch = now;
+              teslaCharging = true;
+              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu starten");
+              highIncomeCount = 0;
+            } else {
+              highIncomeCount++;
+            }
+        } else if(netto < teslaChargeStopThreshold && teslaCharging) { //wenn mehr als |-1000W| aus dem Netz gezogen wird, dann versuchen, den Tesla auszuschalten
+            if(lowIncomeCount>=10) {
+              perry.wakeup();
+              perry.stopCharge();
+              lastTeslaLoadSwitch = now;
+              teslaCharging = false;
+              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu stoppen");
+              lowIncomeCount = 0;
+            } else {
+              lowIncomeCount++;
+            }
         }
     }
     
