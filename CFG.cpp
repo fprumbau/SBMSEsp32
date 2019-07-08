@@ -13,14 +13,14 @@ bool CFG::load() {
   }
   size_t size = configFile.size();
   if(size>1024) {
-     Serial.println("Config file is to large");
+     Serial.println(F("Config file is to large"));
      return false;
   }
   //allocate a buffer to store contetns of the file.
   std::unique_ptr<char[]> buf(new char[size]);
 
   //We don't use String here because ArduinoJson lib req the intput buffer
-  // to be mutable. if you don't use ArduonJson, you may as well use
+  // to be mutable. if you don't use ArduionJson, you may as well use
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
   if(debug) Serial.println(buf.get());
@@ -29,7 +29,7 @@ bool CFG::load() {
   auto error = deserializeJson(doc, buf.get());
 
   if(error) {
-    Serial.println("Failed to parse config file");
+    Serial.println(F("Failed to parse config file"));
     return false;
   }
 
@@ -52,7 +52,7 @@ bool CFG::save() {
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
-    Serial.println("Failed to open config file for writing");
+    Serial.println(F("Failed to open config file for writing"));
     return false;
   }
 

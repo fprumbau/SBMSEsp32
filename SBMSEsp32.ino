@@ -148,7 +148,7 @@ void setup() {
 
   // v.0.9.9.65 favicon via SPIFFS
   if(!SPIFFS.begin()){
-    Serial.println(">> An Error has occurred while mounting SPIFFS");
+    Serial.println(F(">> An Error has occurred while mounting SPIFFS"));
     return;
   }
 
@@ -186,7 +186,7 @@ void loop() {
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();
       //FIXME das folgende Statmement blockiert, wenn keine Daten kommen...
-      //sbms.readSbms();  //SMBS-Werte auslesen (State of Charge, Cell voltages)
+      sbms.readSbms();  //SMBS-Werte auslesen (State of Charge, Cell voltages)
       yield();
       inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       yield();

@@ -1,10 +1,10 @@
-#ifndef __ESP32_OTA_H
-#define __ESP32_OTA_H
+#ifndef __OTA_H
+#define __OTA_H
 
 #include "global.h"
 #include <ESPmDNS.h>
 
-class ESP32OTA
+class OTA
 {
   private:
     String _username = "";

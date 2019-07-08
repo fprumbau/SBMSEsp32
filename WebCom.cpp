@@ -47,18 +47,18 @@ void WebCom::toggleDebug(unsigned char* payload) {
   if (payload[2] == '1') {
     if (payload[4] == 't') {
       debug = true;
-      msg = "Switched debug1 to true";
+      msg = F("Switched debug1 to true");
     } else {
       debug = false;
-      msg = "Switched debug1 to false";
+      msg = F("Switched debug1 to false");
     }
   } else {
     if (payload[4] == 't') {
       debug2 = true;
-      msg = "Switched debug2 to true";
+      msg = F("Switched debug2 to true");
     } else {
       debug2 = false;
-      msg = "Switched debug2 to false";
+      msg = F("Switched debug2 to false");
     }
   }
   if (debug2) {

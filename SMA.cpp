@@ -7,7 +7,7 @@ void SMA::init() {
   unsigned int portMulti = 9522;      
   
   udp.beginMulticast(ipMulti, portMulti);
-  Serial.println("\nUDP init fertig!\n");
+  Serial.println(F("\nUDP init fertig!\n"));
 
   wlb[8]='\0';
   wll[8]='\0';
@@ -20,7 +20,7 @@ void SMA::reset() {
   unsigned int portMulti = 9522;      
   
   udp.beginMulticast(ipMulti, portMulti);
-  wc.sendClients("UDP reinitialized");
+  wc.sendClients(F("UDP reinitialized"));
 }
 
 void SMA::read() {
@@ -67,7 +67,9 @@ void SMA::read() {
       long lastUdp = now - lastUdpRead;
       if(lastUdp > 60000 && (now - lastUdpNotification) > 10000) {
           lastUdpNotification = now;
-          String msg = "Last WiFi UPD-Packet read ";
+          String msg((char *)0);
+          msg.reserve(80);
+          msg += "Last WiFi UPD-Packet read ";
           msg += lastUdp;
           msg += "ms ago";
           Serial.println(msg);

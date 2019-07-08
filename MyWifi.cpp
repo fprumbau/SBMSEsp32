@@ -29,14 +29,14 @@ void MyWifi::connect() {
   }
   Serial.println("\n");
   Serial.printf("New Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
-  Serial.print("Ip Address: ");
+  Serial.print(F("Ip Address: "));
 
   IPAddress ip = WiFi.localIP();
   Serial.println(ip);
   _localIP = ip;
   _ip=ip.toString();
 
-  Serial.println("Initializing sma.init)");
+  Serial.println(F("Initializing sma.init)"));
   sma.init();
 }
 
@@ -49,7 +49,7 @@ IPAddress MyWifi::localIP() {
 }
 
 void MyWifi::reconnect() {
-  Serial.println("Restarting WiFi...");
+  Serial.println(F("Restarting WiFi..."));
   WiFi.disconnect();
   connect();
 }

@@ -4,15 +4,16 @@
    Netzvorrang starten
 */
 void Inverter::starteNetzvorrang(String reason) {
-  String msg = "";
+  String msg((char *)0);
+  msg.reserve(60);
   if (digitalRead(RELAY_PIN) == HIGH) {
     digitalWrite(RELAY_PIN, LOW); //ON, d.h. Netzvorrang aktiv
     wc.sendClients("Netz -> An, Batterie -> Aus");
-    msg += "Starte Netzvorrang :: ";
+    msg += F("Starte Netzvorrang :: ");
     msg += reason;
     msg += '\n';
   } else {
-    if (debug)  msg = "Kann Netzvorrang nicht starten, da schon aktiv\n";
+    if (debug)  msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
   }
   if (msg.length() > 0) {
     if (debug) {
@@ -26,19 +27,20 @@ void Inverter::starteNetzvorrang(String reason) {
    Batteriebetrieb starten
 */
 void Inverter::starteBatterie(String reason) {
-  String msg = "";
+  String msg((char *)0);
+  msg.reserve(60);
   if (!stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
       wc.sendClients("Batterie -> An, Netz -> Aus");
-      msg += "Starte Netzvorrang :: ";
+      msg += F("Starte Netzvorrang :: ");
       msg += reason;
       msg += '\n';
     } else {
       return;
     }
   } else {
-    msg = "Kann Netzvorrang nicht stoppen, da Stopflag aktiv\n";
+    msg = F("Kann Netzvorrang nicht stoppen, da Stopflag aktiv\n");
   }
   if (msg.length() > 0) {
     if (debug) {
@@ -87,7 +89,7 @@ void Inverter::check()  {
   battery.controlFans();
   
   if(debug) {
-    Serial.print("Check...  ; failureCount: ");
+    Serial.print(F("Check...  ; failureCount: "));
     Serial.println(failureCount);
   }
 
@@ -105,7 +107,8 @@ void Inverter::check()  {
   }
   //a) Teste State-Of-Charge
   boolean stop = false;
-  String message = "";
+  String message((char *)0);
+  message.reserve(128);
   if (soc < limit) {
     message = "State of charge below ";
     message += limit;
@@ -120,7 +123,7 @@ void Inverter::check()  {
     }
     for (int k = 0; k < 8; k++) {
       if (cv[k] < limit) {
-        message = "Undervoltage cell: ";
+        message = F("Undervoltage cell: ");
         message += k;
         stop = true;
         break;
@@ -131,7 +134,7 @@ void Inverter::check()  {
     failureCount++;
     if (failureCount < errLimit) { //einen 'Fehlversuch' ignorieren.
       if (debug) {
-        Serial.print("Error found, waiting until failureCount reaches ");
+        Serial.print(F("Error found, waiting until failureCount reaches "));
         Serial.print(errLimit);
         Serial.print("; now: ");
         Serial.println(failureCount);
@@ -139,7 +142,7 @@ void Inverter::check()  {
     } else {
       if (!stopBattery) {
         if (debug) {
-          Serial.println("Error limit reached, stopping inverter...");
+          Serial.println(F("Error limit reached, stopping inverter..."));
         }
       }
       stopBattery = true; //
@@ -177,7 +180,7 @@ void Inverter::check()  {
       if(!nacht) {
         if(!isBatOn) { 
             wc.sendClients(datetime);
-            starteBatterie("Batteriezeit");    
+            starteBatterie(F("Batteriezeit"));    
         }
         nacht = true;    
       } 
@@ -185,7 +188,7 @@ void Inverter::check()  {
       if(nacht) {
         nacht = false;
         if(isBatOn) {
-            starteNetzvorrang("Schalte wieder auf Netz zurück");    
+            starteNetzvorrang(F("Schalte wieder auf Netz zurück"));    
         } else {
             wc.sendClients(datetime);
         }
@@ -193,12 +196,13 @@ void Inverter::check()  {
     }
   }
   //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten (nur volle Minute)
+  /*
   if(hours == 6 && mins == 0 && dayOfMonthLastRestart != day)  {
      dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
      wc.sendClients("Restarte ESP um 6:00 Uhr");
      delay(200); //Warte, bis Nachricht verschickt ist
      ESP.restart();
-  }
+  }*/
 }
 
 /**
@@ -217,7 +221,7 @@ void Inverter::handleButtonPressed() {
         starteBatterie("Buttonaction");
       } else {
         if (debug) {
-          Serial.println("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)");
+          Serial.println(F("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)"));
         }
       }
     }  

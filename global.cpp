@@ -3,7 +3,7 @@
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "wechselrichter.h"
-#include "ESP32OTA.h"
+#include "OTA.h"
 #include "Tesla.h"
 
 #include <WiFiUdp.h>
@@ -55,7 +55,7 @@ SMA sma;
 WebCom wc;
 Inverter inverter;
 AsyncWebServer server(80);
-ESP32OTA updater;
+OTA updater;
 SBMS sbms;
 WiFiUDP udp;
 WiFiUDP ntpUdp;
@@ -70,7 +70,7 @@ float temp = 0.0; //aktuelle Temperatur des SBMS120
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 bool testFixed = false;
-String testData = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
+String testData = F("#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(");
 const char* hostName = "esp32a";
 unsigned long lastReceivedMillis = -1;
 long timeout = 10000;
@@ -85,10 +85,13 @@ bool s2ActForLowCV = false; //Notladungsflag fuer S2, falls Zellspannungen unter
 long s1MinRestMillis = 60000; //0.9.9.53
 long s2MinRestMillis = 30000; //0.9.9.53
 
-int dutyCycle = 0; //0.9.9.60
+int dutyCycle = 0; //0.9.9.60, 0...1023
 long checkOnIncomeMinIntervalMillis = 0;
 long CHECK_INCOME_MIN_INTERVAL_MILLIS = 10000; //0.9.9.62
 bool enableCountBeforeOff = false; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
 Tesla perry;
+long lastTeslaLoadSwitch = -1;
+long TESLA_LOAD_SWITCH_MIN_MILLIS = 300000; //hoechstens alle 5 Minuten schalten
+bool teslaCharging = false;
 CFG config;

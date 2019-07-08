@@ -9,7 +9,7 @@ int Tesla::wakeup() {
 
     HTTPClient http;
 
-    beginRequest(&http, _wakup_url);
+    beginRequest(&http, _wakeup_url);
     
     int rc = http.POST("");
     Serial.print(F("Trying to issue wakeup: "));
@@ -17,7 +17,7 @@ int Tesla::wakeup() {
  
     if(rc>0) {
         if(debug) {
-          Serial.println(_wakup_url);
+          Serial.println(_wakeup_url);
           String response = http.getString();    
           Serial.println(response);  
         }
@@ -200,8 +200,8 @@ void Tesla::init(const char* auth, const char* vehicleid) {
   wakeupUrl.reserve(78); //genaue Laenge 75 + 3 (Reserve)
   wakeupUrl += _vehicle_base_url;
   wakeupUrl += _wakeup;
-  _wakup_url = new char[wakeupUrl.length()+1];
-  strcpy(_wakup_url, wakeupUrl.c_str());
+  _wakeup_url = new char[wakeupUrl.length()+1];
+  strcpy(_wakeup_url, wakeupUrl.c_str());
 }
 
 void Tesla::print() {
@@ -209,7 +209,7 @@ void Tesla::print() {
   Serial.println(_charge_start_url);
   Serial.println(_charge_stop_url);
   Serial.println(_get_charge_state_url);
-  Serial.println(_wakup_url);
+  Serial.println(_wakeup_url);
 }
 
 void Tesla::beginRequest(HTTPClient *client, char *url) {
@@ -219,86 +219,3 @@ void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->addHeader(_hd_content_type, _json_header);
     client->addHeader(_hd_authorization, _authorization);   
 }
-
-/*
-wakeup 200:
-{
-  "response": {
-    "id": 5.0663175238727e+16,
-    "user_id": 679189,
-    "vehicle_id": 850056567,
-    "vin": "5YJ3E7EB4KF196689",
-    "display_name": "Perry",
-    "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0",
-    "color": null,
-    "tokens": [
-      "bc83dc46ad1026c6",
-      "1d665cab2c922f4a"
-    ],
-    "state": "asleep",
-    "in_service": false,
-    "id_s": "50663175238726715",
-    "calendar_enabled": true,
-    "api_version": 6,
-    "backseat_token": null,
-    "backseat_token_updated_at": null
-  }
-}
-readChargeState 408:
-{
-  "response": null,
-  "error": "vehicle unavailable: {:error=>\"vehicle unavailable:\"}",
-  "error_description": ""
-}
-readChargeState 200:
-{
-  "response": {
-    "battery_heater_on": false,
-    "battery_level": 95,
-    "battery_range": 294.73,
-    "charge_current_request": 8,
-    "charge_current_request_max": 13,
-    "charge_enable_request": true,
-    "charge_energy_added": 0,
-    "charge_limit_soc": 90,
-    "charge_limit_soc_max": 100,
-    "charge_limit_soc_min": 50,
-    "charge_limit_soc_std": 90,
-    "charge_miles_added_ideal": 0,
-    "charge_miles_added_rated": 0,
-    "charge_port_cold_weather_mode": false,
-    "charge_port_door_open": true,
-    "charge_port_latch": "Engaged",
-    "charge_rate": 0,
-    "charge_to_max_range": false,
-    "charger_actual_current": 0,
-    "charger_phases": null,
-    "charger_pilot_current": 13,
-    "charger_power": 0,
-    "charger_voltage": 2,
-    "charging_state": "Complete",
-    "conn_charge_cable": "IEC",
-    "est_battery_range": 275.64,
-    "fast_charger_brand": "<invalid>",
-    "fast_charger_present": false,
-    "fast_charger_type": "MCSingleWireCAN",
-    "ideal_battery_range": 294.73,
-    "managed_charging_active": false,
-    "managed_charging_start_time": null,
-    "managed_charging_user_canceled": false,
-    "max_range_charge_counter": 1,
-    "not_enough_power_to_heat": null,
-    "scheduled_charging_pending": false,
-    "scheduled_charging_start_time": null,
-    "time_to_full_charge": 0,
-    "timestamp": 1561015943654,
-    "trip_charging": false,
-    "usable_battery_level": 95,
-    "user_charge_enable_request": null
-  }
-}
-stopCharge 200:
-{"response":{"reason":"","result":true}}
-startCharge 200:
-{"response":{"reason":"","result":true}}
-*/

@@ -122,13 +122,15 @@ void SBMS::readSbms() {
         //Werte
         if (debug) {
           Serial.println(outString);
-          Serial.print("StopBattery: ");
+          Serial.print(F("StopBattery: "));
           Serial.println(inverter.stopBattery);
-          Serial.println("_______________________________________");
+          Serial.println(F("_______________________________________"));
         }
 
         if (debug) {
-          String mem = " Heap (free): ";
+          String mem((char *)0);
+          mem.reserve(64);
+          mem += F(" Heap (free): ");
           mem += ESP.getFreeHeap();
           wc.sendClients(mem);
         }

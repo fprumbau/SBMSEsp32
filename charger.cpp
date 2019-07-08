@@ -140,6 +140,28 @@ int Charger::calculateDc(float netto) {
  */
 void Charger::checkOnIncome(float netto) {
 
+    bool s1on = isChargerOn(1);
+    bool s2on = isChargerOn(2); 
+
+    //Sind ALLE Lademoeglichkeiten ausgeschoepft, dann versuche, den Tesla zu laden; TODO: tatsaechlichen Status des Wagens abfragen
+    unsigned long now = millis() + TESLA_LOAD_SWITCH_MIN_MILLIS; //da millis() bei ESP-Start von 0 anfaengt, muss er diesen Offset erhalten
+    if((now - lastTeslaLoadSwitch) > TESLA_LOAD_SWITCH_MIN_MILLIS) {
+        //Wenn mehr als 500W bleibt, dann versuchen, den Tesla zu laden
+        if(s1on && s2on && dutyCycle==1023 && netto > 500) {
+            perry.wakeup();
+            perry.startCharge();
+            lastTeslaLoadSwitch = now;
+            teslaCharging = true;
+            wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu starten");
+        } else if(netto < -1000) { //wenn mehr als 1000W aus dem Netz gezogen wird, dann versuchen, den Tesla auszuschalten
+            perry.wakeup();
+            perry.stopCharge();
+            lastTeslaLoadSwitch = now;
+            teslaCharging = false;
+            wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu stoppen");
+        }
+    }
+    
     /**
      * Ist Charger2 aus UND ist der letzte Schaltvorgang
      * mehr als 30s her UND gibt es einen Energieüberschuss von 
@@ -150,11 +172,10 @@ void Charger::checkOnIncome(float netto) {
      * ledcWrite(GPIO05, dutyCycle);  ;dutyCycle 0-1023
      * 
      */
-    unsigned long now = millis();
+    now = millis() + CHECK_INCOME_MIN_INTERVAL_MILLIS; //s.o.
 
     //Bis 0.9.9.61 wurde z.T. jede Sekunde ein Check gemacht, dies sollte gedehnt werden
-    unsigned long lastCheckDiff = now - checkOnIncomeMinIntervalMillis;
-    if(lastCheckDiff > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
+    if((now - checkOnIncomeMinIntervalMillis) > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
       checkOnIncomeMinIntervalMillis = now; 
     } else {
       /*if(debug) {
@@ -179,10 +200,10 @@ void Charger::checkOnIncome(float netto) {
      */     
     unsigned long s1Last = now - s1_switched;
     if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
-      if(!isChargerOn(1)) {
+      if(!s1on) {
         if(netto > 600){         
           netto-=600;
-          //Serial.println("Aktiviere Solarcharger 1");
+          //Serial.println(F("Aktiviere Solarcharger 1"));
           toggleCharger(1,true,false);
           s1_countBeforeOff = -1;      
         }
@@ -191,7 +212,7 @@ void Charger::checkOnIncome(float netto) {
             s1_countBeforeOff++;
           } else {
             if(debug) {
-               wc.sendClients("Deaktiviere Solarcharger 1");
+               wc.sendClients(F("Deaktiviere Solarcharger 1"));
             }
             netto+=600;
             toggleCharger(1,false,false);
@@ -201,7 +222,6 @@ void Charger::checkOnIncome(float netto) {
 
     
     unsigned long s2Last = now - s2_switched;
-    bool s2on = isChargerOn(2); 
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!s2on) {
         if (netto > 30) {
@@ -209,10 +229,10 @@ void Charger::checkOnIncome(float netto) {
           // (und der Solarertrag groesser als 100W ist, da sonst abends bei z.B. netto = -400 eingeschaltet wird und dann +500 erzeugt wird, also netto>30 wird )
           // Die 100 entprechen dem, was Mama&Papa verbrauchen
           if(battery.isOn() && lieferung > 100) {
-              inverter.starteNetzvorrang("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)");
+              inverter.starteNetzvorrang(F("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)"));
               return;
           }
-          //Serial.println("Aktiviere Solarcharger 2");
+          //Serial.println(F("Aktiviere Solarcharger 2"));
           toggleCharger(2,true,false);
           s2_countBeforeOff = -1;
         } 
@@ -221,7 +241,7 @@ void Charger::checkOnIncome(float netto) {
               s2_countBeforeOff++; 
             } else {        
               if(debug) {
-                 wc.sendClients("Deaktiviere Solarcharger 2");
+                 wc.sendClients(F("Deaktiviere Solarcharger 2"));
               }
               toggleCharger(2,false,false);
             }
@@ -233,7 +253,7 @@ void Charger::checkOnIncome(float netto) {
       ledcWrite(GPIO05, dutyCycle);
       //Grobe Naeherung: dutycycle von 500 entspricht 250W (0.5)
       if(debug2) {
-          String ms = "Regulating Dutycycle: ( netto / dutyCycle ) | ";
+          String ms = F("Regulating Dutycycle: ( netto / dutyCycle ) | ");
           ms+=netto;
           ms+=" / ";
           ms+=dutyCycle;
@@ -242,7 +262,9 @@ void Charger::checkOnIncome(float netto) {
     } 
 
    if(debug) {
-     String m1 = "; Netto: ";
+     String m1((char *)0);
+     m1.reserve(128);
+     m1+="; Netto: ";
      m1+=netto;
      m1+="; now: ";
      m1+=now;

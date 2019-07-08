@@ -9,7 +9,7 @@
  * - Wenn die Lader angeschaltet sind, aber der Ladestrom < 1A betr&auml;gt, k&ouml;nnen die L&uuml;fter abgeschaltet werden / bleiben
  */
 
-void ESP32OTA::init(const char* host) {
+void OTA::init(const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
   Serial.print("Flash Size: ");
@@ -19,7 +19,7 @@ void ESP32OTA::init(const char* host) {
      MDNS.begin(host);
      MDNS.addService("http", "tcp", 80);
      Serial.printf("\n\nHTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
-     String _version = "Build : 0.9.9.76";
+     String _version = "Build : ";
      _version += VERSION;
      updater.setUpdaterUi("Title", _version, "SBMS120 Solar Charger", "Branch : master", String(changelog));
      //Optional: Authentifizieren
@@ -34,7 +34,7 @@ double calcSpeed(unsigned long ms, size_t len){
     return (double)(len * 125) / (double)(ms * 16);
 }
 
-void ESP32OTA::setup(const char *path, String username, String password) {
+void OTA::setup(const char *path, String username, String password) {
 
     _username = username;
     _password = password;
@@ -94,8 +94,10 @@ void ESP32OTA::setup(const char *path, String username, String password) {
         t_start = millis();
         fileSize = len;
         
-        // calculate sketch space required for the update
-        uint32_t maxSketchSpace = (1048576 - 0x1000) & 0xFFFFF000;
+        // calculate sketch space required for the update; 1048576
+        uint32_t maxSketchSpace = (1248576 - 0x1000) & 0xFFFFF000;
+        Serial.print("maxSketchSpace: ");
+        Serial.println(maxSketchSpace);
         if(!Update.begin(maxSketchSpace)){//start with max available size
           Update.printError(Serial);
         }
@@ -175,7 +177,7 @@ void ESP32OTA::setup(const char *path, String username, String password) {
 
 }
 
-void ESP32OTA::setUpdaterUi(String title,String banner,String build,String branch,String footer) {
+void OTA::setUpdaterUi(String title,String banner,String build,String branch,String footer) {
     _title = title;
     _banner = banner;
     _build = build;

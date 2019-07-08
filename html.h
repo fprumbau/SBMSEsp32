@@ -84,15 +84,18 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.68: Skipmeldungen nur auf Serial, nicht WS, Html-Konsolenlogging mit append, nicht mit innerHtml (Seite steht sonst nach einigen hundert Zeilen)      
 <li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden  
 <li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)       
-<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit lässt muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.
-<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) für S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird
-<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenrückseite auf GPIO15 umgelegt werden muss. Wird da eine Brücke zwischen GPIO15 und GPIO16 gelegt, müssten beide Chips arbeiten.
-<li>0.9.9.74: <Wroom> isAlive Url geschaltet: /lbprobe liefert 'online', Rollback 0.9.9.72 (charger.cpp), es darf auch im Batterieberieb geladen werden
-<li>0.9.9.75: Loop0-Taskmethode integriert, um bisher ungenutzten Code zu 
-<li>0.9.9.76: Beginn der Steuerung der Teslaladeregelung, Tesla.h und Tesla.cpp hinzugefuegt, Status, Wakeup, Ladestart und Ladestop
+<li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit l&auml;sst muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.
+<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) f&uuml;r S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird (Upload geht NICHT, SBMS einlesen auch nicht; Was hat sich hier geändert?; => hier war sbms.readSbms();  auskommentiert!)
+<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenrückseite auf GPIO15 umgelegt werden muss. Wird da eine Brücke zwischen GPIO15 und GPIO16 gelegt, m&uuml;ssten beide Chips arbeiten. (Upload kein Binary)
+<li>0.9.9.74: <Wroom> isAlive Url geschaltet: /lbprobe liefert 'online', Rollback 0.9.9.72 (charger.cpp), es darf auch im Batterieberieb geladen werden (Upload kein Binary)
+<li>0.9.9.75: Loop0-Taskmethode integriert, um bisher ungenutzten Core zu nutzen (Upload kein Binary)
+<li>0.9.9.76: Beginn der Steuerung der Teslaladeregelung, Tesla.h und Tesla.cpp hinzugefuegt, Status, Wakeup, Ladestart und Ladestop, alles implementiert, aber noch nicht angesteuert (Upload geht, SBMS einlesen aber nicht mehr => hier war sbms.readSbms();  auskommentiert!)
+<li>0.9.9.77: Verschiedene Optimierungen wg. Stringnutzung, Changelog wurde in html.h verlegt; Anhebung des Uploadmaximums fuer OTA-Sketches von 1048576 auf 1248576. Das zul&auml;ssige Maximum sollte noch bestimmt werden.
+<li>0.9.9.78: Der mit 0.9.9.58 eingef&uuml;hrte ESP.restart() um 06:00 morgens wird wieder herausgenommen.
+<li>0.9.9.79: In charger.cpp wurde nun die Tesla-Ladesteuerung aktiviert, bei >500 und allen Ladern an wird nun versucht, den Ladevorgang zu starten, bei <-1000W wird gestoppt. Minimale Schaltzeit ist 5Min.
 )=====";
 
-#define VERSION "0.9.9.76"
+#define VERSION "0.9.9.79"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>

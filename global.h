@@ -1,23 +1,24 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "ESPAsyncWebServer.h"
+#include <ESPAsyncWebServer.h>
 #include <esp32-hal-ledc.h>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <SPIFFS.h>
 #include <FS.h>
 
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "wechselrichter.h"
-#include "ESP32OTA.h"
+#include "OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
 #include "battery.h"
 #include "charger.h"
-#include "SPIFFS.h"
+
 #include "Tesla.h"
 #include "CFG.h"
 
@@ -62,7 +63,7 @@ extern SMA sma;  //read SMA energy meter broadcast messages
 extern WebCom wc;
 extern AsyncWebServer server;   
 extern AsyncWebSocket ws;
-extern ESP32OTA updater; //Over-the-air updater
+extern OTA updater; //Over-the-air updater
 extern WiFiUDP udp;
 extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
@@ -98,6 +99,9 @@ extern bool enableCountBeforeOff; //0.9.9.64 Die Charger werden nun direkt gesch
 
 extern Tesla perry;
 extern CFG config;
+extern long lastTeslaLoadSwitch;
+extern long TESLA_LOAD_SWITCH_MIN_MILLIS; //hoechstens alle 5 Minuten schalten
+extern bool teslaCharging;
 
 //PWM
 

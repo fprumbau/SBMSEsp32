@@ -24,7 +24,7 @@ class Tesla {
     char* _authorization;
     char* _vehicle_id;
     //init(..)
-    char* _wakup_url;
+    char* _wakeup_url;
     char* _vehicle_base_url;
     char* _charge_start_url;
     char* _charge_stop_url;
