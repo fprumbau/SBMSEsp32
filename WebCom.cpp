@@ -19,7 +19,9 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["b"]=battery.isOn();
         doc["l"]=lieferung;
         doc["z"]=bezug;
-        doc["d"]=sbmsData;
+        if(sbmsData != NULL) {
+           doc["d"]=sbmsData;
+        }
         doc["dt"]=datetime;
         doc["t"]=temp;
         doc["ta"]=teslaCtrlActive;
@@ -46,7 +48,9 @@ void WebCom::updateUi() {
         doc["b"]=battery.isOn();
         doc["l"]=lieferung;
         doc["z"]=bezug;
-        doc["d"]=sbmsData;
+        if(sbmsData != NULL) {
+           doc["d"]=sbmsData;
+        }
         doc["dt"]=datetime;
         doc["t"]=temp;
         doc["ta"]=teslaCtrlActive;
@@ -143,7 +147,15 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         //Umstellung auf JSon
         StaticJsonDocument<300> doc;
         deserializeJson(doc, data);
-        teslaCtrlActive = doc["ta"];
+        bool saveConfig = false;
+        bool updateTeslaCtrlActive = doc["ta"];
+        if(updateTeslaCtrlActive != teslaCtrlActive) {        
+          teslaCtrlActive = doc["ta"];
+          saveConfig = true;
+        }
+        if(saveConfig) {
+          config.save();
+        }
         //nun die Info an alle zum Umpdate der UI versenden
         updateUi();       
       }

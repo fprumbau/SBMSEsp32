@@ -10,7 +10,7 @@ ButtonConfig tasterConfig;
 AceButton taster(&tasterConfig);
 
 //Erster Versuch mit Multi-Core Multitasking
-//TaskHandle_t Task0;
+TaskHandle_t Task0;
 //SemaphoreHandle_t semaphore;
 
 /**
@@ -144,7 +144,7 @@ void setup() {
   updater.init(hostName);
 
   //neuer Taskcode Multicore
-  //xTaskCreatePinnedToCore(loop0, "Task0", 1000, NULL, 0, &Task0, 0);
+  xTaskCreatePinnedToCore(loop0, "Task0", 5000, NULL, 0, &Task0, 0);
 
   // v.0.9.9.65 favicon via SPIFFS
   if(!SPIFFS.begin()){
@@ -162,16 +162,14 @@ void setup() {
 /*                 Loop0 (Core0)                                      */
 /*                                                                    */
 /**********************************************************************/
-/*void loop0(void * parameter) {
+void loop0(void * parameter) {
   //Der normale Arduino loop laeuft automatisch in einer Schleife; die Schleife DARF nicht leer sein!!!
   for(;;) {
-    Serial.print("0_Running on core: ");
-    Serial.println(xPortGetCoreID());
-    delay(50000);
-
+      commandLine();    //Pruefen, ob eine Kommandozeileneingabe vorhanden ist
+      vTaskDelay(10);   //if not: Task watchdog got triggered. The following tasks did not feed the watchdog in time
     //xSemaphoreGive(semaphore);
   }
-}*/
+}
 
 /**********************************************************************/
 /*                                                                    */
@@ -181,8 +179,6 @@ void setup() {
 void loop() {
 
     if(!updater.stopForOTA) {
-      commandLine();    //Pruefen, ob eine Kommandozeileneingabe vorhanden ist
-      yield();
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();
       //FIXME das folgende Statmement blockiert, wenn keine Daten kommen...
@@ -283,6 +279,10 @@ void commandLine() {
         teslaCtrlActive = true;
       } else if(cmd.startsWith("tesla control off")) {
         teslaCtrlActive = false;
+      } else if(cmd.startsWith("config load")) {
+        config.load();
+      } else if(cmd.startsWith("config save")) {
+        config.save();
       } else if(cmd.startsWith("pwm ")) {      
         msg = F("setze PWM:");     
         String pwm = cmd.substring(4); 
@@ -314,7 +314,8 @@ void commandLine() {
         Serial.println(F(" - tesla wakeup :: Wake your tesla"));
         Serial.println(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));
         Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
-        Serial.println(F(" - tesla control on|off :: Starte/Stoppe die Kontrolle ueber den Tesla Chargezyklus"));
+        Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
+        Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;
       }

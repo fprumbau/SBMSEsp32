@@ -96,9 +96,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.80: Beim startCharge wird nun zwischen Limitsetzung und Chartstart 8s statt 5s gewartet. Eine Schaltung bedingt nun ausserdem mindestens 10 positive Messungen.
 <li>0.9.9.81: Tesla Chargestate zeichnet nun die wichtigsten Grössen auf.
 <li>0.9.9.82: Anfang eines GUI-Controls (Web) um die Teslasteuerung ein-/bzw. auszuschalten
+<li>0.9.9.83: (1) Das Flag teslaCtrlActive wird nun permanent im SPIFFS abgelegt
+<li>0.9.9.83: (2) Die Konfiguration wird nun lokal im CFG vorgehalten, Konfig nun &uuml;ber Kommandozeile speicherbar
+<li>0.9.9.83: (3) Commandline auf Task0
+<li>0.9.9.83: (4) Add Try-Catch in Webseite bei SBMS-Verarbeitung
 )=====";
 
-#define VERSION "0.9.9.82"
+#define VERSION "0.9.9.83"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
@@ -209,7 +213,7 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div2 style='right:10px;text-align: right;'id='d10'></div2>
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
 
-<div2 style="border:1px solid beige;left:360px;width:355px;height:170px;">
+<div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
 <input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
 </div2>
 
@@ -293,8 +297,8 @@ connection.onmessage = function (e) {
               log(data);
             }
             json = JSON.parse(data); 
-            updateSbmsData();
-            updateUi();              
+            updateUi();             
+            updateSbmsData();            
           break;
       default:
             console.log('Nachricht: ', data);
@@ -432,114 +436,117 @@ function updateSbmsData(){
   var r ='</br>'
   var data = json.d;
 
-  var SOC = dcmp(6,2,data);
-  htm('SOC','<b>'+SOC+'%</b>');
-  if(!isNaN(SOC)) {
-    document.getElementById('bat').value=SOC;
-  } else {
-    document.getElementById('bat').value=0;
-  }
-
-  if (sbms2[10]!=1){mos(0);};if (sbms2[11]!=1){mos(1);};
-  function mos(rr){document.getElementById('mo'+rr).style.background='rgba(120,90,0,0.7)';}
-
-  //Logo animieren
-  for (i=0;i<15;i++){setInterval(function(){lg(lg1);},500*i);};
-  function lg(d){
-    var k = new Date();
-    var n = k.getSeconds();
-    if (n>=40){n=n-40};
-    if (n>=20){n=n-20};
-    if (n>12){n=12};
-    ctx.clearRect(0, 0, 70, 120);
-    for (y=0;y<9;y++){
-    for (x=0;x<7;x++){
-    var pix2=((pad(((d.charCodeAt(y+(12*9))-35).toString(2)),6)).charCodeAt(x))-48;
-    var pix=((pad(((d.charCodeAt(y+(n*9))-35).toString(2)),6)).charCodeAt(x))-48;
-    if (pix==1){col1='#be9';col2='rgba(142,204,104,0.'}
-    else if (pix2==1){col1='#694';col2='rgba(66,104,44,0.'}
-    else {col1='#361';col2='rgba(42,84,36,0.'}
-    ctx.fillStyle =col1;
-    ctx.fillRect(x*10, y*10, 8, 8);
-    if(y>=6){ctx.fillStyle =col2+(((y*2)-2)-8)+')';ctx.fillRect(x*10, (17.3-y)*10, 8, 8);}
-  }}}
-  
-  mt8();
-  
-  function mt8() {
-    var w = new Array();
-    for (i=0;i<20;i++){w[i]='';}
-    var bv=pv3=sv=max1=min1=0;
-    var cvs = new Array(8)
-    var minInd = 0;
-    var maxInd = 0;
-    for (a=0;a<8;a++) {
-      cvs[a]=dcmp((a*2)+8,2,data)/1000;       
-      if (cvs[a] < cvs[minInd]) minInd = a;
-      if (cvs[a] > cvs[maxInd]) maxInd = a;
-      if(debug1) 
-        log("Index " + a + "; cvs["+a+"] " + cvs[a] + "; minInd: " + minInd + "; maxInd: " + maxInd);
-    }     
-    sbms2[9]=minInd+1;
-    sbms2[8]=maxInd+1;   
-    for (x1=0;x1<8;x1++) {
-      var n=n1='';   
-      var cv=cvs[x1];
-      if (sbms2[9]==x1+1){min1=cv;n='<mn1>';n1='</mn1>';};
-      if (sbms2[8]==x1+1){max1=cv;n='<mx1>';n1='</mx1>';};
-      w[0] +=n+'Cell. '+ (x1+1)+n1+r ;
-      w[1] +=n+cv.toFixed(3)+n1+r;
-      if (sbms2[x1]!=1){w[2] +='<txt>V</txt>'+r;}
-      else {w[2] +='<lt><</lt>'+r;};
-      bv +=cv;
-      var mt = document.querySelector('#mt1');
-      var x = document.createElement('meter');
-      //Frank: Divisor von 1000 auf 100 geaendert
-      x.setAttribute('min',dcmp(5,2,xsbms)/100);
-      x.setAttribute('max',dcmp(3,2,xsbms)/100);
-      if(!isNaN(cv)) {
-        x.setAttribute('value',cv);      
+  try {
+      var SOC = dcmp(6,2,data);
+      htm('SOC','<b>'+SOC+'%</b>');
+      if(!isNaN(SOC)) {
+        document.getElementById('bat').value=SOC;
       } else {
-        x.setAttribute('value',cv);   
+        document.getElementById('bat').value=0;
       }
-      x.style.top=((x1*21)+3)+'px'
-      mt.appendChild(x);
-    } 
-    for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
-    for (x1=0;x1<8;x1++) {
-      col = sbms1[x1+1];
-      if(col == 'Load') continue; //Load nicht mehr benoetigt  
-      var n2=w[8]=w[9]=w[10]=w[11]='';
-      var cv=dcmp((x1*3)+29,3,data)/1000;
-      var enW=dcmp(x1*6,6,eW);
-      var enA=dcmp(x1*6,6,eA);
-      if (x1==0){
-        n2=data.charAt(28);
-        w[8]='[A]'+r;
-        w[9]='[W]'+r;
-        w[10]='[MAh][kAh][Ah][mAh]'+r;
-        w[11]='[MWh][kWh][Wh]'+r;
-      };
-      if (x1==1||x1==2){pv3 +=cv;};
-      if (x1==3){sv=cv;}
-      if (x1==4){cv=pv3;}
-      if (x1==5){cv=dcmp(0,3,xsbms)/1000;}
-      if (x1==6){cv=sv;}  
-      if(x1!=3){
-      w[3] +=col+r ;
-      w[4] +=w[8]+n2+cv.toFixed(3)+r;
-      w[5] +=w[9]+n2+(cv*bv).toFixed(1)+r;
-      w[6] +=w[10]+fN(enA)+r;
-      w[7] +=w[11]+fN((enW/10).toFixed(1))+r;
+    
+      if (sbms2[10]!=1){mos(0);};if (sbms2[11]!=1){mos(1);};
+      function mos(rr){document.getElementById('mo'+rr).style.background='rgba(120,90,0,0.7)';}
+    
+      //Logo animieren
+      for (i=0;i<15;i++){setInterval(function(){lg(lg1);},500*i);};
+      function lg(d){
+        var k = new Date();
+        var n = k.getSeconds();
+        if (n>=40){n=n-40};
+        if (n>=20){n=n-20};
+        if (n>12){n=12};
+        ctx.clearRect(0, 0, 70, 120);
+        for (y=0;y<9;y++){
+        for (x=0;x<7;x++){
+        var pix2=((pad(((d.charCodeAt(y+(12*9))-35).toString(2)),6)).charCodeAt(x))-48;
+        var pix=((pad(((d.charCodeAt(y+(n*9))-35).toString(2)),6)).charCodeAt(x))-48;
+        if (pix==1){col1='#be9';col2='rgba(142,204,104,0.'}
+        else if (pix2==1){col1='#694';col2='rgba(66,104,44,0.'}
+        else {col1='#361';col2='rgba(42,84,36,0.'}
+        ctx.fillStyle =col1;
+        ctx.fillRect(x*10, y*10, 8, 8);
+        if(y>=6){ctx.fillStyle =col2+(((y*2)-2)-8)+')';ctx.fillRect(x*10, (17.3-y)*10, 8, 8);}
+      }}}
+      
+      mt8();
+      
+      function mt8() {
+        var w = new Array();
+        for (i=0;i<20;i++){w[i]='';}
+        var bv=pv3=sv=max1=min1=0;
+        var cvs = new Array(8)
+        var minInd = 0;
+        var maxInd = 0;
+        for (a=0;a<8;a++) {
+          cvs[a]=dcmp((a*2)+8,2,data)/1000;       
+          if (cvs[a] < cvs[minInd]) minInd = a;
+          if (cvs[a] > cvs[maxInd]) maxInd = a;
+          if(debug1) 
+            log("Index " + a + "; cvs["+a+"] " + cvs[a] + "; minInd: " + minInd + "; maxInd: " + maxInd);
+        }     
+        sbms2[9]=minInd+1;
+        sbms2[8]=maxInd+1;   
+        for (x1=0;x1<8;x1++) {
+          var n=n1='';   
+          var cv=cvs[x1];
+          if (sbms2[9]==x1+1){min1=cv;n='<mn1>';n1='</mn1>';};
+          if (sbms2[8]==x1+1){max1=cv;n='<mx1>';n1='</mx1>';};
+          w[0] +=n+'Cell. '+ (x1+1)+n1+r ;
+          w[1] +=n+cv.toFixed(3)+n1+r;
+          if (sbms2[x1]!=1){w[2] +='<txt>V</txt>'+r;}
+          else {w[2] +='<lt><</lt>'+r;};
+          bv +=cv;
+          var mt = document.querySelector('#mt1');
+          var x = document.createElement('meter');
+          //Frank: Divisor von 1000 auf 100 geaendert
+          x.setAttribute('min',dcmp(5,2,xsbms)/100);
+          x.setAttribute('max',dcmp(3,2,xsbms)/100);
+          if(!isNaN(cv)) {
+            x.setAttribute('value',cv);      
+          } else {
+            x.setAttribute('value',cv);   
+          }
+          x.style.top=((x1*21)+3)+'px'
+          mt.appendChild(x);
+        } 
+        for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
+        for (x1=0;x1<8;x1++) {
+          col = sbms1[x1+1];
+          if(col == 'Load') continue; //Load nicht mehr benoetigt  
+          var n2=w[8]=w[9]=w[10]=w[11]='';
+          var cv=dcmp((x1*3)+29,3,data)/1000;
+          var enW=dcmp(x1*6,6,eW);
+          var enA=dcmp(x1*6,6,eA);
+          if (x1==0){
+            n2=data.charAt(28);
+            w[8]='[A]'+r;
+            w[9]='[W]'+r;
+            w[10]='[MAh][kAh][Ah][mAh]'+r;
+            w[11]='[MWh][kWh][Wh]'+r;
+          };
+          if (x1==1||x1==2){pv3 +=cv;};
+          if (x1==3){sv=cv;}
+          if (x1==4){cv=pv3;}
+          if (x1==5){cv=dcmp(0,3,xsbms)/1000;}
+          if (x1==6){cv=sv;}  
+          if(x1!=3){
+          w[3] +=col+r ;
+          w[4] +=w[8]+n2+cv.toFixed(3)+r;
+          w[5] +=w[9]+n2+(cv*bv).toFixed(1)+r;
+          w[6] +=w[10]+fN(enA)+r;
+          w[7] +=w[11]+fN((enW/10).toFixed(1))+r;
+          }
+            
+        }   
+        for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
+          htm('d'+i,w[i-3]);
+        }
+        htm('d'+12,'Typ: LiIon Kap: 100Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
       }
-        
-    }   
-    for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
-      htm('d'+i,w[i-3]);
-    }
-    htm('d'+12,'Typ: LiIon Kap: 100Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
+  } catch(err) {
+    log(err.message);
   }
-
 }
 
 //anfangs sollten die Checkboxen nicht selektiert sein 

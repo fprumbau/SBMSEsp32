@@ -36,7 +36,7 @@ void MyWifi::connect() {
   _localIP = ip;
   _ip=ip.toString();
 
-  Serial.println(F("Initializing sma.init)"));
+  Serial.println(F("Initializing sma.init"));
   sma.init();
 }
 

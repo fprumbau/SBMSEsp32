@@ -16,7 +16,7 @@ bool CFG::load() {
      Serial.println(F("Config file is to large"));
      return false;
   }
-  //allocate a buffer to store contetns of the file.
+  //allocate a buffer to store contents of the file.
   std::unique_ptr<char[]> buf(new char[size]);
 
   //We don't use String here because ArduinoJson lib req the intput buffer
@@ -25,30 +25,40 @@ bool CFG::load() {
   configFile.readBytes(buf.get(), size);
   if(debug) Serial.println(buf.get());
   
-  StaticJsonDocument<1024> doc;
   auto error = deserializeJson(doc, buf.get());
 
   if(error) {
     Serial.println(F("Failed to parse config file"));
-    return false;
+    return _configRead;
   }
 
   String auth = doc["authorization"];
   String vehicleId = doc["vehicleId"];
   perry.init(auth.c_str(), vehicleId.c_str());
+
+  //Lese andere Konfigwerte fuer global.h
+  teslaCtrlActive = doc["teslaCtrlActive"];
+  Serial.print("teslaCtrlActive=");
+  Serial.println(teslaCtrlActive);
+
+  _configRead = true;
   
-  return true;
+  return _configRead;
 }
 
 bool CFG::save() {
   if(!SPIFFS.begin()) {
     return false;
   }
-
-  StaticJsonDocument<1024> doc;
+  if(!_configRead) {
+    wc.sendClients(F("Kann Konfig nicht schreiben, da sie nie gelesen wurde"));
+    return false;
+  }
   
   //doc["vehicleId"] = "50...15";
   //doc["authorization"] = "Bearer 81..40";
+  
+  doc["teslaCtrlActive"] = teslaCtrlActive;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -57,5 +67,7 @@ bool CFG::save() {
   }
 
   serializeJson(doc, configFile);
+  wc.sendClients(F("Konfiguration wurde erfolgreich gespeichert."));
+  
   return true;
 }
