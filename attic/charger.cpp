@@ -261,7 +261,7 @@ void Charger::checkOnIncome(float netto) {
     if(s2on) {      
       dutyCycle = calculateDc(netto);
       ledcWrite(GPIO05, dutyCycle);
-      //Grobe Naeherung: dutycycle von 500 entspricht 250W (0.5) 
+      //Grobe Naeherung: dutycycle von 500 entspricht 250W (0.5)
       if(debug2) {
           String ms = F("Regulating Dutycycle: ( netto / dutyCycle ) | ");
           ms+=netto;

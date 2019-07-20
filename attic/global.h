@@ -59,7 +59,7 @@ extern Battery battery;
 extern Charger charger;
 extern Inverter inverter;
 extern MyWifi myWifi;
-extern SMA sma;  //read SMA energy meter broadcast messages 
+extern SMA sma;  //read SMA energy meter broadcast messages
 extern WebCom wc;
 extern AsyncWebServer server;   
 extern AsyncWebSocket ws;

@@ -189,7 +189,7 @@ void Inverter::check()  {
         nacht = false;
         if(isBatOn) {
             starteNetzvorrang(F("Schalte wieder auf Netz zurück"));    
-        } else { 
+        } else {
             wc.sendClients(datetime);
         }
       }

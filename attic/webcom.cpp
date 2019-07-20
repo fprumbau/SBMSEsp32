@@ -102,7 +102,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           wc.updateUi(client, false);             
           break;
       }    
-      case WS_EVT_DATA: 
+      case WS_EVT_DATA:
       
       if(debug) {
         Serial.println(String((char *)data));

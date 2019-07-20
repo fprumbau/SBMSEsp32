@@ -50,7 +50,7 @@ int GPIO05 = 2;
 
 Battery battery;
 Charger charger;
-MyWifi myWifi; 
+MyWifi myWifi;
 SMA sma;
 WebCom wc;
 Inverter inverter;

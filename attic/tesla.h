@@ -1,7 +1,7 @@
 #ifndef __TESLA_H
 #define __TESLA_H
 
-#include <HTTPClient.h> 
+#include <HTTPClient.h>
 
 class Tesla {
   private:

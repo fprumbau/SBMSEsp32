@@ -16,4 +16,4 @@ class Inverter {
     void handleButtonPressed(); //Tastersteuerung, um Inverterstatus zu toggeln 
 };
 
-#endif
+#endif 

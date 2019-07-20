@@ -226,7 +226,7 @@ void Tesla::init(const char* auth, const char* vehicleid) {
   _charge_stop_url = new char[chargeStopUrl.length()+1];
   strcpy(_charge_stop_url, chargeStopUrl.c_str());
 
-  String chargeStateUrl((char *)0); 
+  String chargeStateUrl((char *)0);
   chargeStateUrl.reserve(96); //genaue Laenge 93 + 3 (Reserve)
   chargeStateUrl += _vehicle_base_url;
   chargeStateUrl += _charge_state;
