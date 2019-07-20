@@ -8,16 +8,8 @@
 class WebCom {
   
   private:
-
+    void buildMessage(String* msg, const char* name, const char* value);
   public:
-    /**
-     * Toggle:
-     * - @d1-true
-     * - @d1-false
-     * - @d2-true
-     * - @d2-false
-    */
-    void toggleDebug(unsigned char* payload);
     void sendClients(String msg);
     void updateUi(AsyncWebSocketClient *client, bool all);
     void updateUi();

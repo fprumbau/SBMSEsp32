@@ -257,6 +257,7 @@ void commandLine() {
       } else if(cmd.startsWith("test off")) {      
         msg = F("test simulation set to off");     
         testFixed = false;        
+        wc.updateUi();
       } else if(cmd.startsWith("data ")) {      
         msg = F("Setze Testdaten");     
         testData = cmd.substring(5); 

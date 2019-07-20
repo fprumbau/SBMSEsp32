@@ -19,7 +19,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["b"]=battery.isOn();
         doc["l"]=lieferung;
         doc["z"]=bezug;
-        if(sbmsData != NULL) {
+        if(sbmsData != NULL && sbmsData.length() > 10) {
            doc["d"]=sbmsData;
         }
         doc["dt"]=datetime;
@@ -48,7 +48,7 @@ void WebCom::updateUi() {
         doc["b"]=battery.isOn();
         doc["l"]=lieferung;
         doc["z"]=bezug;
-        if(sbmsData != NULL) {
+        if(sbmsData != NULL && sbmsData.length() > 10) {
            doc["d"]=sbmsData;
         }
         doc["dt"]=datetime;
@@ -61,38 +61,6 @@ void WebCom::updateUi() {
           Serial.println(str);
         }
         ws.textAll(str.c_str());
-}
-
-/**
-   Toggle:
-   - @d1-true
-   - @d1-false
-   - @d2-true
-   - @d2-false
-*/
-void WebCom::toggleDebug(unsigned char* payload) {
-  String msg;
-  if (payload[2] == '1') {
-    if (payload[4] == 't') {
-      debug = true;
-      msg = F("Switched debug1 to true");
-    } else {
-      debug = false;
-      msg = F("Switched debug1 to false");
-    }
-  } else {
-    if (payload[4] == 't') {
-      debug2 = true;
-      msg = F("Switched debug2 to true");
-    } else {
-      debug2 = false;
-      msg = F("Switched debug2 to false");
-    }
-  }
-  if (debug2) {
-    Serial.println(msg);
-  }
-  wc.sendClients(msg);
 }
 
 void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len){
@@ -140,25 +108,46 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               }
             }
           }
-          if (data[1] == 'd' && len > 4) { 
-            toggleDebug(data);
-          }
       } else if(data[0] == '{') {
         //Umstellung auf JSon
         StaticJsonDocument<300> doc;
         deserializeJson(doc, data);
+
+        String msg = "";
         bool saveConfig = false;
+        
         bool updateTeslaCtrlActive = doc["ta"];
-        if(updateTeslaCtrlActive != teslaCtrlActive) {        
-          teslaCtrlActive = doc["ta"];
-          saveConfig = true;
+        if(updateTeslaCtrlActive != teslaCtrlActive) {  
+          saveConfig = true;      
+          teslaCtrlActive = updateTeslaCtrlActive;
+          buildMessage(&msg, "teslaCtrlActive", String(teslaCtrlActive).c_str());
         }
+
+        bool updateDbg1 = doc["d1"];
+        if(updateDbg1 != debug) {        
+          debug = updateDbg1;
+          buildMessage(&msg, "debug", String(debug).c_str());
+        }
+        bool updateDbg2 = doc["d2"];
+        if(updateDbg2 != debug2) {        
+          debug2 = updateDbg2;
+          buildMessage(&msg, "debug2", String(debug2).c_str());
+        }
+        
         if(saveConfig) {
           config.save();
+          wc.sendClients(msg);
         }
         //nun die Info an alle zum Umpdate der UI versenden
         updateUi();       
       }
       break;
     }
+}
+
+void WebCom::buildMessage(String* msg, const char* name, const char* value) {
+    msg->concat("Switch ");
+    msg->concat(name);
+    msg->concat(" to ");
+    msg->concat(value);
 }

@@ -100,6 +100,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.83: (2) Die Konfiguration wird nun lokal im CFG vorgehalten, Konfig nun &uuml;ber Kommandozeile speicherbar
 <li>0.9.9.83: (3) Commandline auf Task0
 <li>0.9.9.83: (4) Add Try-Catch in Webseite bei SBMS-Verarbeitung
+<li>0.9.9.83: (5) Nach setzen des Testdatenschalters wird UI aktualisiert
+<li>0.9.9.83: (6) Debug / Debug2 werden nun auch per JSon aus der Webansicht aktualisiert (aber nicht im SPIFFS abgespeichert)
 )=====";
 
 #define VERSION "0.9.9.83"
@@ -191,8 +193,8 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg1' onchange='toggleDebug(1);'>&nbsp;<span ondblclick='updatePage();'>Dbg1</span></input>
-<input type='checkbox' id='dbg2' onchange='toggleDebug(2);'>&nbsp;<span ondblclick='updatePage();'>Dbg2</span></input>
+<br><input type='checkbox' id='dbg1' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg1</span></input>
+<input type='checkbox' id='dbg2' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg2</span></input>
 </div2>
 </div3>
 <div3>
@@ -296,9 +298,14 @@ connection.onmessage = function (e) {
             if(debug1) {
               log(data);
             }
-            json = JSON.parse(data); 
-            updateUi();             
-            updateSbmsData();            
+            try {
+              json = JSON.parse(data); 
+              updateUi();             
+              updateSbmsData();    
+            } catch(err) {
+              log(err.message);
+              console.log(data);
+            }
           break;
       default:
             console.log('Nachricht: ', data);
@@ -403,17 +410,16 @@ function toggleS2(txt) {
       connection.send("@s2-"); //Solarlader S2 off
     }
 }
-function toggleDebug(nr) {
-    if(nr==1) {
-      debug1=document.getElementById("dbg1").checked;
-      connection.send("@d1-"+debug1);
-    } else {
-      debug2=document.getElementById("dbg2").checked;
-      connection.send("@d2-"+debug2);
-    }    
-}
 function updateServer() {
-  var data = JSON.stringify({ "ta": document.getElementById("teslaactive").checked });
+  var o = {};
+  o.ta = document.getElementById("teslaactive").checked;
+  o.d1 = debug1 = document.getElementById("dbg1").checked;
+  o.d2 = debug2 = document.getElementById("dbg2").checked;
+  
+  //geht, aber man muss einen String 'bauen'
+  //var data = JSON.stringify({ "ta": document.getElementById("teslaactive").checked });
+  
+  var data = JSON.stringify( o );
   connection.send(data);
 }
 
