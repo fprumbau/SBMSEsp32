@@ -79,67 +79,82 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
       if(debug) {
         Serial.println(String((char *)data));
       }
-      if (data[0] == '@') {
-          if (data[1] == '+') {
-            inverter.starteBatterie("Websockets");
-          } else if (data[1] == '-') {
-            inverter.starteNetzvorrang("Websockets");
-          } else if (data[1] == 's' && len > 3) {
-            //Solar charger s1 an / ausschalten
-            if (data[2] == '1') {
-              if (data[3] == '+') {
-                //s1 anschalten
-                charger.toggleCharger(1, true, true);
-                wc.sendClients("s1 an");
-              } else {
-                //s1 abschalten
-                charger.toggleCharger(1, false, true);
-                wc.sendClients("s1 aus");
-              }
-            } else {
-              if (data[3] == '+') {
-                //s2 anschalten
-                charger.toggleCharger(2, true, true);
-                wc.sendClients("s2 an");
-              } else {
-                //s2 abschalten
-                charger.toggleCharger(2, false, true);
-                wc.sendClients("s2 aus");
-              }
-            }
-          }
-      } else if(data[0] == '{') {
+      if(data[0] == '{') {
         //Umstellung auf JSon
         StaticJsonDocument<300> doc;
         deserializeJson(doc, data);
 
         String msg = "";
+        bool update = false;
         bool saveConfig = false;
         
         bool updateTeslaCtrlActive = doc["ta"];
         if(updateTeslaCtrlActive != teslaCtrlActive) {  
+          update = true;
           saveConfig = true;      
           teslaCtrlActive = updateTeslaCtrlActive;
           buildMessage(&msg, "teslaCtrlActive", String(teslaCtrlActive).c_str());
         }
-
-        bool updateDbg1 = doc["d1"];
-        if(updateDbg1 != debug) {        
-          debug = updateDbg1;
-          buildMessage(&msg, "debug", String(debug).c_str());
+        //Charger S1
+        if(doc.containsKey("s1")) {
+          bool s1 = doc["s1"];
+          if(s1 != charger.isChargerOn(S1)) {    
+            update = true;    
+            charger.toggleCharger(S1, s1, true, false);
+            buildMessage(&msg, "S1", String(s1).c_str());
+          }
         }
-        bool updateDbg2 = doc["d2"];
-        if(updateDbg2 != debug2) {        
-          debug2 = updateDbg2;
-          buildMessage(&msg, "debug2", String(debug2).c_str());
+        //Charger S2
+        if(doc.containsKey("s2")) {
+          bool s2 = doc["s2"];
+          if(s2 != charger.isChargerOn(S2)) {    
+            update = true;    
+            charger.toggleCharger(S2, s2, true, false);
+            buildMessage(&msg, "S2", String(s2).c_str());
+          }
         }
-        
+        //Debug Flag 1
+        if(doc.containsKey("d1")) {
+          bool updateDbg1 = doc["d1"];
+          if(updateDbg1 != debug) {    
+            update = true;    
+            debug = updateDbg1;
+            buildMessage(&msg, "debug", String(debug).c_str());
+          }
+        }
+        //Debug Flag 2
+        if(doc.containsKey("d2")) {
+          bool updateDbg2 = doc["d2"];
+          if(updateDbg2 != debug2) {       
+            update = true;          
+            debug2 = updateDbg2;
+            buildMessage(&msg, "debug2", String(debug2).c_str());
+          }
+        }
+        if(doc.containsKey("vr")) {
+          String netzOderBatt = doc["vr"];
+          if(netzOderBatt == "netz") {       
+            update = true;
+            inverter.starteNetzvorrang("Websockets");
+            buildMessage(&msg, "Netzvorrang", "true");
+          } else if(netzOderBatt == "batt") {
+            update = true;
+            inverter.starteBatterie("Websockets");    
+            buildMessage(&msg, "Battery", "true");      
+          }
+        }
         if(saveConfig) {
           config.save();
-          wc.sendClients(msg);
         }
-        //nun die Info an alle zum Umpdate der UI versenden
-        updateUi();       
+        if(update) {
+          wc.sendClients(msg);
+          //nun die Info an alle zum Umpdate der UI versenden
+          updateUi();              
+        }   
+      } else {
+        String msg = "Cannot process data: ";
+        msg+=String((char *)data);
+        wc.sendClients(msg);
       }
       break;
     }

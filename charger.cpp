@@ -8,15 +8,15 @@
  * automatisches Ausschalten verhindert ( Der 
  * Charger MUSS manuell wieder ausgeschaltet werden)
  */
-void Charger::toggleCharger(uint8_t nr, bool onOff, bool override) {
+void Charger::toggleCharger(uint8_t nr, bool onOff, bool override, bool notify) {
   bool isOn = isChargerOn(nr);
   if(isOn != onOff) { //nur, wenn es etwas zu schalten gibt
     if(isOn) {
-      disableCharger(nr, override);
+      disableCharger(nr, override, notify);
     } else {     
-      enableCharger(nr, override);
+      enableCharger(nr, override, notify);
     }
-    if(nr == 1) {
+    if(nr == S1) {
       s1_switched = millis();
     } else {
       s2_switched = millis();
@@ -39,24 +39,16 @@ bool Charger::isChargerOn(uint8_t nr) {
 }
 
 bool Charger::isOn() {
-  return (!digitalRead(RELAY_S1) && !digitalRead(RELAY_3)) || !digitalRead(RELAY_S2);
+  return !digitalRead(RELAY_3) || !digitalRead(RELAY_S2);
 }
 
-void Charger::enableCharger(byte nr, bool override) {
+void Charger::enableCharger(byte nr, bool override, bool notify) {
   if(nr == 1) {
       if(override) {
         s1override = true;
       }
-      digitalWrite(RELAY_S1, LOW); //schaltet nur Power an, Charger bleibt aus
-      delay(1000);
       digitalWrite(RELAY_3, LOW); //schaltet Charger ueber Remote an (oeffnet R3)
-      digitalWrite(LED_S1, HIGH);
-
-      //--------------------------------------------------------
-      //TEST only
-      digitalWrite(LED_S2, HIGH);
-
-      
+      digitalWrite(LED_S1, HIGH);      
   } else {
       if(override) {
         s2override = true;
@@ -64,17 +56,18 @@ void Charger::enableCharger(byte nr, bool override) {
       digitalWrite(RELAY_S2, LOW);
       digitalWrite(LED_S2, HIGH);
   }
-  wc.updateUi(NULL, true);
+  if(notify) {
+    wc.updateUi(NULL, true);
+  }
 }
 
-void Charger::disableCharger(uint8_t nr, bool override) {
-  if(nr == 1) {
+void Charger::disableCharger(uint8_t nr, bool override, bool notify) {
+  if(nr == S1) {
       if(override) {
         s1override = false;
       }
       if(override || !s1override) {
-        digitalWrite(RELAY_3, HIGH); //schaltet R3 nur noch über Remote aus (schliesst CO-NC von R3)
-        //digitalWrite(RELAY_S1, HIGH);        
+        digitalWrite(RELAY_3, HIGH); //schaltet R3 nur noch über Remote aus (schliesst CO-NC von R3)       
         digitalWrite(LED_S1, LOW);
       }  
   } else {
@@ -86,7 +79,9 @@ void Charger::disableCharger(uint8_t nr, bool override) {
         digitalWrite(LED_S2, LOW);
       } 
   }
-  wc.updateUi(NULL, true);
+  if(notify) {
+    wc.updateUi(NULL, true);
+  }
 }
 
 /**
@@ -214,7 +209,7 @@ void Charger::checkOnIncome(float netto) {
         if(netto > 600){         
           netto-=600;
           //Serial.println(F("Aktiviere Solarcharger 1"));
-          toggleCharger(1,true,false);
+          toggleCharger(S1,true,false,true);
           s1_countBeforeOff = -1;      
         }
       } else if(netto < -300 && !s1override) {        
@@ -225,7 +220,7 @@ void Charger::checkOnIncome(float netto) {
                wc.sendClients(F("Deaktiviere Solarcharger 1"));
             }
             netto+=600;
-            toggleCharger(1,false,false);
+            toggleCharger(S1,false,false,true);
           }
       }
     }  
@@ -243,7 +238,7 @@ void Charger::checkOnIncome(float netto) {
               return;
           }
           //Serial.println(F("Aktiviere Solarcharger 2"));
-          toggleCharger(2,true,false);
+          toggleCharger(S2,true,false,true);
           s2_countBeforeOff = -1;
         } 
       } else if(netto < -400 && !s2override) {
@@ -253,7 +248,7 @@ void Charger::checkOnIncome(float netto) {
               if(debug) {
                  wc.sendClients(F("Deaktiviere Solarcharger 2"));
               }
-              toggleCharger(2,false,false);
+              toggleCharger(S2,false,false,true);
             }
       }
     }

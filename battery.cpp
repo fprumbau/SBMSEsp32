@@ -23,7 +23,7 @@ void Battery::checkCellVoltages() {
             m+=k;
             Serial.println(m);
             wc.sendClients(m);
-            charger.toggleCharger(2,true,true);
+            charger.toggleCharger(S2,true,true,true);
             s2ActForLowCV = true;
             break;            
       }
@@ -33,7 +33,7 @@ void Battery::checkCellVoltages() {
           String m = F("Deaktiviere Solarcharger 2 nach 5 Minuten Ladezeit jetzt...");
           Serial.println(m);
           wc.sendClients(m);
-          charger.toggleCharger(2,false,true);
+          charger.toggleCharger(S2,false,true, true);
           s2ActForLowCV = false;
       }
   }  

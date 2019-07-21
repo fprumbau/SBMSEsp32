@@ -52,7 +52,11 @@ void setup() {
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(RELAY_PIN, OUTPUT);
-  pinMode(RELAY_S1, OUTPUT);
+
+  //FIXME: RELAY_S1 sollte nicht mehr den Charger S1 schalten; RELAY_3 könnte dann in RELAY_S1 umbenannt werden
+  pinMode(RELAY_S1, OUTPUT); //Charger S2, hart (wird in der Loging aber RELAY_3 geschaltet); 
+  
+  digitalWrite(RELAY_S1, LOW); //schaltet nur Power an, Charger bleibt aus 
   pinMode(RELAY_S2, OUTPUT);
 
   //v.0.9.9.40

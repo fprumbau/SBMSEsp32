@@ -102,6 +102,9 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.83: (4) Add Try-Catch in Webseite bei SBMS-Verarbeitung
 <li>0.9.9.83: (5) Nach setzen des Testdatenschalters wird UI aktualisiert
 <li>0.9.9.83: (6) Debug / Debug2 werden nun auch per JSon aus der Webansicht aktualisiert (aber nicht im SPIFFS abgespeichert)
+<li>0.9.9.83: (7) S1,S2 und Netzvorrang werden nun ueber Json aktualisiert, alter Benachrichtigungscode bereinigt, S1 und S2 sind nun als symbolische Links integriert
+<li>0.9.9.83: (8) Der mit 0.9.9.78 ausgeplante Restart ging einher mit dem Abschalten des Batterievorrangs ab 06 Uhr (wechselrichter.cpp); (Umschaltung über eine boolean Variable nacht auf einmal pro Zyklus begrenzt); Dies wurde auf 09 Uhr angehoben.
+<li>0.9.9.83: (9) Das RELAY_S1 wird nun im Setup geschaltet. Nur das RELAY_3 bestimmt noch (ueber Remote) den Zustand des Chargers S1 (HLG600A)
 )=====";
 
 #define VERSION "0.9.9.83"
@@ -190,9 +193,9 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="updatePage();">www.ElectroDacus.com</div></div2>
 <div2 id="demo"></div2>
 <div2 style='width:350px; top:82px; left:520px;'>
-<button id="bb" onclick="toggleBattery(this.innerHTML);">Netzvorrang</button>
-<button id="b1" style="width:47px" onclick="toggleS1(this.innerHTML);">S1off</button>
-<button id="b2" style="width:47px" onclick="toggleS2(this.innerHTML);">S2off</button>
+<button id="bb" onclick="updateServer(this.innerHTML);">Netzvorrang</button>
+<button id="b1" style="width:47px" onclick="updateServer(this.innerHTML);">S1off</button>
+<button id="b2" style="width:47px" onclick="updateServer(this.innerHTML);">S2off</button>
 <br><input type='checkbox' id='dbg1' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg1</span></input>
 <input type='checkbox' id='dbg2' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg2</span></input>
 </div2>
@@ -318,6 +321,7 @@ console.log('End trying to open Webclient socket');
 log('End trying to open webclient socket');
 
 /**
+ * Akualisierung nach Empfang von Serverdaten
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
 function updateUi() {
@@ -388,30 +392,34 @@ function updateUi() {
   elem.innerHTML=''+sum.toFixed(1)+' W';
 }
 
-//Keine State-Information hier, die Bestätigung kommt mit Websocket-Datagramm
-function toggleBattery(txt) {
-    if(txt == 'Netzvorrang') {
-      connection.send("@+"); //auf Batterie aendern
-    } else {
-      connection.send("@-"); //auf Netzvorrang schalten
-    }
-}
-function toggleS1(txt) {
-    if(txt == 'S1off') {
-      connection.send("@s1+"); //Solarlader S1 an
-    } else {
-      connection.send("@s1-"); //Solarlader S1 off
-    }
-}
-function toggleS2(txt) {
-    if(txt == 'S2off') {
-      connection.send("@s2+"); //Solarlader S2 an
-    } else {
-      connection.send("@s2-"); //Solarlader S2 off
-    }
-}
-function updateServer() {
+//Sende Daten zum Server
+function updateServer(txt) {
   var o = {};
+  
+  //Charger S1,S2, Netzstatus
+  if(typeof txt !== undefined) {
+     switch(txt) {
+        case "S1on":
+          o.s1 = false;
+        break;      
+        case "S1off":
+          o.s1 = true;
+        break;
+        case "S2on":
+          o.s2 = false;
+        break;      
+        case "S2off":
+          o.s2 = true;
+        break;        
+        case "Netzvorrang":
+          o.vr = 'batt';
+        break;
+        case "Batterie":
+          o.vr = 'netz';
+        break;        
+     }
+  }
+  
   o.ta = document.getElementById("teslaactive").checked;
   o.d1 = debug1 = document.getElementById("dbg1").checked;
   o.d2 = debug2 = document.getElementById("dbg2").checked;
@@ -420,6 +428,7 @@ function updateServer() {
   //var data = JSON.stringify({ "ta": document.getElementById("teslaactive").checked });
   
   var data = JSON.stringify( o );
+  console.log("Sending to Server: " + data)
   connection.send(data);
 }
 

@@ -174,9 +174,9 @@ void Inverter::check()  {
       Serial.println(secs);    
       wc.sendClients(datetime);
   }
-  //ab v.0.9.9.29 zwischen 20Uhr und 5Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
+  //ab v.0.9.9.29 zwischen 20Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
   if(!stop) {
-    if(hours>=20 || hours < 5) {
+    if(hours>=20 || hours < 9) {
       if(!nacht) {
         if(!isBatOn) { 
             wc.sendClients(datetime);
