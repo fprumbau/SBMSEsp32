@@ -39,6 +39,9 @@ class Tesla {
     char* _get_charge_state_url;
     char* _set_charge_limit_url;
 
+    //Updated flag
+    bool _hasUpdate;
+
     //beginRequest
     void beginRequest(HTTPClient *client, char *url);
         
@@ -50,6 +53,9 @@ class Tesla {
     int readChargeState();
     void print();
     bool isCharging();
+    bool hasUpdate();
+    void reset();
+    const char* status();
 };
 
 #endif

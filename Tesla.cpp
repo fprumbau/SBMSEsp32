@@ -65,6 +65,8 @@ int Tesla::readChargeState() {
       String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected
       _chargingState = cState;
 
+      _hasUpdate = true;
+
       //"charge_rate":10.9            10.9 km/h
       //"charger_phases":1            eine Phase
       //"charger_pilot_current":13    13A
@@ -247,21 +249,45 @@ void Tesla::print() {
   Serial.println(_charge_stop_url);
   Serial.println(_get_charge_state_url);
   Serial.println(_wakeup_url);
-  Serial.print("Chargerate: ");
+  Serial.print(F("Has update: "));
+  Serial.println(_hasUpdate);
+  Serial.print(F("Chargerate: "));
   Serial.println(_chargeRate);
-  Serial.print("ChargePhases: ");
+  Serial.print(F("ChargePhases: "));
   Serial.println(_chargerPhases);
-  Serial.print("ChargerActualCurrent: ");
+  Serial.print(F("ChargerActualCurrent: "));
   Serial.println(_chargerActualCurrent);
-  Serial.print("ChargerPower: ");
+  Serial.print(F("ChargerPower: "));
   Serial.println(_chargerPower);
-  Serial.print("BatteryLevel: ");
+  Serial.print(F("BatteryLevel: "));
   Serial.println(_batteryLevel);
-  Serial.print("ChargeLimitSoc: ");
+  Serial.print(F("ChargeLimitSoc: "));
   Serial.println(_chargeLimitSoc);
-  Serial.print("ChargingState: ");
+  Serial.print(F("ChargingState: "));
   Serial.println(_chargingState);
 } 
+
+const char* Tesla::status() {
+  String status = String((char*)0);
+  status.reserve(128);
+
+  status+=F("<b>Chargerate:</b> ");
+  status+=_chargeRate;
+  status+=F("<br><b>ChargePhases:</b> ");
+  status+=_chargerPhases;
+  status+=F("<br><b>ChargerActualCurrent:</b> ");
+  status+=_chargerActualCurrent;
+  status+=F("<br><b>ChargerPower:</b> ");
+  status+=_chargerPower;
+  status+=F("<br><b>BatteryLevel:</b> ");
+  status+=_batteryLevel;
+  status+=F("<br><b>ChargeLimitSoc:</b> ");
+  status+=_chargeLimitSoc;
+  status+=F("<br><b>ChargingState:</b> ");
+  status+=_chargingState;
+
+  return status.c_str();
+}
 
 void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->begin(url);
@@ -277,4 +303,12 @@ bool Tesla::isCharging() {
       return true;
     }
     return false;
+}
+
+bool Tesla::hasUpdate() {
+  return _hasUpdate;
+}
+
+void Tesla::reset() {
+  _hasUpdate = false;
 }

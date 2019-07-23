@@ -22,6 +22,9 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         if(sbmsData != NULL && sbmsData.length() > 10) {
            doc["d"]=sbmsData;
         }
+        if(perry.hasUpdate()) {
+          doc["rts"] = perry.status();
+        }
         doc["dt"]=datetime;
         doc["t"]=temp;
         doc["ta"]=teslaCtrlActive;
@@ -50,6 +53,9 @@ void WebCom::updateUi() {
         doc["z"]=bezug;
         if(sbmsData != NULL && sbmsData.length() > 10) {
            doc["d"]=sbmsData;
+        }
+        if(perry.hasUpdate()) {
+          doc["rts"] = perry.status();
         }
         doc["dt"]=datetime;
         doc["t"]=temp;
@@ -84,7 +90,8 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         StaticJsonDocument<300> doc;
         deserializeJson(doc, data);
 
-        String msg = "";
+        String msg = String((char*)0);
+        msg.reserve(63);
         bool update = false;
         bool saveConfig = false;
         
@@ -143,6 +150,23 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             buildMessage(&msg, "Battery", "true");      
           }
         }
+
+        //rts, requst Tesla status
+        if(doc.containsKey("rts")) {
+          update = true;
+          int rc = perry.readChargeState();     
+          msg+=F("Updated tesla status information; status code: ");    
+          msg+=rc;
+        }
+
+        //wt, requst Tesla wakeup
+        if(doc.containsKey("wt")) {
+          update = true;
+          int rc = perry.wakeup();     
+          msg+=F("Requested Tesla wakeup; status code: ");    
+          msg+=rc;
+        }
+        
         if(saveConfig) {
           config.save();
         }

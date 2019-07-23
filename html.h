@@ -103,11 +103,14 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.83: (5) Nach setzen des Testdatenschalters wird UI aktualisiert
 <li>0.9.9.83: (6) Debug / Debug2 werden nun auch per JSon aus der Webansicht aktualisiert (aber nicht im SPIFFS abgespeichert)
 <li>0.9.9.83: (7) S1,S2 und Netzvorrang werden nun ueber Json aktualisiert, alter Benachrichtigungscode bereinigt, S1 und S2 sind nun als symbolische Links integriert
-<li>0.9.9.83: (8) Der mit 0.9.9.78 ausgeplante Restart ging einher mit dem Abschalten des Batterievorrangs ab 06 Uhr (wechselrichter.cpp); (Umschaltung über eine boolean Variable nacht auf einmal pro Zyklus begrenzt); Dies wurde auf 09 Uhr angehoben.
+<li>0.9.9.83: (8) Der mit 0.9.9.78 ausgeplante Restart ging einher mit dem Abschalten des Batterievorrangs ab 06 Uhr (wechselrichter.cpp); &Auml;nderung: 6Uhr->9Uhr
 <li>0.9.9.83: (9) Das RELAY_S1 wird nun im Setup geschaltet. Nur das RELAY_3 bestimmt noch (ueber Remote) den Zustand des Chargers S1 (HLG600A)
+<li>0.9.9.84: (1) Der Aufruf der Upgradeseite erfolgt - beim Aufruf von der Homepage - nun mit dem internen DNS-Namen http://sbms/update
+<li>0.9.9.84: (2) Hintergrundfarben der deaktivierten Buttons S1,S2 etc angepasst.
+<li>0.9.9.84: (3) Auskunftsfenstern div:id='teslaout' hinzugef&uuml;gt.
 )=====";
 
-#define VERSION "0.9.9.83"
+#define VERSION "0.9.9.84"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
@@ -178,7 +181,9 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22px;}
+button{color:#505050;background:#D8D8D8;border:2px solid white;width:85px;height:22px;}
+.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:12px;}
+.bs{background-color:#d8d8d8;color:#505050;width:60px}
 </style>
 </head>
 <body style='background: #000;'>
@@ -220,6 +225,11 @@ button{color:#b50;background:#D8BFD8;border:2px solid white;width:85px;height:22
 
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
 <input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
+<br><input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="wake" value="WakeUp" onclick="wait(this);updateServer(this.id);"/>
+<div2 id="teslaout" class="bt">
+TEST 'teslaout'
+</div2>
 </div2>
 
 </div3>
@@ -247,7 +257,7 @@ function log(msg) {
 function updatePage() {
   var origin = document.location.origin;
   if(origin.indexOf("prumbaum") !== -1) {
-    origin = "http://192.168.178.47";
+    origin = "http://sbms";
   }
   var url = origin + '/update';
   document.location.href=url;
@@ -303,10 +313,13 @@ connection.onmessage = function (e) {
             }
             try {
               json = JSON.parse(data); 
-              updateUi();             
-              updateSbmsData();    
+              updateUi();      
+              if(json.hasOwnProperty('d')) {       
+                updateSbmsData();    
+              }
             } catch(err) {
-              log(err.message);
+              log("ERROR_319: " + err.message);
+              console.log("ERROR_320: ");
               console.log(data);
             }
           break;
@@ -349,8 +362,8 @@ function updateUi() {
       b1.style.color='#ff0';
       b1.innerHTML='S1on';
     } else {
-      b1.style.background='#D8BFD8';
-      b1.style.color='#b50';
+      b1.style.background='#D8D8D8';
+      b1.style.color='#505050';
       b1.innerHTML='S1off';      
     }
   }
@@ -362,8 +375,8 @@ function updateUi() {
       b2.style.color='#ff0';
       b2.innerHTML='S2on';
     } else {
-      b2.style.background='#D8BFD8';
-      b2.style.color='#b50';
+      b2.style.background='#D8D8D8';
+      b2.style.color='#505050';
       b2.innerHTML='S2off';
     }
   }
@@ -375,8 +388,8 @@ function updateUi() {
         bb.style.color='#ff0';
         bb.innerHTML='Batterie';
       } else {
-        bb.style.background='#D8BFD8';
-        bb.style.color='#b50';
+        bb.style.background='#D8D8D8';
+        bb.style.color='#505050';
         bb.innerHTML='Netzvorrang';
       }
   }  
@@ -390,6 +403,24 @@ function updateUi() {
     elem.style.color='#F1948A';
   }
   elem.innerHTML=''+sum.toFixed(1)+' W';
+
+  //Antwort auf Statusabfrage vom Server darstellen
+  if(json.hasOwnProperty('rts')) {
+    var rts = json.rts;
+    log("json.rts="+rts);
+    reset(document.getElementById('state'));
+    reset(document.getElementById('wakeup'));
+    document.getElementById('teslaout').innerHTML=rts;
+  }
+}
+
+function wait(elem) {
+        elem.style.color='#ff0';
+        elem.style.background='#f00';
+}
+function reset(elem) {
+        elem.style.color='#505050';
+        elem.style.background='#d8d8d8';
 }
 
 //Sende Daten zum Server
@@ -416,6 +447,12 @@ function updateServer(txt) {
         break;
         case "Batterie":
           o.vr = 'netz';
+        break;        
+        case "state":
+          o.rts = true; //request tesla state
+        break;
+        case "wake":
+          o.wt = true; //request tesla waekup
         break;        
      }
   }
@@ -560,7 +597,9 @@ function updateSbmsData(){
         htm('d'+12,'Typ: LiIon Kap: 100Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
       }
   } catch(err) {
-    log(err.message);
+    log("ERROR_595: " + err.message);
+    console.log("ERROR_596: ");
+    console.log(data);
   }
 }
 
