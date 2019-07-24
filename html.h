@@ -187,7 +187,7 @@ div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;backgro
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
 button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height:22px;}
-.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;}
+.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;line-height:13px;}
 .bs{background-color:#d8d8d8;color:#505050;width:65px;border:1px solid white;}
 </style>
 </head>

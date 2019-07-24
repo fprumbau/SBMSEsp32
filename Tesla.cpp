@@ -58,10 +58,11 @@ int Tesla::readChargeState() {
       
       _chargeRate = resp["charger_rate"];
       _chargerPhases = resp["charger_phases"];
-      _chargerActualCurrent = resp["charger_power"];
+      _chargerActualCurrent = resp["charger_actual_current"];
       _chargerPower = resp["charger_power"];
       _chargeLimitSoc = resp["charge_limit_soc"];    
       _batteryLevel = resp["battery_level"];  
+      _chargerVoltage = resp["charger_voltage"];
       String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected
       _chargingState = cState;
 
@@ -265,6 +266,8 @@ void Tesla::print() {
   Serial.println(_chargeLimitSoc);
   Serial.print(F("ChargingState: "));
   Serial.println(_chargingState);
+  Serial.print(F("Ladespannung: "));
+  Serial.println(_chargerVoltage);  
 } 
 
 const char* Tesla::status() {
@@ -285,6 +288,8 @@ const char* Tesla::status() {
   status+=_chargeLimitSoc;
   status+=F("<br><b>ChargingState:</b> ");
   status+=_chargingState;
+  status+=F("<br><b>Spannung:</b> ");
+  status+=_chargerVoltage;
 
   return status.c_str();
 }

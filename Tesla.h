@@ -22,10 +22,11 @@ class Tesla {
 
     float _chargeRate;  //10.9
     int _chargerPhases; //1
-    int _chargerActualCurrent; //13A
-    int _chargerPower; //3kW
-    int _batteryLevel; //61%
+    int _chargerActualCurrent; //11 (A)
+    int _chargerPower; //3 (kW)
+    int _batteryLevel; //61 (%)
     int _chargeLimitSoc;
+    int _chargerVoltage; //229 (V)
     String _chargingState; //Stopped / Charging
 
     //SPIFFS
