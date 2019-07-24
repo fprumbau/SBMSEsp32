@@ -81,7 +81,7 @@ void Battery::controlFans() {
     }
  } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
     if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen, aber nur wenn der Ladestand<99% UND die Temperatur>35°C ist, beim Balancing werden die Luefter nicht benutzt
-      if(soc<99 && temp>35) {
+      if(soc<99 && temp>TEMP_THRESHOLD_HIGH) {
         msg = F("Schalte Luefter an, da gerade geladen wird; Temperatur: ");
         msg+=temp;
         msg+="°C";
@@ -90,7 +90,7 @@ void Battery::controlFans() {
         digitalWrite(RELAY_4, LOW);
       }
     } else {
-      if(soc>=99 && temp<36) {
+      if(soc>=99 && temp<TEMP_THRESHOLD_LOW) {
         msg = F("Schalte Luefter ab, da fertig geladen wurde");
         Serial.println(msg);
         wc.sendClients(msg);
@@ -99,7 +99,7 @@ void Battery::controlFans() {
     }
  } else {
     if(fansRunning) { //Versuche, die Luefter auszuschalten nur dann, wenn sie schon laufen
-      if(temp<40) {
+      if(temp<TEMP_THRESHOLD_LOW) {
         if(fansRunning) {
           msg = F("Schalte Luefter ab, da weder Batterie noch Charger laufen");
           Serial.println(msg);

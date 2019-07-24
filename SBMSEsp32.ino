@@ -55,8 +55,6 @@ void setup() {
 
   //FIXME: RELAY_S1 sollte nicht mehr den Charger S1 schalten; RELAY_3 könnte dann in RELAY_S1 umbenannt werden
   pinMode(RELAY_S1, OUTPUT); //Charger S2, hart (wird in der Loging aber RELAY_3 geschaltet); 
-  
-  digitalWrite(RELAY_S1, LOW); //schaltet nur Power an, Charger bleibt aus 
   pinMode(RELAY_S2, OUTPUT);
 
   //v.0.9.9.40
@@ -68,10 +66,12 @@ void setup() {
   tasterConfig.setEventHandler(handleButton);
   taster.init(TASTER, HIGH, 0 /* id */);
 
-  digitalWrite(RELAY_S1, HIGH); //Schaltet S1 (HLG600B, regelbar) an/aus (240V!)
-  digitalWrite(RELAY_S2, HIGH); //Schaltet S2 (HLG600A, fest) an/aus (Remoteeingang des Laders)
+  //Gibt Strom auf BEIDE Charger
+  digitalWrite(RELAY_S1, LOW); //schaltet nur Power an beider Charger an; (S1 wird zusätzlich über RELAY_3 gestartet)  
 
-  digitalWrite(RELAY_3, HIGH); //Schaltet S2 (s.o.) an/aus (Remoteeingang des Laders)
+  digitalWrite(RELAY_3, HIGH); //Schaltet S1, HLG600b,regelbar, in den Initialstatus AUS (Remoteeingang des Laders S1)
+  digitalWrite(RELAY_S2, HIGH); //Schaltet S2, HLG600A, fest, in den Intialstatus AUS (Remoteeingang des Laders S2)
+
   digitalWrite(RELAY_4, HIGH); //Schaltet die Luefter an/aus (24V)
 
   //v.0.9.9.51 ff
@@ -288,6 +288,10 @@ void commandLine() {
         config.load();
       } else if(cmd.startsWith("config save")) {
         config.save();
+      } else if(cmd.startsWith("config set")) {
+        String keyVal = cmd.substring(10); //alles hinter 'set'
+        keyVal.trim();
+        config.set(keyVal);
       } else if(cmd.startsWith("pwm ")) {      
         msg = F("setze PWM:");     
         String pwm = cmd.substring(4); 
@@ -321,6 +325,7 @@ void commandLine() {
         Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
         Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
+        Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!)"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;
       }

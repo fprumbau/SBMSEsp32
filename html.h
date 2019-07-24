@@ -108,6 +108,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.84: (1) Der Aufruf der Upgradeseite erfolgt - beim Aufruf von der Homepage - nun mit dem internen DNS-Namen http://sbms/update
 <li>0.9.9.84: (2) Hintergrundfarben der deaktivierten Buttons S1,S2 etc angepasst.
 <li>0.9.9.84: (3) Auskunftsfenstern div:id='teslaout' hinzugef&uuml;gt.
+<li>0.9.9.84: (4) Die L&uuml;fter sollten laufen, solange die Grenztemperatur nicht um 2 Grand unterschritten wurde (TEMP_THRESHOLD_HIGH/_LOW) (verhindert Relayklickmarathon) 
+<li>0.9.9.84: (5) Fehlermeldung fixed: 'Cannot process data: Connect Wed Jul 24 2019 10:17:46 GMT+0200 (Mitteleuropäische Sommerzeit)' (aus onopen-Event in Webseite; jetzt nur noch lokal).
+<li>0.9.9.84: (6) Moeglichkeit geschaffen, &uuml;ber die Kommandozeile Konfigwerte zu setzen (um sie dann mit einem config.save) sp&auml;ter speichern zu k&ouml;nnen. 
+<li>0.9.9.84: (7) Wird ein Tesla-Statusupdate empfangen, dann wurde die maximale Nachrichtengroesse von 300Byte ueberschritten (392), Max wurde nun auf 512 erh&uuml;ht
+<li>0.9.9.84: (8) Fehler bei Namen WakeUp-Button behoben, Styling, 'teslaout' wird nun bef&uuml;llt.
 )=====";
 
 #define VERSION "0.9.9.84"
@@ -181,9 +186,9 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{color:#505050;background:#D8D8D8;border:2px solid white;width:85px;height:22px;}
-.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:12px;}
-.bs{background-color:#d8d8d8;color:#505050;width:60px}
+button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height:22px;}
+.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;}
+.bs{background-color:#d8d8d8;color:#505050;width:65px;border:1px solid white;}
 </style>
 </head>
 <body style='background: #000;'>
@@ -225,10 +230,10 @@ button{color:#505050;background:#D8D8D8;border:2px solid white;width:85px;height
 
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
 <input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
-<br><input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>
-<input type="button" class="bs" id="wake" value="WakeUp" onclick="wait(this);updateServer(this.id);"/>
+<br><input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>&nbsp;
+<input type="button" class="bs" id="wakeup" value="WakeUp" onclick="wait(this);updateServer(this.id);"/>
 <div2 id="teslaout" class="bt">
-TEST 'teslaout'
+...
 </div2>
 </div2>
 
@@ -282,18 +287,15 @@ var ip = location.host;
 var connection = new ReconnectingWebSocket('ws://' + ip + '/ws', null, { debug:true, reconnectInterval: 6000, reconnectDecay: 1.1, maxReconnectInterval: 10000 });
 
 console.log('Trying to open Webclient socket');
-log('Trying to open Webclient socket hihi');
+log('Trying to open Webclient socket');
 
 //var timerID=0;
 connection.onopen = function () { 
-  connection.send('Connect ' + new Date()); 
+  log('Serververbindung aufgebaut: ' + new Date()); 
 };
 connection.onerror = function (error) { 
   console.log('wsServer Error ', error);
   log('wsServer Error ' + error);
-};
-
-connection.onclose = function(){
 };
 
 //vom Server empfangen
@@ -311,17 +313,17 @@ connection.onmessage = function (e) {
             if(debug1) {
               log(data);
             }
-            try {
+            //try {
               json = JSON.parse(data); 
               updateUi();      
               if(json.hasOwnProperty('d')) {       
                 updateSbmsData();    
               }
-            } catch(err) {
-              log("ERROR_319: " + err.message);
-              console.log("ERROR_320: ");
+            /*} catch(err) {
+              log("ERROR_324 : " + err.message);
+              console.log("ERROR_325: " + err);
               console.log(data);
-            }
+            }*/
           break;
       default:
             console.log('Nachricht: ', data);
@@ -356,7 +358,7 @@ function updateUi() {
   }
   var s1 = json.s1;
   if(null != s1) {
-    b1 = document.getElementById("b1");
+    var b1 = document.getElementById("b1");
     if(s1) {   
       b1.style.background='#f00';
       b1.style.color='#ff0';
@@ -369,7 +371,7 @@ function updateUi() {
   }
   var s2 = json.s2;
   if(null != s2) {
-    b2 = document.getElementById("b2");
+    var b2 = document.getElementById("b2");
     if(s2) {   
       b2.style.background='#f00';
       b2.style.color='#ff0';
@@ -382,7 +384,7 @@ function updateUi() {
   }
   var batt = json.b;
   if(null != batt) {
-    bb = document.getElementById("bb");
+    var bb = document.getElementById("bb");
     if(batt) {
         bb.style.background='#f00';
         bb.style.color='#ff0';
@@ -410,17 +412,26 @@ function updateUi() {
     log("json.rts="+rts);
     reset(document.getElementById('state'));
     reset(document.getElementById('wakeup'));
-    document.getElementById('teslaout').innerHTML=rts;
+    var to = document.getElementById("teslaout");
+    if(typeof to !== 'undefined') {
+      to.innerHTML=rts;
+    } else {
+      console.log("Element 'teslaout' not found");
+    }
   }
 }
 
 function wait(elem) {
+    if(typeof elem !== 'undefined') {
         elem.style.color='#ff0';
         elem.style.background='#f00';
+    }
 }
 function reset(elem) {
+    if(typeof elem !== 'undefined') {
         elem.style.color='#505050';
         elem.style.background='#d8d8d8';
+    }
 }
 
 //Sende Daten zum Server
@@ -598,7 +609,7 @@ function updateSbmsData(){
       }
   } catch(err) {
     log("ERROR_595: " + err.message);
-    console.log("ERROR_596: ");
+    console.log("ERROR_596: " + err);
     console.log(data);
   }
 }

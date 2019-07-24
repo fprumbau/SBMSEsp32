@@ -269,7 +269,7 @@ void Tesla::print() {
 
 const char* Tesla::status() {
   String status = String((char*)0);
-  status.reserve(128);
+  status.reserve(256);
 
   status+=F("<b>Chargerate:</b> ");
   status+=_chargeRate;

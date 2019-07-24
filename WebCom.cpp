@@ -11,7 +11,7 @@ void WebCom::sendClients(String msg) {
 
 void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         //mit JSON
-        StaticJsonDocument<300> doc; //letzte Zaehlung: 114
+        StaticJsonDocument<512> doc; 
         doc["d1"]=debug;
         doc["d2"]=debug2;
         doc["s1"]=charger.isChargerOn(1);
@@ -42,31 +42,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
 }
 
 void WebCom::updateUi() {
-        //mit JSON
-        StaticJsonDocument<300> doc; //letzte Zaehlung: 114
-        doc["d1"]=debug;
-        doc["d2"]=debug2;
-        doc["s1"]=charger.isChargerOn(1);
-        doc["s2"]=charger.isChargerOn(2);
-        doc["b"]=battery.isOn();
-        doc["l"]=lieferung;
-        doc["z"]=bezug;
-        if(sbmsData != NULL && sbmsData.length() > 10) {
-           doc["d"]=sbmsData;
-        }
-        if(perry.hasUpdate()) {
-          doc["rts"] = perry.status();
-        }
-        doc["dt"]=datetime;
-        doc["t"]=temp;
-        doc["ta"]=teslaCtrlActive;
-        char jsonChar[512];
-        serializeJson(doc, jsonChar);
-        String str(jsonChar);
-        if(debug2) {
-          Serial.println(str);
-        }
-        ws.textAll(str.c_str());
+        updateUi(NULL, true);
 }
 
 void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len){

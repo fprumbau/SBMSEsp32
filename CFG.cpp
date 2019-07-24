@@ -32,6 +32,16 @@ bool CFG::load() {
     return _configRead;
   }
 
+  init();
+  
+  _configRead = true;
+  
+  return _configRead;
+}
+
+void CFG::init() {
+  //Konfigwerte initialisieren 
+
   String auth = doc["authorization"];
   String vehicleId = doc["vehicleId"];
   perry.init(auth.c_str(), vehicleId.c_str());
@@ -39,11 +49,7 @@ bool CFG::load() {
   //Lese andere Konfigwerte fuer global.h
   teslaCtrlActive = doc["teslaCtrlActive"];
   Serial.print("teslaCtrlActive=");
-  Serial.println(teslaCtrlActive);
-
-  _configRead = true;
-  
-  return _configRead;
+  Serial.println(teslaCtrlActive);  
 }
 
 bool CFG::save() {
@@ -70,4 +76,35 @@ bool CFG::save() {
   wc.sendClients(F("Konfiguration wurde erfolgreich gespeichert."));
   
   return true;
+}
+
+void CFG::set(const String& keyVal) {
+
+  String key = getValue(keyVal, ':', 0);
+  String val = getValue(keyVal, ':', 1);
+  
+  doc[key] = val;
+  Serial.print("Set config value ");
+  Serial.print(key);
+  Serial.print(" to ");
+  Serial.print(val);
+  Serial.println("; Still has to be saved");
+  
+  //Konfiginitialisierung durchfuehren
+  init();
+}
+
+String CFG::getValue(String data, char separator, int index) {
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }

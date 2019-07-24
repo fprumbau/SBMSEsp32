@@ -74,6 +74,8 @@ extern long lastUdpNotification; //verhindert Stackoverflow, senden von zu viele
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen
 extern float temp; //SBMS Temperatur
+extern int TEMP_THRESHOLD_HIGH; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
+extern int TEMP_THRESHOLD_LOW; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 extern bool testFixed;

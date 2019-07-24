@@ -67,6 +67,8 @@ AsyncWebSocket ws("/ws");
 long soc = -1; //aktueller Wert State Of Charge
 int cv[8]; //aktuelle Zellspannungen
 float temp = 0.0; //aktuelle Temperatur des SBMS120
+int TEMP_THRESHOLD_HIGH = 37; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
+int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 bool testFixed = false;
