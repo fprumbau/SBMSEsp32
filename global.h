@@ -40,6 +40,8 @@ extern int LED_BLUE;
 
 extern bool debug;
 extern bool debug2;
+extern String bitset;
+
 extern int RELAY_S1;
 extern int RELAY_S2; 
 extern int RELAY_3;
@@ -69,7 +71,8 @@ extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
-extern long lastUdpNotification; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
+extern long lastUdpReset; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
+extern long lastPingUdp;
 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen

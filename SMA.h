@@ -11,10 +11,11 @@ class SMA {
     char hex[1202]; //Hex von buf
     char wlb[9]; //Wirkleistung Bezug
     char wll[9]; //Wirkleistung Lieferung
+    void reset();
+    void ping();
     
   public:
     void init();
-    void reset();
     void read();
 };
 

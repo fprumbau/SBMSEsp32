@@ -117,6 +117,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.85: (2) Implementierung eines Mechanismus' der verhindert, dass der Server immer dieselben Teslastatusdaten sendet
 <li>0.9.9.85: (3) Einige yield()s hinzugefuegt, viele String-Optimierungen
 <li>0.9.9.85: (4) Bisher wurde beim Laden die Lüfter bei SOC<99 angeschaltet, nun wird dies nur noch bei hoher Temperatur gemacht.
+<li>0.9.9.85: (5) Statt Dbg1+Dbg2 als Einzelflags zu regeln, gibt es nun eine Bitleiste auf Server und Client.
+<li>0.9.9.85: (6) Steueroption Tesla start/stop charge hinzugef&uuml;gt 
+<li>0.9.9.85: (7) Der UDP-Reinitialisierungthreshold wurde von 60s auf 120s angehoben, alle 60s wird nun ein Ping-Paket versendet.
+<li>0.9.9.85: (8) Eine Authentifizierungsmethode ist zum Teslaobjekt hinzugekommen um das Bearer-Token erneuern zu k&ouml;nnen.
 )=====";
 
 #define VERSION "0.9.9.85"
@@ -191,7 +195,7 @@ div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;backgroun
 div5{position:absolute;background: rgba(120,90,0,0.4);}
 button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height:22px;}
 .bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;line-height:13px;}
-.bs{background-color:#d8d8d8;color:#505050;width:65px;border:1px solid white;}
+.bs{background-color:#d8d8d8;color:#505050;width:50px;border:1px solid white;margin-left:2px;}
 </style>
 </head>
 <body style='background: #000;'>
@@ -209,8 +213,15 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 <button id="bb" onclick="updateServer(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="updateServer(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="updateServer(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg1' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg1</span></input>
-<input type='checkbox' id='dbg2' onchange='updateServer();'>&nbsp;<span ondblclick='updatePage();'>Dbg2</span></input>
+
+<br><input type='checkbox' id='dbg' onchange='updateBitset();'>
+    <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;">
+      <option name="0">Debug Web (Client)</option>
+      <option name="1">Debug Websckts (Srv)</option>
+      <option name="2">Mmmmh</option>
+    </select>
+</input>
+
 </div2>
 </div3>
 <div3>
@@ -233,8 +244,15 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
 <input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
-<br><input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>&nbsp;
-<input type="button" class="bs" id="wakeup" value="WakeUp" onclick="wait(this);updateServer(this.id);"/>
+<br>
+<input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>
+<br>
+<input type="button" class="bs" id="wakeup" value="Wake" onclick="wait(this);updateServer(this.id);"/>
+<br>
+<input type="button" class="bs" id="charge" value="Laden" onclick="wait(this);updateServer(this.id);"/>
+<br>
+<input type="button" class="bs" id="idle" value="Idle" onclick="wait(this);updateServer(this.id);"/>
+
 <div2 id="teslaout" class="bt">
 ...
 </div2>
@@ -247,8 +265,51 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 </div>
 <script id='smain2'>
 
-var debug1 = false;
-var debug2 = false;
+var debug = false;
+
+var bitset = "0000000000";
+
+String.prototype.replaceAt=function(index, char) {
+    var a = this.split("");
+    a[index] = char;
+    return a.join("");
+}
+    
+function updateFromBitset() {
+  //a) welche Selectoption ist angewählt?
+  var selIndex = document.getElementById("dbgsel").selectedIndex;
+  if(debug) {
+    log("SelectedIndex: " + selIndex);
+  }
+  if(-1 != selIndex)  { 
+        if(bitset.charCodeAt(selIndex) == 48) {
+            if(debug) log("Setting selIndex["+selIndex+"] to false; " + bitset.charCodeAt(selIndex));
+            document.getElementById("dbg").checked = false;
+        } else {
+            if(debug) log("Setting selIndex["+selIndex+"] to true; " + bitset.charCodeAt(selIndex));
+            document.getElementById("dbg").checked = true;
+        }
+  }
+  if(debug) {
+    log(bitset);
+  }
+}
+
+function updateBitset() {
+  //a) welche Selectoption ist angewählt?
+  var selIndex = document.getElementById("dbgsel").selectedIndex;
+  if(-1 != selIndex)  { 
+    if(document.getElementById("dbg").checked) {
+        bitset = bitset.replaceAt(selIndex, '1');    
+    } else {
+        bitset = bitset.replaceAt(selIndex, '0');   
+    }
+  }
+  if(debug) {
+    log(bitset);
+  }
+  updateServer();
+}
 
 function log(msg) {
   cs = document.getElementById('console');
@@ -313,7 +374,7 @@ connection.onmessage = function (e) {
     data = e.data;
     switch(data[0]) {
        case '{':
-            if(debug1) {
+            if(debug) {
               log(data);
             }
             //try {
@@ -345,13 +406,10 @@ var rts_reset = false;
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
 function updateUi() {
-  debug1 = json.d1; //debug ist global
-  if(null != debug1) {
-    document.getElementById("dbg1").checked = debug1;
-  }
-  var debug2 = json.d2;
-  if(null != debug2) {
-    document.getElementById("dbg2").checked = debug2;
+  var dbgBitset = json.dbg;
+  if(null != dbgBitset) {
+    bitset = dbgBitset;
+    updateFromBitset();
   }
   var teslaCtlActive = json.ta;
   if(null != teslaCtlActive) {    
@@ -420,7 +478,9 @@ function updateUi() {
   //Antwort auf Statusabfrage vom Server darstellen
   if(json.hasOwnProperty('rts')) {
     var rts = json.rts;
-    if(debug1) log("json.rts="+rts);
+    if(debug) log("json.rts="+rts);
+    reset(document.getElementById('idle'));    
+    reset(document.getElementById('charge'));   
     reset(document.getElementById('state'));
     reset(document.getElementById('wakeup'));
     var to = document.getElementById("teslaout");
@@ -483,13 +543,18 @@ function updateServer(txt) {
         break;
         case "wake":
           o.wt = true; //request tesla waekup
+        break;
+        case "charge":
+          o.ch = true; //request charge start
+        break;
+        case "idle":
+          o.id = true; //request charge stop      
         break;        
      }
   }
   
   o.ta = document.getElementById("teslaactive").checked;
-  o.d1 = debug1 = document.getElementById("dbg1").checked;
-  o.d2 = debug2 = document.getElementById("dbg2").checked;
+  o.dbg=bitset;
 
   //Wurden Teslastatusdaten verarbeitet, sende Signal an Server, damit dieser keine Wiederholung mehr sendet
   if(rts_reset) {
@@ -570,7 +635,7 @@ function updateSbmsData(){
           cvs[a]=dcmp((a*2)+8,2,data)/1000;       
           if (cvs[a] < cvs[minInd]) minInd = a;
           if (cvs[a] > cvs[maxInd]) maxInd = a;
-          if(debug1) 
+          if(debug) 
             log("Index " + a + "; cvs["+a+"] " + cvs[a] + "; minInd: " + minInd + "; maxInd: " + maxInd);
         }     
         sbms2[9]=minInd+1;
@@ -639,9 +704,8 @@ function updateSbmsData(){
   }
 }
 
-//anfangs sollten die Checkboxen nicht selektiert sein 
-document.getElementById("dbg1").checked=false;
-document.getElementById("dbg2").checked=false;
+//anfangs sollten die Checkbox nicht selektiert sein 
+document.getElementById("dbg").checked=false;
 </script>
 
 </body>

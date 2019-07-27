@@ -203,6 +203,15 @@ int Tesla::stopCharge() {
     return rc;    
 }
 
+int Tesla::authorize(const char* userId, const char* password) {
+  Serial.print(F("Re-authorization mit userId >>"));
+  Serial.print(userId);
+  Serial.print(F("<< und password >>"));
+  Serial.print(password);
+  Serial.println(F("<<"));
+  return 0;
+}
+
 void Tesla::init(const char* auth, const char* vehicleid) {
   _authorization = new char[strlen(auth)+1];
   strcpy(_authorization, auth);

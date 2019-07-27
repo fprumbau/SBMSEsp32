@@ -48,6 +48,7 @@ class Tesla {
         
   public:
     void init(const char* auth, const char* vehicleid);
+    int authorize(const char* userId, const char* password);
     int wakeup();
     int startCharge();
     int stopCharge();

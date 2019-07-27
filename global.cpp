@@ -27,6 +27,8 @@ int LED_BLUE = 27;
 
 bool debug = false;
 bool debug2 = false;
+extern String bitset = "00000000";
+
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
 
@@ -61,7 +63,8 @@ WiFiUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
-long lastUdpNotification = -1;
+long lastUdpReset = -1;
+long lastPingUdp = -1;
 AsyncWebSocket ws("/ws");
 
 long soc = -1; //aktueller Wert State Of Charge

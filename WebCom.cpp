@@ -12,8 +12,19 @@ void WebCom::sendClients(String msg) {
 void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         //mit JSON
         StaticJsonDocument<512> doc; 
-        doc["d1"]=debug;
-        doc["d2"]=debug2;
+        
+        if(debug) {
+          bitset.setCharAt(0,49);
+        } else {
+          bitset.setCharAt(0,48);
+        }
+        if(debug2) {
+          bitset.setCharAt(1,49);
+        } else {
+          bitset.setCharAt(1,48);
+        }        
+        doc["dbg"]=bitset;
+        
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
         doc["b"]=battery.isOn();
@@ -99,24 +110,40 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             buildMessage(&msg, "S2", String(s2).c_str());
           }
         } 
-        
-        if(doc.containsKey("d1")) { //Debug Flag 1
-          bool updateDbg1 = doc["d1"];
-          if(updateDbg1 != debug) {    
-            update = true;    
-            debug = updateDbg1;
-            buildMessage(&msg, "debug", String(debug).c_str());
+
+        if(doc.containsKey("dbg")) { //0.9.9.54 Bitset statt Debugflags
+          String bs = doc["dbg"]; 
+          for(int i=0; i<bs.length(); i++) {
+            char c = bs.charAt(i);
+            switch(i) {
+              case 0:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debug = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debug", String(debug).c_str());      
+                }
+                break;
+              case 1:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debug2 = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debug2", String(debug2).c_str());      
+                }
+                break;      
+              default:   
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);  
+                  update = true;         
+                }              
+            }
           }
-        }  
-      
-        if(doc.containsKey("d2")) {  //Debug Flag 2
-          bool updateDbg2 = doc["d2"];
-          if(updateDbg2 != debug2) {       
-            update = true;          
-            debug2 = updateDbg2;
-            buildMessage(&msg, "debug2", String(debug2).c_str());
+          if(update) {
+            Serial.print(F("Aktualisierung von Bitset: "));
+            Serial.println(bitset);
           }
-        }  
+        }       
         
         if(doc.containsKey("vr")) {
           String netzOderBatt = doc["vr"];
@@ -147,6 +174,20 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           update = true;
           int rc = perry.wakeup();     
           msg+=F("Requested Tesla wakeup; status code: ");    
+          msg+=rc;
+        }
+
+        if(doc.containsKey("ch")) { //ch, request Tesla charge start
+          update = true;
+          int rc = perry.startCharge();     
+          msg+=F("Requested Tesla charge start; status code: ");    
+          msg+=rc;
+        }
+
+        if(doc.containsKey("id")) { //id, requst Tesla charge stop
+          update = true;
+          int rc = perry.stopCharge();     
+          msg+=F("Requested Tesla charge stop; status code: ");    
           msg+=rc;
         }
         

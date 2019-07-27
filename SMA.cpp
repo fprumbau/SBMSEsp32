@@ -23,10 +23,25 @@ void SMA::reset() {
   wc.sendClients(F("UDP reinitialized"));
 }
 
+void SMA::ping() {
+   Serial.println(F("Ping udp!"));
+   udp.beginPacket(udp.remoteIP(), udp.remotePort());
+   uint8_t buffer[8] = "pingupd";
+   udp.write(buffer,7);
+   udp.endPacket();
+}
+
 void SMA::read() {
 
   if(!initialized) {
     return;
+  }
+
+  //da der UDP-Empfang alle 5-10Minuten einmal zusammenbricht, jetzt ein Ping jede Minute
+  long now = millis();
+  if(now-lastPingUdp > 600000) {
+    ping();
+    lastPingUdp = now;
   }
   
   int packetSize = udp.parsePacket();
@@ -65,11 +80,15 @@ void SMA::read() {
     charger.checkOnIncome(netto);
     yield();
   } else {
-      //Wird 60s kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
+      //Wird 2 Minuten kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
       long now = millis();
       long lastUdp = now - lastUdpRead;
-      if(lastUdp > 60000 && (now - lastUdpNotification) > 10000) {
-          lastUdpNotification = now;
+      //wurde lastUdp millis kein Paket mehr empfangen UND liegt der letzte Resetversuch mind. 10s zurück
+      if(lastUdp > 120000 && (now - lastUdpReset) > 10000) {
+          yield();
+          reset();
+          lastUdpReset = now;
+          yield();
           String msg((char *)0);
           msg.reserve(80);
           msg += F("Last WiFi UPD-Packet read ");
@@ -77,8 +96,6 @@ void SMA::read() {
           msg += F("ms ago");
           Serial.println(msg);
           wc.sendClients(msg);
-
-          reset();
       }
   }
 }
