@@ -36,6 +36,70 @@ int Tesla::wakeup() {
     return rc;
 }
 
+int Tesla::authorize(const char* password) {
+    Serial.print(F("Re-authorization mit password >>"));
+    Serial.print(password);
+    Serial.println(F("<<"));
+
+    HTTPClient http;
+
+    beginRequest(&http, _auth_url);
+    yield();
+
+    //Prepare Requestdata
+    DynamicJsonDocument doc(256);
+    doc["email"]="fprumbau@gmail.com";
+    doc["password"]=password;
+    doc["client_id"]=TESLA_CLIENT_ID;
+    doc["client_secret"]=TESLA_CLIENT_SECRET;
+    doc["grant_type"]="password";  //alternativ: refresh_token, dann STATT password refresh_token="alter token", der verliert dann seine Gueltigkeit!
+    String reqData = String((char *)0);
+    reqData.reserve(256);
+    serializeJson(doc, reqData);
+    Serial.println(reqData);
+    
+    int rc = http.POST(reqData);
+    Serial.print(F("Trying to renew bearer token: "));
+    Serial.println(rc);
+    yield();
+ 
+    if(rc>0) {
+        if(debug) {
+          Serial.println(_auth_url);
+          String response = http.getString();    
+          Serial.println(response);  
+          DynamicJsonDocument doc(256);
+          deserializeJson(doc, response);
+          String rt = doc["refresh_token"];
+          _authorization = new char[rt.length()+1];
+          rt.toCharArray(_authorization, rt.length()+1);           
+          /*
+          {
+            "access_token": "abc123",
+            "token_type": "bearer",
+            "expires_in": 3888000,  //45d 
+            "refresh_token": "cba321",
+            "created_at": 1538359034
+          }
+          */          
+        }
+        //200 == OK,
+        //401 == Bearer Token abgelaufen oder nicht richtig
+
+    } else {
+        Serial.println(F("Error sending wakeup POST"));
+    }
+  
+    http.end();
+
+    yield();
+    return rc;
+
+
+  
+  return 0;
+}
+
 int Tesla::readChargeState() {
 
   HTTPClient http;
@@ -94,53 +158,23 @@ int Tesla::readChargeState() {
     
 int Tesla::startCharge() {
 
-    if(teslaCtrlActive) {
-      return -1;
-    }
-  
     HTTPClient http;
-    
-    beginRequest(&http, _set_charge_limit_url);
-    yield();
-    int rc = http.POST("{\"percent\":90}");
-    Serial.print(F("Trying to issue charge start (through setting charge limit to 90%): "));
-    Serial.println(rc);
-    yield();
       
-    if(rc>0) {   
-        if(debug) {       
-          Serial.println(_set_charge_limit_url);
-          String response = http.getString(); 
+    yield();
+    beginRequest(&http, _charge_start_url);    
+    yield();
+    int rc = http.POST("");
+    Serial.print(F("Trying to issue charge start: "));
+    Serial.println(rc);
+    
+    if(rc>0) {  
+        if(debug) {
+          Serial.println(_charge_start_url);
+          String response = http.getString();                        
           Serial.println(response);  
         }
-        //200 == OK,
-        //401 == Bearer Token abgelaufen oder nicht richtig
-        //408 == Vehicle not available, do wakeup
-        if(rc==200) {
-
-              //FIXME wird der Ladestart direkt nach dem Setzen des neuen Chargelimits versucht,
-              //      misslingt der Zugriff (reason:complete). Erst einige Sekunden später geht das.
-              yield();
-              delay(8000);
-              yield();
-              beginRequest(&http, _charge_start_url);    
-              yield();
-              int rc = http.POST("");
-              Serial.print(F("Trying to issue charge start: "));
-              Serial.println(rc);
-
-              if(rc>0) {  
-                  if(debug) {
-                    Serial.println(_charge_start_url);
-                    String response = http.getString();                        
-                    Serial.println(response);  
-                  }
-              } else {
-                  Serial.println(F("Error sending POST charge start"));
-              }
-        }
     } else {
-        Serial.println(F("Error sending POST charge start (set_charge_limit to 90%)"));
+        Serial.println(F("Error sending POST charge start"));
     }
   
     http.end();
@@ -150,13 +184,9 @@ int Tesla::startCharge() {
 
 int Tesla::stopCharge() {
 
-    if(teslaCtrlActive) {
-      return -1;
-    }
-  
-
     HTTPClient http;
 
+    yield();
     beginRequest(&http, _charge_stop_url);
     yield();
     
@@ -166,34 +196,9 @@ int Tesla::stopCharge() {
     yield();
 
     if(rc>0) {  
-        if(debug) {    
           Serial.println(_charge_stop_url);    
           String response = http.getString(); 
-          Serial.println(response);  
-        }
-        
-        //200 == OK,
-        //401 == Bearer Token abgelaufen oder nicht richtig
-        //408 == Vehicle not available, do wakeup
-        if(rc==200) {
-          
-                beginRequest(&http, _set_charge_limit_url);
-                yield();
-                
-                int rc = http.POST("{\"percent\":50}");
-                Serial.print(F("Trying to issue set charge limit to 50%: "));
-                Serial.println(rc);
-                
-                if(rc>0) {  
-                    if(debug) {
-                      Serial.println(_set_charge_limit_url);
-                      String response = http.getString();                        
-                      Serial.println(response);  
-                    }
-                } else {
-                    Serial.println(F("Error sending POST charge limit 50%"));
-                }
-        }
+          Serial.println(response); 
     } else {
         Serial.println(F("Error sending POST charge stop"));
     }
@@ -203,13 +208,38 @@ int Tesla::stopCharge() {
     return rc;    
 }
 
-int Tesla::authorize(const char* userId, const char* password) {
-  Serial.print(F("Re-authorization mit userId >>"));
-  Serial.print(userId);
-  Serial.print(F("<< und password >>"));
-  Serial.print(password);
-  Serial.println(F("<<"));
-  return 0;
+int Tesla::setChargeLimit(int percent) {
+
+  HTTPClient http;
+
+  yield();
+  beginRequest(&http, _set_charge_limit_url);
+  yield();
+
+  DynamicJsonDocument doc(32);
+  doc["percent"]=percent;
+  String reqData = String((char *)0);
+  reqData.reserve(32);
+  serializeJson(doc, reqData);
+  Serial.println(reqData);
+
+  int rc = http.POST(reqData);
+  Serial.print(F("Trying to issue set charge limit: "));
+  Serial.println(rc);
+  
+  if(rc>0) {  
+      if(debug) {
+        Serial.println(_set_charge_limit_url);
+        String response = http.getString();                        
+        Serial.println(response);  
+      }
+  } else {
+      Serial.println(F("Error sending POST charge limit"));
+  }  
+
+  http.end();
+  yield();
+  return rc;
 }
 
 void Tesla::init(const char* auth, const char* vehicleid) {
@@ -260,6 +290,13 @@ void Tesla::init(const char* auth, const char* vehicleid) {
   wakeupUrl += _wakeup;
   _wakeup_url = new char[wakeupUrl.length()+1];
   strcpy(_wakeup_url, wakeupUrl.c_str());
+
+  String authUrl((char *)0);
+  authUrl.reserve(80); //spaeter
+  authUrl += _vehicle_base_url;
+  authUrl += _auth;
+  _auth_url = new char[authUrl.length()+1];
+  strcpy(_auth_url, authUrl.c_str());
 }
 
 void Tesla::print() {
@@ -268,6 +305,7 @@ void Tesla::print() {
   Serial.println(_charge_stop_url);
   Serial.println(_get_charge_state_url);
   Serial.println(_wakeup_url);
+  Serial.println(_auth_url);
   Serial.print(F("Has update: "));
   Serial.println(_hasUpdate);
   Serial.print(F("Chargerate: "));

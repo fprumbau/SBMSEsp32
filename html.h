@@ -121,6 +121,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.85: (6) Steueroption Tesla start/stop charge hinzugef&uuml;gt 
 <li>0.9.9.85: (7) Der UDP-Reinitialisierungthreshold wurde von 60s auf 120s angehoben, alle 60s wird nun ein Ping-Paket versendet.
 <li>0.9.9.85: (8) Eine Authentifizierungsmethode ist zum Teslaobjekt hinzugekommen um das Bearer-Token erneuern zu k&ouml;nnen.
+<li>0.9.9.85: (9) Tesla charge start/stop versuchen nun nicht mehr, das Chargelimit zu setzen. Daf&uuml;r gibt es eine eigene Methode
+
+<hr>
+<h2>TODO</h2>
+<li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
+<li>  Methode zum Einstellen des ChargeLimits einbinden
+<li>  Der Laden-Button sollte den Laden-Status wieder spiegeln, eine Idle-Button braucht man dann nicht mehr
 )=====";
 
 #define VERSION "0.9.9.85"

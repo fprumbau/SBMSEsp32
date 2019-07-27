@@ -18,6 +18,7 @@ class Tesla {
     const char* _charge_state = "/data_request/charge_state";
     const char* _charge_start = "/command/charge_start";
     const char* _charge_stop = "/command/charge_stop";
+    const char* _auth = "/oauth/token";
     const char* _wakeup = "/wake_up";
 
     float _chargeRate;  //10.9
@@ -33,6 +34,7 @@ class Tesla {
     char* _authorization;
     char* _vehicle_id;
     //init(..)
+    char* _auth_url;
     char* _wakeup_url;
     char* _vehicle_base_url;
     char* _charge_start_url;
@@ -48,10 +50,11 @@ class Tesla {
         
   public:
     void init(const char* auth, const char* vehicleid);
-    int authorize(const char* userId, const char* password);
+    int authorize(const char* password);
     int wakeup();
     int startCharge();
     int stopCharge();
+    int setChargeLimit(int percent);
     int readChargeState();
     void print();
     bool isCharging();

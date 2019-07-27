@@ -102,6 +102,8 @@ extern long checkOnIncomeMinIntervalMillis; //0.9.9.62
 extern long CHECK_INCOME_MIN_INTERVAL_MILLIS; //0.9.9.62
 extern bool enableCountBeforeOff; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
+extern String TESLA_CLIENT_ID;
+extern String TESLA_CLIENT_SECRET;
 extern boolean teslaCtrlActive;
 extern Tesla perry;
 extern CFG config;

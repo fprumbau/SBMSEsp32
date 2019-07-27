@@ -277,10 +277,9 @@ void commandLine() {
       } else if(cmd.startsWith(F("tesla charge stop"))) {         
         perry.stopCharge();
       } else if(cmd.startsWith(F("tesla authorize"))) {      
-        String keyVal = cmd.substring(15); //alles hinter 'authorize'
-        String key = config.getValue(keyVal, ':', 0);         
-        String val = config.getValue(keyVal, ':', 1);  
-        perry.authorize(key.c_str(),val.c_str());
+        String password = cmd.substring(15); //alles hinter 'authorize'
+        password.trim();
+        perry.authorize(password.c_str());
       } else if(cmd.startsWith(F("debug on"))) {        
         debug = true;
       } else if(cmd.startsWith(F("debug off"))) {         
@@ -333,7 +332,7 @@ void commandLine() {
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
         Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
-        Serial.println(F(" - tesla authorize user:password :: Wieder anmelden (neues bearer token erzeugen)"));
+        Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
         Serial.println(F(" - tesla status :: Check Tesla charge state"));
         Serial.println(F(" - tesla wakeup :: Wake your tesla"));
         Serial.println(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));

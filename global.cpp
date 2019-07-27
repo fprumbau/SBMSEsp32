@@ -95,6 +95,8 @@ long checkOnIncomeMinIntervalMillis = 0;
 long CHECK_INCOME_MIN_INTERVAL_MILLIS = 10000; //0.9.9.62
 bool enableCountBeforeOff = false; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
+String TESLA_CLIENT_ID = F("81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384");
+String TESLA_CLIENT_SECRET = F("c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3");
 Tesla perry;
 boolean teslaCtrlActive = false;
 long lastTeslaLoadSwitch = -1;
