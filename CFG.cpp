@@ -84,11 +84,11 @@ void CFG::set(const String& keyVal) {
   String val = getValue(keyVal, ':', 1);
   
   doc[key] = val;
-  Serial.print("Set config value ");
+  Serial.print(F("Set config value "));
   Serial.print(key);
-  Serial.print(" to ");
+  Serial.print(F(" to "));
   Serial.print(val);
-  Serial.println("; Still has to be saved");
+  Serial.println(F("; Still has to be saved"));
   
   //Konfiginitialisierung durchfuehren
   init();

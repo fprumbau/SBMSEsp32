@@ -191,6 +191,7 @@ void loop() {
       inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       yield();
       sma.read();       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
+      yield();
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -215,95 +216,103 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
 void commandLine() {
   if(Serial.available()) {
       String cmd = Serial.readString();
-      Serial.print("Echo: ");
+      Serial.print(F("Echo: "));
       Serial.println(cmd);
-      String msg = "-";
-      if(cmd.startsWith("restart wifi")) {      
+      String msg = String((char*)0);
+      msg.reserve(32);
+      if(cmd.startsWith(F("restart wifi"))) {      
         myWifi.reconnect();
-      } else if(cmd.startsWith("restart esp")) {      
+      } else if(cmd.startsWith(F("restart esp"))) {      
         msg = F("Restarting ESP...");
         Serial.println(msg);
         wc.sendClients(msg);
         ESP.restart();
-      } else if(cmd.startsWith("start RELAY_S1")) {      
+      } else if(cmd.startsWith(F("start RELAY_S1"))) {      
         msg = F("Starting RELAY_S1...");
         digitalWrite(RELAY_S1, LOW);        
-      } else if(cmd.startsWith("stop RELAY_S1")) {      
+      } else if(cmd.startsWith(F("stop RELAY_S1"))) {      
         msg = F("Stopping RELAY_S1...");
         digitalWrite(RELAY_S1, HIGH);
-      } else if(cmd.startsWith("start RELAY_S2")) {      
+      } else if(cmd.startsWith(F("start RELAY_S2"))) {      
         msg = F("Starting RELAY_S2...");
         digitalWrite(RELAY_S2, LOW);        
-      } else if(cmd.startsWith("stop RELAY_S2")) {      
+      } else if(cmd.startsWith(F("stop RELAY_S2"))) {      
         msg = F("Stopping RELAY_S2...");
         digitalWrite(RELAY_S2, HIGH);
-      } else if(cmd.startsWith("start RELAY_3")) {      
+      } else if(cmd.startsWith(F("start RELAY_3"))) {      
         msg = F("Starting RELAY_3...");
         digitalWrite(RELAY_3, LOW);        
-      } else if(cmd.startsWith("stop RELAY_3")) {      
+      } else if(cmd.startsWith(F("stop RELAY_3"))) {      
         msg = F("Stopping RELAY_3...");
         digitalWrite(RELAY_3, HIGH);
-      } else if(cmd.startsWith("start RELAY_4")) {      
+      } else if(cmd.startsWith(F("start RELAY_4"))) {      
         msg = F("Starting RELAY_4...");
         digitalWrite(RELAY_4, LOW);        
-      } else if(cmd.startsWith("stop RELAY_4")) {      
+      } else if(cmd.startsWith(F("stop RELAY_4"))) {      
         msg = F("Stopping RELAY_4...");
         digitalWrite(RELAY_4, HIGH);       
-      } else if(cmd.startsWith("start RELAY_W")) {      
+      } else if(cmd.startsWith(F("start RELAY_W"))) {      
         msg = F("Starting RELAY_W...");
         digitalWrite(RELAY_PIN, LOW);        
-      } else if(cmd.startsWith("stop RELAY_W")) {      
+      } else if(cmd.startsWith(F("stop RELAY_W"))) {      
         msg = F("Stopping RELAY_W...");
         digitalWrite(RELAY_PIN, HIGH);       
-      } else if(cmd.startsWith("test on")) {      
+      } else if(cmd.startsWith(F("test on"))) {      
         msg = F("test simulation set to on");     
         testFixed = true;        
-      } else if(cmd.startsWith("test off")) {      
+      } else if(cmd.startsWith(F("test off"))) {      
         msg = F("test simulation set to off");     
         testFixed = false;        
         wc.updateUi();
-      } else if(cmd.startsWith("data ")) {      
+      } else if(cmd.startsWith(F("data "))) {      
         msg = F("Setze Testdaten");     
         testData = cmd.substring(5); 
         msg+=testData;     
-      } else if(cmd.startsWith("tesla status")) {          
+      } else if(cmd.startsWith(F("tesla status"))) {          
         perry.readChargeState();
-      } else if(cmd.startsWith("tesla wakeup")) {          
+      } else if(cmd.startsWith(F("tesla wakeup"))) {          
         perry.wakeup();
-      } else if(cmd.startsWith("tesla charge start")) {          
+      } else if(cmd.startsWith(F("tesla charge start"))) {          
         perry.startCharge();
-      } else if(cmd.startsWith("tesla charge stop")) {         
+      } else if(cmd.startsWith(F("tesla charge stop"))) {         
         perry.stopCharge();
-      } else if(cmd.startsWith("debug on")) {        
+      } else if(cmd.startsWith(F("debug on"))) {        
         debug = true;
-      } else if(cmd.startsWith("debug off")) {         
+      } else if(cmd.startsWith(F("debug off"))) {         
         debug = false;
-      } else if(cmd.startsWith("print")) {         
+      } else if(cmd.startsWith(F("print"))) {         
         perry.print();
-      } else if(cmd.startsWith("tesla control on")) {
+      } else if(cmd.startsWith(F("show heap"))) {
+        Serial.print(F("Free heap: "));
+        Serial.println(ESP.getFreeHeap()); 
+        //Serial.print("Heap fragmentation: ");
+        //Serial.println(ESP.getHeapFragmentation()); 
+        //Serial.print("Max free blocksize: ");
+        //Serial.println(ESP.getMaxFreeBlockSize()); 
+      } else if(cmd.startsWith(F("tesla control on"))) {
         teslaCtrlActive = true;
-      } else if(cmd.startsWith("tesla control off")) {
+      } else if(cmd.startsWith(F("tesla control off"))) {
         teslaCtrlActive = false;
-      } else if(cmd.startsWith("config load")) {
+      } else if(cmd.startsWith(F("config load"))) {
         config.load();
-      } else if(cmd.startsWith("config save")) {
+      } else if(cmd.startsWith(F("config save"))) {
         config.save();
-      } else if(cmd.startsWith("config set")) {
+      } else if(cmd.startsWith(F("config set"))) {
         String keyVal = cmd.substring(10); //alles hinter 'set'
         keyVal.trim();
         config.set(keyVal);
-      } else if(cmd.startsWith("pwm ")) {      
+      } else if(cmd.startsWith(F("pwm "))) {      
         msg = F("setze PWM:");     
         String pwm = cmd.substring(4); 
         msg+=pwm; 
         String val = pwm.substring(5);    
         int dutyCycle = val.toInt();
         if(testFixed) {
-          if(pwm.startsWith("io25")) {
+          if(pwm.startsWith(F("io25"))) {
             ledcWrite(GPIO25, dutyCycle);
-          } else if(pwm.startsWith("io26")) {
+          } else if(pwm.startsWith(F("io26"))) {
             ledcWrite(GPIO26, dutyCycle);
-          } else if(pwm.startsWith("io05")) {
+          } else if(pwm.startsWith(F("io05"))) {
             ledcWrite(GPIO05, dutyCycle);          
           }
         } else {
@@ -326,6 +335,7 @@ void commandLine() {
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
         Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
         Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!)"));
+        Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;
       }

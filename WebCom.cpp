@@ -33,6 +33,9 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         String str(jsonChar);
         if(debug2) {
           Serial.println(str);
+          doc["fh"]=ESP.getFreeHeap();
+          //doc["hf"]=ESP.getHeapFragmentation();
+          //doc["bs"]=ESP.getMaxFreeBlockSize();
         }
         if (all) {
           ws.textAll(str.c_str());
@@ -50,7 +53,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
   switch (type) {
     case WS_EVT_CONNECT: {       
        
-          client->text("@ Connected");
+          client->text(F("@ Connected"));
          
           //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
           wc.updateUi(client, false);             
@@ -77,66 +80,70 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           saveConfig = true;      
           teslaCtrlActive = updateTeslaCtrlActive;
           buildMessage(&msg, "teslaCtrlActive", String(teslaCtrlActive).c_str());
-        }
-        //Charger S1
-        if(doc.containsKey("s1")) {
+        } 
+        
+        if(doc.containsKey("s1")) { //Charger S1
           bool s1 = doc["s1"];
           if(s1 != charger.isChargerOn(S1)) {    
             update = true;    
             charger.toggleCharger(S1, s1, true, false);
             buildMessage(&msg, "S1", String(s1).c_str());
           }
-        }
-        //Charger S2
-        if(doc.containsKey("s2")) {
+        }  
+        
+        if(doc.containsKey("s2")) { //Charger S2
           bool s2 = doc["s2"];
           if(s2 != charger.isChargerOn(S2)) {    
             update = true;    
             charger.toggleCharger(S2, s2, true, false);
             buildMessage(&msg, "S2", String(s2).c_str());
           }
-        }
-        //Debug Flag 1
-        if(doc.containsKey("d1")) {
+        } 
+        
+        if(doc.containsKey("d1")) { //Debug Flag 1
           bool updateDbg1 = doc["d1"];
           if(updateDbg1 != debug) {    
             update = true;    
             debug = updateDbg1;
             buildMessage(&msg, "debug", String(debug).c_str());
           }
-        }
-        //Debug Flag 2
-        if(doc.containsKey("d2")) {
+        }  
+      
+        if(doc.containsKey("d2")) {  //Debug Flag 2
           bool updateDbg2 = doc["d2"];
           if(updateDbg2 != debug2) {       
             update = true;          
             debug2 = updateDbg2;
             buildMessage(&msg, "debug2", String(debug2).c_str());
           }
-        }
+        }  
+        
         if(doc.containsKey("vr")) {
           String netzOderBatt = doc["vr"];
           if(netzOderBatt == "netz") {       
             update = true;
-            inverter.starteNetzvorrang("Websockets");
+            inverter.starteNetzvorrang(F("Websockets"));
             buildMessage(&msg, "Netzvorrang", "true");
           } else if(netzOderBatt == "batt") {
             update = true;
-            inverter.starteBatterie("Websockets");    
+            inverter.starteBatterie(F("Websockets"));    
             buildMessage(&msg, "Battery", "true");      
           }
-        }
-
-        //rts, requst Tesla status
-        if(doc.containsKey("rts")) {
+        }  
+        
+        if(doc.containsKey("rts")) { //rts, requst Tesla status
           update = true;
           int rc = perry.readChargeState();     
           msg+=F("Updated tesla status information; status code: ");    
           msg+=rc;
-        }
+        }  
 
-        //wt, requst Tesla wakeup
-        if(doc.containsKey("wt")) {
+        if(doc.containsKey("rts_reset")) { //rts update reset, es werden keine weiteren Daten an den Client gesendet
+          perry.reset(); //keine Updates mehr
+          msg+=F("Reset Tesla Request Status ( perry.reset() )");    
+        }  
+
+        if(doc.containsKey("wt")) { //wt, requst Tesla wakeup
           update = true;
           int rc = perry.wakeup();     
           msg+=F("Requested Tesla wakeup; status code: ");    
@@ -152,7 +159,9 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           updateUi();              
         }   
       } else {
-        String msg = "Cannot process data: ";
+        String msg = String((char*)0);
+        msg.reserve(32);
+        msg+=F("Cannot process data: ");
         msg+=String((char *)data);
         wc.sendClients(msg);
       }

@@ -113,9 +113,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.84: (6) Moeglichkeit geschaffen, &uuml;ber die Kommandozeile Konfigwerte zu setzen (um sie dann mit einem config.save) sp&auml;ter speichern zu k&ouml;nnen. 
 <li>0.9.9.84: (7) Wird ein Tesla-Statusupdate empfangen, dann wurde die maximale Nachrichtengroesse von 300Byte ueberschritten (392), Max wurde nun auf 512 erh&uuml;ht
 <li>0.9.9.84: (8) Fehler bei Namen WakeUp-Button behoben, Styling, 'teslaout' wird nun bef&uuml;llt.
+<li>0.9.9.85: (1) Free heap Anzeige, nur bei Debug2 (online), Hinzu kommmt heap fragmentation und max available block size (command line und online)
+<li>0.9.9.85: (2) Implementierung eines Mechanismus' der verhindert, dass der Server immer dieselben Teslastatusdaten sendet
+<li>0.9.9.85: (3) Einige yield()s hinzugefuegt, viele String-Optimierungen
+<li>0.9.9.85: (4) Bisher wurde beim Laden die Lüfter bei SOC<99 angeschaltet, nun wird dies nur noch bei hoher Temperatur gemacht.
 )=====";
 
-#define VERSION "0.9.9.84"
+#define VERSION "0.9.9.85"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
@@ -159,7 +163,6 @@ const char html[] PROGMEM = R"=====(
 <meta http-equiv='cache-control' content='no-cache'>
 <meta http-equiv='expires' content='0'>
 <meta http-equiv='pragma' content='no-cache'>
-<!--meta http-equiv='refresh' content='3'-->
 <style media='screen' type='text/css'>
 meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;}
 .bar{position:absolute;bottom:0px;display:inline-block;}
@@ -194,7 +197,7 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 <body style='background: #000;'>
 <div3 style='height: 135px;'>
 <canvas id='Lg' width='70' height='120' style='position:relative; top:11px; left:12px; z-index:2; float: left;'></canvas>
-<div2 style="top:12px; left:360px;" id="id">SBMS120
+<div2 style="top:12px; left:360px;" id="id"><span ondblclick='updatePage();'>SBMS120</span>
 <div2 style="top:0px;left:200px;top:-6px;width:138px;font-family:'Arial';font-size:28px;color:lightgreen;background-color:#505050;border:1px solid white;padding:5px;text-align:right;white-space:pre" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'>
@@ -335,6 +338,8 @@ connection.onmessage = function (e) {
 console.log('End trying to open Webclient socket');
 log('End trying to open webclient socket');
 
+var rts_reset = false;
+
 /**
  * Akualisierung nach Empfang von Serverdaten
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
@@ -406,10 +411,16 @@ function updateUi() {
   }
   elem.innerHTML=''+sum.toFixed(1)+' W';
 
+  if(json.hasOwnProperty('fh')) {
+    log("ESP32 free heap: " + json.fh);
+    //log("ESP32 heap fragmentation: " + json.hf);
+    //log("ESP32 max free blocksize: " + json.bs);
+  }
+
   //Antwort auf Statusabfrage vom Server darstellen
   if(json.hasOwnProperty('rts')) {
     var rts = json.rts;
-    log("json.rts="+rts);
+    if(debug1) log("json.rts="+rts);
     reset(document.getElementById('state'));
     reset(document.getElementById('wakeup'));
     var to = document.getElementById("teslaout");
@@ -417,6 +428,14 @@ function updateUi() {
       to.innerHTML=rts;
     } else {
       console.log("Element 'teslaout' not found");
+    }
+    console.log("Setting rts_reset to true"); //for debug only
+    rts_reset = true; //Setze Resetflag
+    updateServer();
+  } else {
+    if(rts_reset) {
+      console.log("Setting rts_reset to false"); //for debug only
+      rts_reset = false; //es kommen keine Teslastatusdaten mehr, also kann Resetflag zurückgesetzt werden
     }
   }
 }
@@ -471,6 +490,12 @@ function updateServer(txt) {
   o.ta = document.getElementById("teslaactive").checked;
   o.d1 = debug1 = document.getElementById("dbg1").checked;
   o.d2 = debug2 = document.getElementById("dbg2").checked;
+
+  //Wurden Teslastatusdaten verarbeitet, sende Signal an Server, damit dieser keine Wiederholung mehr sendet
+  if(rts_reset) {
+    console.log("Sending rts_reset=true to server"); //for debug only
+    o.rts_reset = rts_reset;
+  }
   
   //geht, aber man muss einen String 'bauen'
   //var data = JSON.stringify({ "ta": document.getElementById("teslaactive").checked });

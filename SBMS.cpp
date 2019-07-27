@@ -55,9 +55,10 @@ void SBMS::readSbms() {
     sread = testData;    
   } else {
     while (Serial1.available()) {
-      sread = Serial1.readString();
+      sread = Serial1.readString();      
     }
   }
+  yield();
   sread.trim();
   int len = sread.length();
 
@@ -118,6 +119,7 @@ void SBMS::readSbms() {
           //((dcmp(24,2,data)/10)-45)
           temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
         }
+        yield();
 
         //Werte
         if (debug) {

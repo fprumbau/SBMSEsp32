@@ -27,8 +27,7 @@ void MyWifi::connect() {
       Serial.print(".");
       delay(500); 
   }
-  Serial.println("\n");
-  Serial.printf("New Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
+  Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
   Serial.print(F("Ip Address: "));
 
   IPAddress ip = WiFi.localIP();

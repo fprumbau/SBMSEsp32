@@ -49,26 +49,26 @@ void Battery::controlFans() {
   if(debug) {
     String m((char *)0);
     m.reserve(128);
-    m += "Lueft.: ";
+    m += F("Lueft.: ");
     m += fansRunning;
-    m += "; Batt: ";
+    m += F("; Batt: ");
     m += isOn();
-    m += "; Chrg: ";
+    m += F("; Chrg: ");
     m += charger.isOn();
-    m+="; RS1: ";
-    m+=digitalRead(RELAY_S1);
-    m+="; RS2: ";
-    m+=digitalRead(RELAY_S2);
-    m+="; R3: ";
-    m+=digitalRead(RELAY_3);
-    m+="; isOnS1: ";
-    m+= charger.isChargerOn(1);
-    m+="; isOnS2: ";
-    m+= charger.isChargerOn(2);
-    m+= "\nBez/Lief: ";
-    m+= bezug;
-    m+= " / ";
-    m+= lieferung;
+    m += F("; RS1: ");
+    m +=digitalRead(RELAY_S1);
+    m += F("; RS2: ");
+    m +=digitalRead(RELAY_S2);
+    m += F("; R3: ");
+    m +=digitalRead(RELAY_3);
+    m += F("; isOnS1: ");
+    m += charger.isChargerOn(1);
+    m += F("; isOnS2: ");
+    m += charger.isChargerOn(2);
+    m += F("\nBez/Lief: ");
+    m += bezug;
+    m += F(" / ");
+    m += lieferung;
     wc.sendClients(m);
   }
   String msg;
@@ -81,7 +81,7 @@ void Battery::controlFans() {
     }
  } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
     if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen, aber nur wenn der Ladestand<99% UND die Temperatur>35°C ist, beim Balancing werden die Luefter nicht benutzt
-      if(soc<99 && temp>TEMP_THRESHOLD_HIGH) {
+      if(temp>TEMP_THRESHOLD_HIGH) {
         msg = F("Schalte Luefter an, da gerade geladen wird; Temperatur: ");
         msg+=temp;
         msg+="°C";

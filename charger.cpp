@@ -148,7 +148,7 @@ void Charger::checkOnIncome(float netto) {
               perry.startCharge();
               lastTeslaLoadSwitch = now;
               teslaCharging = true;
-              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu starten");
+              wc.sendClients(F("Es wurde versucht, den Ladevorgang des TESLA zu starten"));
               highIncomeCount = 0;
             } else {
               highIncomeCount++;
@@ -159,13 +159,14 @@ void Charger::checkOnIncome(float netto) {
               perry.stopCharge();
               lastTeslaLoadSwitch = now;
               teslaCharging = false;
-              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu stoppen");
+              wc.sendClients(F("Es wurde versucht, den Ladevorgang des TESLA zu stoppen"));
               lowIncomeCount = 0;
             } else {
               lowIncomeCount++;
             }
         }
     }
+    yield();
     
     /**
      * Ist Charger2 aus UND ist der letzte Schaltvorgang
@@ -252,6 +253,8 @@ void Charger::checkOnIncome(float netto) {
             }
       }
     }
+    yield();
+    
     //Nun Ladelevel ueber GPIO5 einstellen.
     if(s2on) {      
       dutyCycle = calculateDc(netto);
@@ -269,25 +272,25 @@ void Charger::checkOnIncome(float netto) {
    if(debug) {
      String m1((char *)0);
      m1.reserve(128);
-     m1+="; Netto: ";
+     m1+=F("; Netto: ");
      m1+=netto;
-     m1+="; now: ";
+     m1+=F("; now: ");
      m1+=now;
-     m1+="; s1Last: ";
+     m1+=F("; s1Last: ");
      m1+=s1Last;
-     m1+="; s1_switched: ";
+     m1+=F("; s1_switched: ");
      m1+=s1_switched;
-     m1+="; s1_countBeforeOff: ";
+     m1+=F("; s1_countBeforeOff: ");
      m1+=s1_countBeforeOff;
-     m1+="; s1override: ";
+     m1+=F("; s1override: ");
      m1+=s1override;       
-     m1+="; s2Last: ";
+     m1+=F("; s2Last: ");
      m1+=s2Last;
-     m1+="; s2_switched: ";
+     m1+=F("; s2_switched: ");
      m1+=s2_switched;
-     m1+="; s2_countBeforeOff: ";
+     m1+=F("; s2_countBeforeOff: ");
      m1+=s2_countBeforeOff;
-     m1+="; s2override: ";
+     m1+=F("; s2override: ");
      m1+=s2override;
      wc.sendClients(m1);
    }

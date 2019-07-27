@@ -15,6 +15,7 @@ int Tesla::wakeup() {
     int rc = http.POST("");
     Serial.print(F("Trying to issue wakeup: "));
     Serial.println(rc);
+    yield();
  
     if(rc>0) {
         if(debug) {
@@ -30,7 +31,8 @@ int Tesla::wakeup() {
     }
   
     http.end();
-  
+
+    yield();
     return rc;
 }
 
@@ -44,6 +46,7 @@ int Tesla::readChargeState() {
   int rc = http.GET();
   Serial.print(F("Trying to issue read charge state: "));
   Serial.println(rc);
+  yield();
   
   if(rc>0) {
       Serial.println(_get_charge_state_url);
@@ -80,9 +83,11 @@ int Tesla::readChargeState() {
       //401 == Bearer Token abgelaufen oder nicht richtig
       //408 == 'vehicle not available' => Wakup
   } else {
-      Serial.println(F("Error sending GET charge state"));
+      Serial.print(F("Error sending GET charge state; rc="));
+      Serial.println(rc);
   }
 
+  yield();
   http.end();
   return rc;
 }
@@ -100,6 +105,7 @@ int Tesla::startCharge() {
     int rc = http.POST("{\"percent\":90}");
     Serial.print(F("Trying to issue charge start (through setting charge limit to 90%): "));
     Serial.println(rc);
+    yield();
       
     if(rc>0) {   
         if(debug) {       
@@ -138,6 +144,7 @@ int Tesla::startCharge() {
     }
   
     http.end();
+    yield();
     return rc;   
 }
 
@@ -156,6 +163,7 @@ int Tesla::stopCharge() {
     int rc = http.POST("");
     Serial.print(F("Trying to issue charge stop: "));
     Serial.println(rc);
+    yield();
 
     if(rc>0) {  
         if(debug) {    
@@ -191,6 +199,7 @@ int Tesla::stopCharge() {
     }
   
     http.end();
+    yield();
     return rc;    
 }
 

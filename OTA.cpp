@@ -67,9 +67,9 @@ void OTA::setup(const char *path, String username, String password) {
         String pageIndex = String(update);
         pageIndex.replace("{title}",_title);
         if(Update.hasError()){
-          pageIndex.replace("{banner}","<b><font color=red>Update gescheitert</font></b>");
+          pageIndex.replace("{banner}",F("<b><font color=red>Update gescheitert</font></b>"));
         } else {
-          pageIndex.replace("{banner}","<b><font color=green>Update erfolgreich</font></b>");
+          pageIndex.replace("{banner}",F("<b><font color=green>Update erfolgreich</font></b>"));
           pageIndex.replace("{redirect}", "redirect=true;");
         }
         pageIndex.replace("{build}",_build);
@@ -116,8 +116,8 @@ void OTA::setup(const char *path, String username, String password) {
       if(final){ // if the final flag is set then this is the last frame of data
         if(Update.end(true)){ //true to set the size to the current progress
             t_stop = millis();
-            Serial.print("\nTime UPLOAD: "); Serial.print((t_stop - t_start) / 1000.0); Serial.println(" sec.");
-            Serial.print("Speed UPLOAD: "); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(" Kbit/s");
+            Serial.print(F("\nTime UPLOAD: ")); Serial.print((t_stop - t_start) / 1000.0); Serial.println(" sec.");
+            Serial.print(F("Speed UPLOAD: ")); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(" Kbit/s");
             Serial.printf("Upload Success, Rebooting: %u bytes\n", fileSize);
             restartRequired = true;  // Tell the main loop to restart the ESP
         } else {

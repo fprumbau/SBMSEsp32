@@ -1,5 +1,6 @@
 #include "global.h"
 
+#define BUTTONACTION "Buttonaction"
 /**
    Netzvorrang starten
 */
@@ -84,9 +85,11 @@ void Inverter::check()  {
     
   //v. 0.9.9.38 faellt die CV zu sehr, sollte S1 (Charger 1) aktiviert werden
   battery.checkCellVoltages();
+  yield();
 
   //v. 0.9.9.40 ggfls. Luefer abschalten (es laeuft weder ein Charger noch der Inverter)
   battery.controlFans();
+  yield();
   
   if(debug) {
     Serial.print(F("Check...  ; failureCount: "));
@@ -110,7 +113,7 @@ void Inverter::check()  {
   String message((char *)0);
   message.reserve(128);
   if (soc < limit) {
-    message = "State of charge below ";
+    message = F("State of charge below ");
     message += limit;
     message += "%";
     stop = true;
@@ -159,6 +162,7 @@ void Inverter::check()  {
   }
   //ab v.0.9.9.28 NTPClient mit Zeit
   while(!timeClient.update()) {
+    yield();
     timeClient.forceUpdate();
   }
   int day = timeClient.getDay();
@@ -210,15 +214,15 @@ void Inverter::check()  {
  */
 void Inverter::handleButtonPressed() {
 
-    Serial.println("Button pressed");
+    Serial.println(F("Button pressed"));
 
     bool relayStatus = digitalRead(RELAY_PIN);
     if (relayStatus == HIGH) {
       // starte Netzvorrang
-      starteNetzvorrang("Buttonaction");
+      starteNetzvorrang(BUTTONACTION);
     } else {
       if (!stopBattery) {
-        starteBatterie("Buttonaction");
+        starteBatterie(BUTTONACTION);
       } else {
         if (debug) {
           Serial.println(F("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)"));
