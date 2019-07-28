@@ -122,7 +122,12 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.85: (7) Der UDP-Reinitialisierungthreshold wurde von 60s auf 120s angehoben, alle 60s wird nun ein Ping-Paket versendet.
 <li>0.9.9.85: (8) Eine Authentifizierungsmethode ist zum Teslaobjekt hinzugekommen um das Bearer-Token erneuern zu k&ouml;nnen.
 <li>0.9.9.85: (9) Tesla charge start/stop versuchen nun nicht mehr, das Chargelimit zu setzen. Daf&uuml;r gibt es eine eigene Methode
-
+<li>0.9.9.86: (1) Nach einer Teslastatusabfrage wird 'cs' (charge state) &uuml;bermittelt
+<li>0.9.9.86: (2) Weitere yields im Berech des Datenempfangs und der Verarbeitung in WebCom.cpp
+<li>0.9.9.86: (3) WebCom.sendJson(key,value) zugef&uuml;gt, auch eine neue Methode WebCom.sendClients(String* msg) gebaut, die das Kopieren des Strings verhindert
+<li>0.9.9.86: (4) UpdateUi in html.h sollte nun auch mit Teilantworten zurecht kommen. Das 'cs' (chargeState) kommt nun allein, wenn start/stop charge mit rc==200 erfolgreich
+<li>0.9.9.86: (5) Wakeup repariert, der RC wird nun &uuml;bermittelt und gelogged
+<li>0.9.9.86: (6) Ein drittes Debugflag 'jsonDebug' erlaubt die Analyse der Server-/Clientkommunikation
 <hr>
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
@@ -130,7 +135,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>  Der Laden-Button sollte den Laden-Status wieder spiegeln, eine Idle-Button braucht man dann nicht mehr
 )=====";
 
-#define VERSION "0.9.9.85"
+#define VERSION "0.9.9.86"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
@@ -147,7 +152,8 @@ body{
   background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAEfnpUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjarVdttuMsCP7PKmYJAcSP5WiM57w7eJc/j8YmbW9vpp078SRYQEQeREvb//81+oVH2C3kLESfvF/wuOSSZHTisj875cWN7/6ESfmRT4dAwFJQ3X/6bepn8O0cENzkl0c+hXXaidPQbeZpUPvMgs7Ui9OQys7n+ZvSHJfd3XLmu27DxMLT6PNvFxCMamCqkGwKPr5jFoUHGjWDGr6sviuBZnVonZ9ex46O7lPwjt5T7JY8+foYClr8VPBPMZp8ttexGxG694jPmR8Ezg48v8SutRpb2/bVZecRKU9zUbeljB4UC0zpGObRAl5DP4yW0CKWuAKxCjQL2kqcWBDtxo4rZ268DbryChedbBJARVZEvPOiBkmyDlB6+B03CZq0EjASXYGagi2HLzzmTWO+lSNmrgxNYRhjjPjS6BXzb9phqLWeusxLPGIFv6QnINzoyPUvtAAItxlTG/Edje7yZrkDVoGgjTBHLDAvZTdRjM/c0oGzQs8WR8u+NTjUaQAhwtwGZ1iBwOJZjT0vQSQwI44R+GR4LuqkAAE2k8rUgI1iJwSJ0ufGmMBDV0x2NkoLgDD1GgBN0gywnDPkT3AROZRNzZGZeQsWLVn26p03733wvUbloMEFCz6EEEMKOWp00aKPIcaYYk6SFCXMkk+BUkwp5YxJM0xnjM7QyLlI0eKKFV9CiSWVvCJ9Vrfa6tewxjWtuUrViu1ffQ1UY001b7whlTa32ea3sMUtbbkh15o216z5FlpsqeUDtYnqI2r8hNw1ajxR64i5oRdO1MAO4WaCezmxjhkQE8dAPHQEkNDSMVsiOycduY7ZkgSbwgSosXVwKnfEgKDbWKzxgd2J3CVuZO4j3OQ75KhD9y+Qow7dRO4rbi9Qq3mcKDoA6ruwx3TRhsLWHCIRs5S41qV3YtdF2ssC95aDdU3pXUXQtGAdwq9V6IHxsR8npZ/5cVJCx3AGAjufModcNaO0leIq48WP3O8BVZ3Hu2X5TkiX0g+EdCEFuFFdy8iiHjVf2Vm/M9grSuggdQrG+9wsB+sXjC76kNKlQvX7FG+4RPwnlwoUkutl+bJD38nEcA6MjMdhv/sUTLnlCrxhP/WZuv7s0Jg1HjkRZHilNhPhtGVjQ3+bTXSRiYLKICmeoRgO6ZZiq74j+xxsqf/ALfrTBnnXLboh9FO36K368YZb3SM5ZmP/ZON9t+j9snbtFt3C9VO36KMyeOEWPaD4A7fo8+r82i36mlwXblkvE6h0MsvE/abFQYmzeR/kbqM/6CTpXQ/4T6N73HBW1w/8u5WxxwpZYLN8V5WvqBh9V8Ks9BKmuxduedqSp41cqk+4RWCLlNTdzLie4BgZ0QIoYGrop2KAeq2rj/1duDrTAMEXIV1KXwn7rXlTl0qseielKR5LYQhx5Uu6F+7rUD/dEyj+xYXhVWrSLezcU12PKJ4Fzg4cJu3g4lLp77fJXmofGO9RN3aYv8sc6ndO3Fxu2XQGRXHNw19z+g0EzfGFJDrJyAAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAAd0SU1FB+IFEAwsCt9fsxIAAABDSURBVAjXfc67DYBADATRMUf/hVAGCU1ZHgInp+Oz0kZPtjau8zAiWKOyA4wxHpiZjQDztXY3PuMf0m/VZcyEVfWKN854GDbTdSsxAAAAAElFTkSuQmCC");} button{border:0;background-color:#b2ad98;color:#545147;line-height:2.4rem;font-size:1.2rem;width:100%;} #header{height:120px;text-align: left;color:#cbc6af;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH4gUQDDYwqX6QewAAAA1JREFUCNdjMDXWOwMAApoBY44cvvsAAAAASUVORK5CYII=");}#footer{height:24px;color:#292723;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH4gUQDDg61yhU6wAAAA1JREFUCNdjMDXWSwMAAjQA/b8+kbgAAAAASUVORK5CYII=");
 }
 #body{text-align:left;display:inline-block;min-width:260px;min-height: calc(100% - 186px);
-color:#545147;}h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bottom: 0px;margin-left: 10px;}
+color:#545147;}
+h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bottom: 0px;margin-left: 10px;}
 </style>
 <script>var redirect = false;
 {redirect};
@@ -202,7 +208,9 @@ div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;backgroun
 div5{position:absolute;background: rgba(120,90,0,0.4);}
 button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height:22px;}
 .bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;line-height:13px;}
-.bs{background-color:#d8d8d8;color:#505050;width:50px;border:1px solid white;margin-left:2px;}
+.bs{background-color:#d8d8d8;color:#505050;width:50px;border:1px solid white;margin-left:5px;}
+.onc{color:#ff0;background:#f00}
+.off{color:#505050;background:#d8d8d8}
 </style>
 </head>
 <body style='background: #000;'>
@@ -225,7 +233,7 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
     <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;">
       <option name="0">Debug Web (Client)</option>
       <option name="1">Debug Websckts (Srv)</option>
-      <option name="2">Mmmmh</option>
+      <option name="2">Debug Json</option>
     </select>
 </input>
 
@@ -252,13 +260,13 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
 <input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
 <br>
-<input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs off" id="state" value="Status" onclick="updateServer(this.id);setOn(this);"/>
 <br>
-<input type="button" class="bs" id="wakeup" value="Wake" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs off" id="wakeup" value="Wake" onclick="updateServer(this.id);setOn(this);"/>
 <br>
-<input type="button" class="bs" id="charge" value="Laden" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs off" id="charge" value="Laden" onclick="updateServer(this.id);setOn(this);"/>
 <br>
-<input type="button" class="bs" id="idle" value="Idle" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs off" id="idle" value="Idle" onclick="updateServer(this.id);setOn(this);"/>
 
 <div2 id="teslaout" class="bt">
 ...
@@ -273,6 +281,7 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 <script id='smain2'>
 
 var debug = false;
+var debugJson = false;
 
 var bitset = "0000000000";
 
@@ -281,9 +290,9 @@ String.prototype.replaceAt=function(index, char) {
     a[index] = char;
     return a.join("");
 }
-    
+
+//Aktualisierung vom Server    
 function updateFromBitset() {
-  //a) welche Selectoption ist angewählt?
   var selIndex = document.getElementById("dbgsel").selectedIndex;
   if(debug) {
     log("SelectedIndex: " + selIndex);
@@ -297,13 +306,32 @@ function updateFromBitset() {
             document.getElementById("dbg").checked = true;
         }
   }
-  if(debug) {
-    log(bitset);
+  for (var i = 0; i < bitset.length; i++) {
+     switch(i) {
+        case 0:
+          if(bitset.charCodeAt(i) == 48) {
+            debug = false;
+          } else {
+            debug = true;
+          }
+          console.log("Setting debug to " + debug);
+          break;
+        case 2:
+          if(bitset.charCodeAt(i) == 48) {
+            debugJson = false;
+          } else {
+            debugJson = true;
+          }
+          console.log("Setting debugJson to " + debugJson);
+          break;
+     }
   }
+  log("Vom Server: " + bitset);
+
 }
 
+//Aktualisierung des Bitsets auf dem Weg zum Server
 function updateBitset() {
-  //a) welche Selectoption ist angewählt?
   var selIndex = document.getElementById("dbgsel").selectedIndex;
   if(-1 != selIndex)  { 
     if(document.getElementById("dbg").checked) {
@@ -312,9 +340,7 @@ function updateBitset() {
         bitset = bitset.replaceAt(selIndex, '0');   
     }
   }
-  if(debug) {
-    log(bitset);
-  }
+  log("Zum Server: " + bitset);
   updateServer();
 }
 
@@ -381,7 +407,7 @@ connection.onmessage = function (e) {
     data = e.data;
     switch(data[0]) {
        case '{':
-            if(debug) {
+            if(debugJson) {
               log(data);
             }
             //try {
@@ -413,21 +439,21 @@ var rts_reset = false;
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
 function updateUi() {
-  var dbgBitset = json.dbg;
-  if(null != dbgBitset) {
+  if(json.hasOwnProperty("dbg")) {
+    var dbgBitset = json.dbg;
     bitset = dbgBitset;
     updateFromBitset();
   }
-  var teslaCtlActive = json.ta;
-  if(null != teslaCtlActive) {    
+  if(json.hasOwnProperty("ta")) {    
+    var teslaCtlActive = json.ta;
     document.getElementById("teslaactive").checked = teslaCtlActive;
   }
-  var dt = json.dt;
-  if(null != dt) {
+  if(json.hasOwnProperty("dt")) {
+    var dt = json.dt;
     document.getElementById("datetime").innerHTML=dt;
   }
-  var s1 = json.s1;
-  if(null != s1) {
+  if(json.hasOwnProperty("s1")) {
+    var s1 = json.s1;
     var b1 = document.getElementById("b1");
     if(s1) {   
       b1.style.background='#f00';
@@ -439,8 +465,8 @@ function updateUi() {
       b1.innerHTML='S1off';      
     }
   }
-  var s2 = json.s2;
-  if(null != s2) {
+  if(json.hasOwnProperty("s2")) {
+    var s2 = json.s2;
     var b2 = document.getElementById("b2");
     if(s2) {   
       b2.style.background='#f00';
@@ -452,8 +478,8 @@ function updateUi() {
       b2.innerHTML='S2off';
     }
   }
-  var batt = json.b;
-  if(null != batt) {
+  if(json.hasOwnProperty("json")) {
+    var batt = json.b;
     var bb = document.getElementById("bb");
     if(batt) {
         bb.style.background='#f00';
@@ -478,18 +504,13 @@ function updateUi() {
 
   if(json.hasOwnProperty('fh')) {
     log("ESP32 free heap: " + json.fh);
-    //log("ESP32 heap fragmentation: " + json.hf);
-    //log("ESP32 max free blocksize: " + json.bs);
   }
-
   //Antwort auf Statusabfrage vom Server darstellen
   if(json.hasOwnProperty('rts')) {
     var rts = json.rts;
-    if(debug) log("json.rts="+rts);
-    reset(document.getElementById('idle'));    
-    reset(document.getElementById('charge'));   
-    reset(document.getElementById('state'));
-    reset(document.getElementById('wakeup'));
+    if(debug) log("json.rts="+rts);    
+    setOff(document.getElementById('state'));
+    setOff(document.getElementById('wakeup'));
     var to = document.getElementById("teslaout");
     if(typeof to !== 'undefined') {
       to.innerHTML=rts;
@@ -505,19 +526,39 @@ function updateUi() {
       rts_reset = false; //es kommen keine Teslastatusdaten mehr, also kann Resetflag zurückgesetzt werden
     }
   }
+  if(json.hasOwnProperty('cs')) {
+     if(json.cs || json.cs == 'true') { //laedt
+        setOn(document.getElementById('charge'));
+     } else { //idle
+        setOff(document.getElementById('charge'));
+     }
+  }
+  if(json.hasOwnProperty('wt')) {
+     setOff(document.getElementById('wakeup')); //Request ist durch
+     log("Tesla wakeup StatusCode: " + json.wt);
+  }  
 }
 
-function wait(elem) {
+function setOn(elem) {
     if(typeof elem !== 'undefined') {
-        elem.style.color='#ff0';
-        elem.style.background='#f00';
+        var cl = elem.classList;
+        cl.remove("off");
+        cl.add("onc");
     }
 }
-function reset(elem) {
+function setOff(elem) {
     if(typeof elem !== 'undefined') {
-        elem.style.color='#505050';
-        elem.style.background='#d8d8d8';
+        var cl = elem.classList;
+        cl.remove("onc");
+        cl.add("off");
     }
+}
+function isOn(elem) {
+    if(typeof elem !== 'undefined') {
+        var cl = elem.classList;
+        return cl.contains("onc");
+    }  
+    return false;
 }
 
 //Sende Daten zum Server
@@ -548,14 +589,17 @@ function updateServer(txt) {
         case "state":
           o.rts = true; //request tesla state
         break;
-        case "wake":
-          o.wt = true; //request tesla waekup
+        case "wakeup":
+          o.wt = true; //request tesla wakeup
         break;
-        case "charge":
-          o.ch = true; //request charge start
-        break;
-        case "idle":
-          o.id = true; //request charge stop      
+        case "charge":          
+          if(isOn(document.getElementById("charge"))) {
+            console.log("charge req on");
+            o.ch = false;  //request charge stop   
+          } else {
+            console.log("charge req off");
+            o.ch = true; //request charge start
+          }
         break;        
      }
   }
@@ -573,6 +617,9 @@ function updateServer(txt) {
   //var data = JSON.stringify({ "ta": document.getElementById("teslaactive").checked });
   
   var data = JSON.stringify( o );
+  if(debugJson) {
+    log("Sending to Server: " + data);
+  }
   console.log("Sending to Server: " + data)
   connection.send(data);
 }

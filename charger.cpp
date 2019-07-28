@@ -148,7 +148,7 @@ void Charger::checkOnIncome(float netto) {
               perry.startCharge();
               lastTeslaLoadSwitch = now;
               teslaCharging = true;
-              wc.sendClients(F("Es wurde versucht, den Ladevorgang des TESLA zu starten"));
+              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu starten");
               highIncomeCount = 0;
             } else {
               highIncomeCount++;
@@ -159,7 +159,7 @@ void Charger::checkOnIncome(float netto) {
               perry.stopCharge();
               lastTeslaLoadSwitch = now;
               teslaCharging = false;
-              wc.sendClients(F("Es wurde versucht, den Ladevorgang des TESLA zu stoppen"));
+              wc.sendClients("Es wurde versucht, den Ladevorgang des TESLA zu stoppen");
               lowIncomeCount = 0;
             } else {
               lowIncomeCount++;
@@ -218,7 +218,7 @@ void Charger::checkOnIncome(float netto) {
             s1_countBeforeOff++;
           } else {
             if(debug) {
-               wc.sendClients(F("Deaktiviere Solarcharger 1"));
+               wc.sendClients("Deaktiviere Solarcharger 1");
             }
             netto+=600;
             toggleCharger(S1,false,false,true);
@@ -247,7 +247,7 @@ void Charger::checkOnIncome(float netto) {
               s2_countBeforeOff++; 
             } else {        
               if(debug) {
-                 wc.sendClients(F("Deaktiviere Solarcharger 2"));
+                 wc.sendClients("Deaktiviere Solarcharger 2");
               }
               toggleCharger(S2,false,false,true);
             }
@@ -265,7 +265,7 @@ void Charger::checkOnIncome(float netto) {
           ms+=netto;
           ms+=" / ";
           ms+=dutyCycle;
-          wc.sendClients(ms); 
+          wc.sendClients(ms.c_str()); 
       }     
     } 
 
@@ -292,7 +292,7 @@ void Charger::checkOnIncome(float netto) {
      m1+=s2_countBeforeOff;
      m1+=F("; s2override: ");
      m1+=s2override;
-     wc.sendClients(m1);
+     wc.sendClients(m1.c_str());
    }
 }
 

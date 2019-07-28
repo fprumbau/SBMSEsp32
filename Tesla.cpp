@@ -22,6 +22,7 @@ int Tesla::wakeup() {
           Serial.println(_wakeup_url);
           String response = http.getString();    
           Serial.println(response);  
+          wc.sendClients(response.c_str());
         }
         //200 == OK,
         //401 == Bearer Token abgelaufen oder nicht richtig
@@ -68,6 +69,7 @@ int Tesla::authorize(const char* password) {
           Serial.println(_auth_url);
           String response = http.getString();    
           Serial.println(response);  
+          wc.sendClients(response.c_str());
           DynamicJsonDocument doc(256);
           deserializeJson(doc, response);
           String rt = doc["refresh_token"];
@@ -116,6 +118,7 @@ int Tesla::readChargeState() {
       Serial.println(_get_charge_state_url);
       String response = http.getString();    
       Serial.println(response);  
+      wc.sendClients(response.c_str());
 
       //Update
       DynamicJsonDocument doc(1024);
@@ -172,6 +175,7 @@ int Tesla::startCharge() {
           Serial.println(_charge_start_url);
           String response = http.getString();                        
           Serial.println(response);  
+          wc.sendClients(response.c_str());
         }
     } else {
         Serial.println(F("Error sending POST charge start"));
@@ -196,9 +200,10 @@ int Tesla::stopCharge() {
     yield();
 
     if(rc>0) {  
-          Serial.println(_charge_stop_url);    
-          String response = http.getString(); 
-          Serial.println(response); 
+        Serial.println(_charge_stop_url);    
+        String response = http.getString(); 
+        Serial.println(response); 
+        wc.sendClients(response.c_str());
     } else {
         Serial.println(F("Error sending POST charge stop"));
     }
@@ -232,6 +237,7 @@ int Tesla::setChargeLimit(int percent) {
         Serial.println(_set_charge_limit_url);
         String response = http.getString();                        
         Serial.println(response);  
+        wc.sendClients(response.c_str());
       }
   } else {
       Serial.println(F("Error sending POST charge limit"));

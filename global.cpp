@@ -27,6 +27,7 @@ int LED_BLUE = 27;
 
 bool debug = false;
 bool debug2 = false;
+bool debugJson = false;
 extern String bitset = "00000000";
 
 int RELAY_S1 = 33;

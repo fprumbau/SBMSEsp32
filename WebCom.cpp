@@ -5,7 +5,19 @@
    Sende Daten zu allen über Websockets verbundenen
    Clients. 
 */
-void WebCom::sendClients(String msg) { 
+void WebCom::sendClients(const char* msg) { 
+  ws.textAll(msg);
+}
+
+void WebCom::sendJson(const char* key, const char* value) {
+  int len = strlen(key) + strlen(value) + 8;
+  String msg = String((char *)0);
+  msg.reserve(len);
+  msg+=F("{\"");
+  msg+=key;
+  msg+=F("\":\"");
+  msg+=value;
+  msg+=F("\"}");
   ws.textAll(msg.c_str());
 }
 
@@ -22,7 +34,12 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           bitset.setCharAt(1,49);
         } else {
           bitset.setCharAt(1,48);
-        }        
+        }     
+        if(debugJson) {
+          bitset.setCharAt(2,49);
+        } else {
+          bitset.setCharAt(2,48);
+        }  
         doc["dbg"]=bitset;
         
         doc["s1"]=charger.isChargerOn(1);
@@ -35,6 +52,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         }
         if(perry.hasUpdate()) {
           doc["rts"] = perry.status();
+          doc["cs"] = perry.isCharging();
         }
         doc["dt"]=datetime;
         doc["t"]=temp;
@@ -42,11 +60,11 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         char jsonChar[512];
         serializeJson(doc, jsonChar);
         String str(jsonChar);
-        if(debug2) {
+        if(debugJson) {
           Serial.println(str);
+        }
+        if(debug2) {
           doc["fh"]=ESP.getFreeHeap();
-          //doc["hf"]=ESP.getHeapFragmentation();
-          //doc["bs"]=ESP.getMaxFreeBlockSize();
         }
         if (all) {
           ws.textAll(str.c_str());
@@ -76,6 +94,9 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         Serial.println(String((char *)data));
       }
       if(data[0] == '{') {
+        if(debugJson) {
+          Serial.println(String((char *)data));
+        }
         //Umstellung auf JSon
         StaticJsonDocument<300> doc;
         deserializeJson(doc, data);
@@ -91,6 +112,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           saveConfig = true;      
           teslaCtrlActive = updateTeslaCtrlActive;
           buildMessage(&msg, "teslaCtrlActive", String(teslaCtrlActive).c_str());
+          yield();
         } 
         
         if(doc.containsKey("s1")) { //Charger S1
@@ -100,6 +122,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             charger.toggleCharger(S1, s1, true, false);
             buildMessage(&msg, "S1", String(s1).c_str());
           }
+          yield();
         }  
         
         if(doc.containsKey("s2")) { //Charger S2
@@ -109,6 +132,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             charger.toggleCharger(S2, s2, true, false);
             buildMessage(&msg, "S2", String(s2).c_str());
           }
+          yield();
         } 
 
         if(doc.containsKey("dbg")) { //0.9.9.54 Bitset statt Debugflags
@@ -132,6 +156,14 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "debug2", String(debug2).c_str());      
                 }
                 break;      
+              case 2:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugJson = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugJson", String(debugJson).c_str());      
+                }
+                break;                 
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  
@@ -143,7 +175,8 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             Serial.print(F("Aktualisierung von Bitset: "));
             Serial.println(bitset);
           }
-        }       
+          yield();
+        }     
         
         if(doc.containsKey("vr")) {
           String netzOderBatt = doc["vr"];
@@ -156,6 +189,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             inverter.starteBatterie(F("Websockets"));    
             buildMessage(&msg, "Battery", "true");      
           }
+          yield();
         }  
         
         if(doc.containsKey("rts")) { //rts, requst Tesla status
@@ -163,56 +197,71 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           int rc = perry.readChargeState();     
           msg+=F("Updated tesla status information; status code: ");    
           msg+=rc;
+          yield();
         }  
 
         if(doc.containsKey("rts_reset")) { //rts update reset, es werden keine weiteren Daten an den Client gesendet
           perry.reset(); //keine Updates mehr
-          msg+=F("Reset Tesla Request Status ( perry.reset() )");    
+          msg+=F("Reset Tesla Request Status ( perry.reset() )");   
+          yield(); 
         }  
 
-        if(doc.containsKey("wt")) { //wt, requst Tesla wakeup
+        if(doc.containsKey("wt")) { //wt, request Tesla wakeup
           update = true;
           int rc = perry.wakeup();     
           msg+=F("Requested Tesla wakeup; status code: ");    
           msg+=rc;
+          wc.sendJson("wt", String(rc).c_str());  //GUI-Aktualisierung     
+          yield();
         }
 
-        if(doc.containsKey("ch")) { //ch, request Tesla charge start
-          update = true;
-          int rc = perry.startCharge();     
-          msg+=F("Requested Tesla charge start; status code: ");    
-          msg+=rc;
-        }
-
-        if(doc.containsKey("id")) { //id, requst Tesla charge stop
-          update = true;
-          int rc = perry.stopCharge();     
-          msg+=F("Requested Tesla charge stop; status code: ");    
-          msg+=rc;
+        if(doc.containsKey("ch")) { //ch, request Tesla charge start/stop
+          bool chargeRequest = doc["ch"];
+          int rc;
+          if(chargeRequest) {
+              update = true;
+              rc = perry.startCharge();
+              if(rc == 200) {
+                 wc.sendJson("cs","false");     
+              }
+              msg+=F("Requested Tesla charge start; status code: ");    
+              msg+=rc;            
+          } else {
+              update = true;
+              int rc = perry.stopCharge();  
+              if(rc == 200) {
+                  wc.sendJson("cs","true");    
+              }   
+              msg+=F("Requested Tesla charge stop; status code: ");     
+              msg+=rc;            
+          }     
+          yield();    
         }
         
         if(saveConfig) {
           config.save();
+          yield();
         }
         if(update) {
-          wc.sendClients(msg);
+          wc.sendClients(msg.c_str());
           //nun die Info an alle zum Umpdate der UI versenden
-          updateUi();              
+          updateUi();         
+          yield();     
         }   
       } else {
         String msg = String((char*)0);
         msg.reserve(32);
         msg+=F("Cannot process data: ");
         msg+=String((char *)data);
-        wc.sendClients(msg);
+        wc.sendClients(msg.c_str());
       }
       break;
     }
 }
 
 void WebCom::buildMessage(String* msg, const char* name, const char* value) {
-    msg->concat("Switch ");
+    msg->concat(F("Switch "));
     msg->concat(name);
-    msg->concat(" to ");
+    msg->concat(F(" to "));
     msg->concat(value);
 }

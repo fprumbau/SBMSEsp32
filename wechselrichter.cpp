@@ -20,7 +20,7 @@ void Inverter::starteNetzvorrang(String reason) {
     if (debug) {
       Serial.println(msg);
     }
-    wc.sendClients(msg);
+    wc.sendClients(msg.c_str());
   }
 }
 
@@ -47,7 +47,7 @@ void Inverter::starteBatterie(String reason) {
     if (debug) {
       Serial.println(msg);
     }
-    wc.sendClients(msg);
+    wc.sendClients(msg.c_str());
   }
 }
 
@@ -176,14 +176,14 @@ void Inverter::check()  {
       Serial.print(mins);
       Serial.print(":");
       Serial.println(secs);    
-      wc.sendClients(datetime);
+      wc.sendClients(datetime.c_str());
   }
   //ab v.0.9.9.29 zwischen 20Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
   if(!stop) {
     if(hours>=20 || hours < 9) {
       if(!nacht) {
         if(!isBatOn) { 
-            wc.sendClients(datetime);
+            wc.sendClients(datetime.c_str());
             starteBatterie(F("Batteriezeit"));    
         }
         nacht = true;    
@@ -194,7 +194,7 @@ void Inverter::check()  {
         if(isBatOn) {
             starteNetzvorrang(F("Schalte wieder auf Netz zurück"));    
         } else { 
-            wc.sendClients(datetime);
+            wc.sendClients(datetime.c_str());
         }
       }
     }
@@ -203,7 +203,7 @@ void Inverter::check()  {
   /*
   if(hours == 6 && mins == 0 && dayOfMonthLastRestart != day)  {
      dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
-     wc.sendClients("Restarte ESP um 6:00 Uhr");
+     wc.sendClients(F("Restarte ESP um 6:00 Uhr").c_str());
      delay(200); //Warte, bis Nachricht verschickt ist
      ESP.restart();
   }*/

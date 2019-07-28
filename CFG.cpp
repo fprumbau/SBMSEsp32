@@ -57,7 +57,7 @@ bool CFG::save() {
     return false;
   }
   if(!_configRead) {
-    wc.sendClients(F("Kann Konfig nicht schreiben, da sie nie gelesen wurde"));
+    wc.sendClients("Kann Konfig nicht schreiben, da sie nie gelesen wurde");
     return false;
   }
   
@@ -73,7 +73,7 @@ bool CFG::save() {
   }
 
   serializeJson(doc, configFile);
-  wc.sendClients(F("Konfiguration wurde erfolgreich gespeichert."));
+  wc.sendClients("Konfiguration wurde erfolgreich gespeichert.");
   
   return true;
 }

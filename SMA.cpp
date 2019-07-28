@@ -20,7 +20,7 @@ void SMA::reset() {
   unsigned int portMulti = 9522;      
   
   udp.beginMulticast(ipMulti, portMulti);
-  wc.sendClients(F("UDP reinitialized"));
+  wc.sendClients("UDP reinitialized");
 }
 
 void SMA::ping() {
@@ -95,7 +95,7 @@ void SMA::read() {
           msg += lastUdp;
           msg += F("ms ago");
           Serial.println(msg);
-          wc.sendClients(msg);
+          wc.sendClients(msg.c_str());
       }
   }
 }

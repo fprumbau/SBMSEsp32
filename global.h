@@ -40,6 +40,7 @@ extern int LED_BLUE;
 
 extern bool debug;
 extern bool debug2;
+extern bool debugJson;
 extern String bitset;
 
 extern int RELAY_S1;

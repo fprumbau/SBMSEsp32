@@ -225,7 +225,7 @@ void commandLine() {
       } else if(cmd.startsWith(F("restart esp"))) {      
         msg = F("Restarting ESP...");
         Serial.println(msg);
-        wc.sendClients(msg);
+        wc.sendClients(msg.c_str());
         ESP.restart();
       } else if(cmd.startsWith(F("start RELAY_S1"))) {      
         msg = F("Starting RELAY_S1...");
@@ -345,6 +345,6 @@ void commandLine() {
         return;
       }
       Serial.println(msg);
-      wc.sendClients(msg);
+      wc.sendClients(msg.c_str());
     }  
 } 

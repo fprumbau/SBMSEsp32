@@ -16,13 +16,13 @@ void Battery::checkCellVoltages() {
         d+=cv[k];
         d+="; Limit: ";
         d+=LOW_MINIMAL_CV_MILLIS;
-        wc.sendClients(d);
+        wc.sendClients(d.c_str());
       }      
       if (cv[k] < LOW_MINIMAL_CV_MILLIS) {            
             String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
             m+=k;
             Serial.println(m);
-            wc.sendClients(m);
+            wc.sendClients(m.c_str());
             charger.toggleCharger(S2,true,true,true);
             s2ActForLowCV = true;
             break;            
@@ -32,7 +32,7 @@ void Battery::checkCellVoltages() {
       if(s2ActForLowCV && charger.getRunningMillis(2) > 300000) { //nachdem S2 5 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
           String m = F("Deaktiviere Solarcharger 2 nach 5 Minuten Ladezeit jetzt...");
           Serial.println(m);
-          wc.sendClients(m);
+          wc.sendClients(m.c_str());
           charger.toggleCharger(S2,false,true, true);
           s2ActForLowCV = false;
       }
@@ -69,14 +69,14 @@ void Battery::controlFans() {
     m += bezug;
     m += F(" / ");
     m += lieferung;
-    wc.sendClients(m);
+    wc.sendClients(m.c_str());
   }
   String msg;
   if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
     if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
       msg = F("Schalte Luefter an, da der Batteriebetrieb aktiv ist");
       Serial.println(msg);
-      wc.sendClients(msg);
+      wc.sendClients(msg.c_str());
       digitalWrite(RELAY_4, LOW);
     }
  } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
@@ -86,14 +86,14 @@ void Battery::controlFans() {
         msg+=temp;
         msg+="°C";
         Serial.println(msg);
-        wc.sendClients(msg);
+        wc.sendClients(msg.c_str());
         digitalWrite(RELAY_4, LOW);
       }
     } else {
       if(soc>=99 && temp<TEMP_THRESHOLD_LOW) {
         msg = F("Schalte Luefter ab, da fertig geladen wurde");
         Serial.println(msg);
-        wc.sendClients(msg);
+        wc.sendClients(msg.c_str());
         digitalWrite(RELAY_4, HIGH);
       }      
     }
@@ -103,7 +103,7 @@ void Battery::controlFans() {
         if(fansRunning) {
           msg = F("Schalte Luefter ab, da weder Batterie noch Charger laufen");
           Serial.println(msg);
-          wc.sendClients(msg);
+          wc.sendClients(msg.c_str());
           digitalWrite(RELAY_4, HIGH);
         }
       } else {
