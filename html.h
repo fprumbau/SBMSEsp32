@@ -130,7 +130,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.86: (6) Ein drittes Debugflag 'jsonDebug' erlaubt die Analyse der Server-/Clientkommunikation
 <li>0.9.9.87: (1) Es wurden zuviele Debugmessages ohne Debugschalter geschickt (Bitset vom/zum Server)
 <li>0.9.9.87: (2) Wird bei aktivem Laden auf dem Ladenbutten geklickt, dann wird das Laden gestoppt. Hier muss bei rc==200 ein Resetz des Schalters erfolgen
-<li>0.9.9.87: (3) Schriftgroesse des Konsolenoutputs (Ausgabe GUI) von 0.7em auf 0.6em herabgesetzt
+<li>0.9.9.87: (3) Schriftgroesse des Konsolenoutputs (Ausgabe GUI) von 0.7em auf 0.6em herabgesetzt, deakt.Buttons hellbraun statt grau
 <hr>
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
@@ -210,8 +210,8 @@ div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;backgro
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
 button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height:22px;}
-.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;line-height:13px;}
-.bs{background-color:#D7CCC8;color:#505050;width:50px;border:1px solid white;margin-left:5px;}
+.bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:130px;height:160px;font-size:10px;line-height:13px;}
+.bs{background-color:#D7CCC8;color:#505050;width:50px;border:1px solid white;}
 .onc{color:#ff0;background:#f00}
 .off{color:#505050;background:#d8d8d8}
 </style>
@@ -261,17 +261,13 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
 
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
-<input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Steuerung aktiv
-<br>
-<input type="button" class="bs off" id="state" value="Status" onclick="updateServer(this.id);setOn(this);"/>
-<br>
-<input type="button" class="bs off" id="wakeup" value="Wake" onclick="updateServer(this.id);setOn(this);"/>
-<br>
-<input type="button" class="bs off" id="charge" value="Laden" onclick="updateServer(this.id);setOn(this);"/>
-<br>
-<!--
-<input type="button" class="bs off" id="idle" value="Idle" onclick="updateServer(this.id);setOn(this);"/>
--->
+<input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Ladestrg.
+<input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/><br>
+<input type="button" class="bs" id="wakeup" value="Wake" onclick="wait(this);updateServer(this.id);" style="margin-top:12px;margin-left:3px;"/>
+<input type="button" class="bs" id="charge" value="Laden" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="lim50" value="Lim50" onclick="wait(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="lim90" value="Lim90" onclick="wait(this);updateServer(this.id);"/>
+
 <div2 id="teslaout" class="bt">
 ...
 </div2>
