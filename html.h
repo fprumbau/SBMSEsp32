@@ -130,6 +130,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.86: (6) Ein drittes Debugflag 'jsonDebug' erlaubt die Analyse der Server-/Clientkommunikation
 <li>0.9.9.87: (1) Es wurden zuviele Debugmessages ohne Debugschalter geschickt (Bitset vom/zum Server)
 <li>0.9.9.87: (2) Wird bei aktivem Laden auf dem Ladenbutten geklickt, dann wird das Laden gestoppt. Hier muss bei rc==200 ein Resetz des Schalters erfolgen
+<li>0.9.9.87: (3) Schriftgroesse des Konsolenoutputs (Ausgabe GUI) von 0.7em auf 0.6em herabgesetzt
 <hr>
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
@@ -208,9 +209,9 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height:22px;}
+button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height:22px;}
 .bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:140px;height:160px;font-size:10px;line-height:13px;}
-.bs{background-color:#d8d8d8;color:#505050;width:50px;border:1px solid white;margin-left:5px;}
+.bs{background-color:#D7CCC8;color:#505050;width:50px;border:1px solid white;margin-left:5px;}
 .onc{color:#ff0;background:#f00}
 .off{color:#505050;background:#d8d8d8}
 </style>
