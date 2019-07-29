@@ -116,7 +116,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.85: (1) Free heap Anzeige, nur bei Debug2 (online), Hinzu kommmt heap fragmentation und max available block size (command line und online)
 <li>0.9.9.85: (2) Implementierung eines Mechanismus' der verhindert, dass der Server immer dieselben Teslastatusdaten sendet
 <li>0.9.9.85: (3) Einige yield()s hinzugefuegt, viele String-Optimierungen
-<li>0.9.9.85: (4) Bisher wurde beim Laden die Lüfter bei SOC<99 angeschaltet, nun wird dies nur noch bei hoher Temperatur gemacht.
+<li>0.9.9.85: (4) Bisher wurde beim Laden die L&uuml;fter bei SOC<99 angeschaltet, nun wird dies nur noch bei hoher Temperatur gemacht.
 <li>0.9.9.85: (5) Statt Dbg1+Dbg2 als Einzelflags zu regeln, gibt es nun eine Bitleiste auf Server und Client.
 <li>0.9.9.85: (6) Steueroption Tesla start/stop charge hinzugef&uuml;gt 
 <li>0.9.9.85: (7) Der UDP-Reinitialisierungthreshold wurde von 60s auf 120s angehoben, alle 60s wird nun ein Ping-Paket versendet.
@@ -128,6 +128,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.86: (4) UpdateUi in html.h sollte nun auch mit Teilantworten zurecht kommen. Das 'cs' (chargeState) kommt nun allein, wenn start/stop charge mit rc==200 erfolgreich
 <li>0.9.9.86: (5) Wakeup repariert, der RC wird nun &uuml;bermittelt und gelogged
 <li>0.9.9.86: (6) Ein drittes Debugflag 'jsonDebug' erlaubt die Analyse der Server-/Clientkommunikation
+<li>0.9.9.87: (1) Es wurden zuviele Debugmessages ohne Debugschalter geschickt (Bitset vom/zum Server)
+<li>0.9.9.87: (2) Wird bei aktivem Laden auf dem Ladenbutten geklickt, dann wird das Laden gestoppt. Hier muss bei rc==200 ein Resetz des Schalters erfolgen
 <hr>
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
@@ -135,7 +137,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>  Der Laden-Button sollte den Laden-Status wieder spiegeln, eine Idle-Button braucht man dann nicht mehr
 )=====";
 
-#define VERSION "0.9.9.86"
+#define VERSION "0.9.9.87"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="en" style="height:100%;"><head>
@@ -266,8 +268,9 @@ button{color:#505050;background:#D8D8D8;border:1px solid white;width:85px;height
 <br>
 <input type="button" class="bs off" id="charge" value="Laden" onclick="updateServer(this.id);setOn(this);"/>
 <br>
+<!--
 <input type="button" class="bs off" id="idle" value="Idle" onclick="updateServer(this.id);setOn(this);"/>
-
+-->
 <div2 id="teslaout" class="bt">
 ...
 </div2>
@@ -314,7 +317,9 @@ function updateFromBitset() {
           } else {
             debug = true;
           }
-          console.log("Setting debug to " + debug);
+          if(debug) {
+            console.log("Setting debug to " + debug);
+          }
           break;
         case 2:
           if(bitset.charCodeAt(i) == 48) {
@@ -322,12 +327,15 @@ function updateFromBitset() {
           } else {
             debugJson = true;
           }
-          console.log("Setting debugJson to " + debugJson);
+          if(debug) {
+            console.log("Setting debugJson to " + debugJson);
+          }
           break;
      }
   }
-  log("Vom Server: " + bitset);
-
+  if(debugJson) {
+    log("Vom Server: " + bitset);
+  }
 }
 
 //Aktualisierung des Bitsets auf dem Weg zum Server
@@ -340,7 +348,9 @@ function updateBitset() {
         bitset = bitset.replaceAt(selIndex, '0');   
     }
   }
-  log("Zum Server: " + bitset);
+  if(debugJson) {
+    log("Zum Server: " + bitset);
+  }
   updateServer();
 }
 
@@ -527,9 +537,11 @@ function updateUi() {
     }
   }
   if(json.hasOwnProperty('cs')) {
-     if(json.cs || json.cs == 'true') { //laedt
+     if(json.cs == 'true') { //laedt
+        console.log("set on charge: " + json.cs);
         setOn(document.getElementById('charge'));
      } else { //idle
+        console.log("set off charge:" + json.cs);
         setOff(document.getElementById('charge'));
      }
   }

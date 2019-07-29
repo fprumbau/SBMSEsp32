@@ -209,7 +209,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         if(doc.containsKey("wt")) { //wt, request Tesla wakeup
           update = true;
           int rc = perry.wakeup();     
-          msg+=F("Requested Tesla wakeup; status code: ");    
+          msg+=F("Requested Tesla wakeup; Statuscode: ");    
           msg+=rc;
           wc.sendJson("wt", String(rc).c_str());  //GUI-Aktualisierung     
           yield();
@@ -222,17 +222,17 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               update = true;
               rc = perry.startCharge();
               if(rc == 200) {
-                 wc.sendJson("cs","false");     
+                 wc.sendJson("cs","true");     
               }
-              msg+=F("Requested Tesla charge start; status code: ");    
+              msg+=F("Requested Tesla charge start; Statuscode: ");    
               msg+=rc;            
           } else {
               update = true;
               int rc = perry.stopCharge();  
               if(rc == 200) {
-                  wc.sendJson("cs","true");    
+                  wc.sendJson("cs","false");    
               }   
-              msg+=F("Requested Tesla charge stop; status code: ");     
+              msg+=F("Requested Tesla charge stop; Statuscode: ");     
               msg+=rc;            
           }     
           yield();    
