@@ -121,34 +121,36 @@ int Tesla::readChargeState() {
       wc.sendClients(response.c_str());
 
       //Update
-      DynamicJsonDocument doc(1024);
-      deserializeJson(doc, response);
-      JsonObject obj = doc.as<JsonObject>();
-      JsonObject resp = obj["response"].as<JsonObject>();     
-      
-      _chargeRate = resp["charger_rate"];
-      _chargerPhases = resp["charger_phases"];
-      _chargerActualCurrent = resp["charger_actual_current"];
-      _chargerPower = resp["charger_power"];
-      _chargeLimitSoc = resp["charge_limit_soc"];    
-      _batteryLevel = resp["battery_level"];  
-      _chargerVoltage = resp["charger_voltage"];
-      String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected|Starting
-      _chargingState = cState;
-
-      _hasUpdate = true;
-
-      //"charge_rate":10.9            10.9 km/h
-      //"charger_phases":1            eine Phase
-      //"charger_pilot_current":13    13A
-      //"charger_actual_current":13   13A
-      //"charger_power":3             3kw
-      //"charge_limit_soc":90         90% charge limit
-      //"battery_level":61            61%
-      
-      //200 == OK,
-      //401 == Bearer Token abgelaufen oder nicht richtig
-      //408 == 'vehicle not available' => Wakup
+      if(rc==200) {
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, response);
+        JsonObject obj = doc.as<JsonObject>();
+        JsonObject resp = obj["response"].as<JsonObject>();     
+        
+        _chargeRate = resp["charger_rate"];
+        _chargerPhases = resp["charger_phases"];
+        _chargerActualCurrent = resp["charger_actual_current"];
+        _chargerPower = resp["charger_power"];
+        _chargeLimitSoc = resp["charge_limit_soc"];    
+        _batteryLevel = resp["battery_level"];  
+        _chargerVoltage = resp["charger_voltage"];
+        String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected|Starting
+        _chargingState = cState;
+  
+        _hasUpdate = true;
+  
+        //"charge_rate":10.9            10.9 km/h
+        //"charger_phases":1            eine Phase
+        //"charger_pilot_current":13    13A
+        //"charger_actual_current":13   13A
+        //"charger_power":3             3kw
+        //"charge_limit_soc":90         90% charge limit
+        //"battery_level":61            61%
+        
+        //200 == OK,
+        //401 == Bearer Token abgelaufen oder nicht richtig
+        //408 == 'vehicle not available' => Wakup
+      }
   } else {
       Serial.print(F("Error sending GET charge state; rc="));
       Serial.println(rc);
