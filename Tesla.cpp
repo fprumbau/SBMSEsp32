@@ -133,7 +133,7 @@ int Tesla::readChargeState() {
       _chargeLimitSoc = resp["charge_limit_soc"];    
       _batteryLevel = resp["battery_level"];  
       _chargerVoltage = resp["charger_voltage"];
-      String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected
+      String cState = resp["charging_state"]; //Complete|Charging|Stopped|Disconnected|Starting
       _chargingState = cState;
 
       _hasUpdate = true;
@@ -366,10 +366,22 @@ void Tesla::beginRequest(HTTPClient *client, char *url) {
 
 bool Tesla::isCharging() {
     //Complete|Charging|Stopped|Disconnected
-    if(_chargingState.equals("Charging")) {
+    if(_chargingState.equals("Charging") || _chargingState.equals("Starting")) {
       return true;
     }
     return false;
+}
+
+void Tesla::setCharging(bool charging) {
+  if(charging) {
+    _chargingState = F("Charging");
+  } else {
+    _chargingState = F("Stopped");
+  }
+}
+
+int Tesla::getSoC() {
+  return _batteryLevel;
 }
 
 bool Tesla::hasUpdate() {

@@ -25,6 +25,12 @@ void handleButton(AceButton*, uint8_t eventType, uint8_t);
 void commandLine();
 
 /**
+ * Ausgabe von einigen Variablen (SOC, Temperatur)
+ * aus global.cpp
+ */
+void print();
+
+/**
  * Registriere Eventhandler für WebSocketEvents in WebCom
  */
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
@@ -286,6 +292,7 @@ void commandLine() {
         debug = false;
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
+        print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -348,3 +355,10 @@ void commandLine() {
       wc.sendClients(msg.c_str());
     }  
 } 
+
+void print() {
+  Serial.print(F("Temperatur: "));
+  Serial.println(temp);  
+  Serial.print(F("Ladezustand: "));
+  Serial.println(soc);   
+}

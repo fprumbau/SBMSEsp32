@@ -28,8 +28,7 @@ class Tesla {
     int _batteryLevel; //61 (%)
     int _chargeLimitSoc;
     int _chargerVoltage; //229 (V)
-    String _chargingState; //Stopped / Charging
-
+    String _chargingState; //Complete|Charging|Stopped|Disconnected|Starting
     //SPIFFS
     char* _authorization;
     char* _vehicle_id;
@@ -56,8 +55,10 @@ class Tesla {
     int stopCharge();
     int setChargeLimit(int percent);
     int readChargeState();
+    int getSoC();
     void print();
     bool isCharging();
+    void setCharging(bool charging);
     bool hasUpdate();
     void reset();
     const char* status();

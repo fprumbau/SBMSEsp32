@@ -131,11 +131,17 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.87: (1) Es wurden zuviele Debugmessages ohne Debugschalter geschickt (Bitset vom/zum Server)
 <li>0.9.9.87: (2) Wird bei aktivem Laden auf dem Ladenbutten geklickt, dann wird das Laden gestoppt. Hier muss bei rc==200 ein Resetz des Schalters erfolgen
 <li>0.9.9.87: (3) Schriftgroesse des Konsolenoutputs (Ausgabe GUI) von 0.7em auf 0.6em herabgesetzt, deakt.Buttons hellbraun statt grau
-<hr>
+<li>0.9.9.87: (4) Der Statusbutton ist nun rechts neben der Checkbox, zwei neue Buttons (Lim50 und Lim90) wurden vorbereitet, die Statusausgabe 'teslaout' ist 10px schm&auml;ler
+<li>0.9.9.87: (5) Bei webcom.updateUi() wird nun immer der letzte Chargingstatus ausgeliefert, nicht nur wenn der Gesamtstatus abgerufen wurde.
+<li>0.9.9.87: (6) Aufnahme einer neuen print()-Methode in der Hauptklasse SBMSEsp32, die erst einmal Temperatur und Ladezustand der Batterie ausgibt.
+<li>0.9.9.87: (7) Ladestandsanzeiger f&uuml;r den Teslabereich
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
-<li>  Methode zum Einstellen des ChargeLimits einbinden
-<li>  Der Laden-Button sollte den Laden-Status wieder spiegeln, eine Idle-Button braucht man dann nicht mehr
+<li>  Methode zum Einstellen des ChargeLimits einbinden (Buttons sind schon vorhanden)
+<li>  Wird ein Wake/Start charging/Stop charging gemacht, sollte ein 'deeferredStatusRequest'-Flag in der Seite gesetzt und nach einem Rc200 ein Statusupdate gemacht werden (Wait einbauen?)
+<li>  Neues Debugflag 'debugRelais' einbauen, um alle Schaltaktionen von Relais zu dokumentieren; das Ergebnis sollte immer mit log(...) in der Konsole erscheinen
+<li>  Es sollte immer zuerst S1 ausgeschaltet werden, S2 erst dann, wenn 5 Minuten die Lieferung negativ war (S2 regelt selbst herunter bis ca. 1A).
+<li>  
 )=====";
 
 #define VERSION "0.9.9.87"
@@ -261,12 +267,15 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
 
 <div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
-<input type="checkbox" id="teslaactive" onchange='updateServer();'></input>Tesla Ladestrg.
-<input type="button" class="bs" id="state" value="Status" onclick="wait(this);updateServer(this.id);"/><br>
-<input type="button" class="bs" id="wakeup" value="Wake" onclick="wait(this);updateServer(this.id);" style="margin-top:12px;margin-left:3px;"/>
-<input type="button" class="bs" id="charge" value="Laden" onclick="wait(this);updateServer(this.id);"/>
-<input type="button" class="bs" id="lim50" value="Lim50" onclick="wait(this);updateServer(this.id);"/>
-<input type="button" class="bs" id="lim90" value="Lim90" onclick="wait(this);updateServer(this.id);"/>
+<meter style='height:10px; left: 202px; top:15px; width: 6px;' min='2' max='8' value='0'></meter>
+<meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
+<div2 style='color:#030;font-size:24px;top:10px;left:87px;text-shadow: -2px -2px 2px #efc;' id='SOC2' >0%</div2>
+<input type="checkbox" id="teslaactive" onchange='updateServer();' style="margin-top:45px;"></input>Tesla Ladestrg.
+<input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);"/><br>
+<input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="margin-top:12px;margin-left:3px;"/>
+<input type="button" class="bs" id="charge" value="Laden" onclick="setOn(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);"/>
 
 <div2 id="teslaout" class="bt">
 ...
@@ -485,7 +494,7 @@ function updateUi() {
       b2.innerHTML='S2off';
     }
   }
-  if(json.hasOwnProperty("json")) {
+  if(json.hasOwnProperty("b")) {
     var batt = json.b;
     var bb = document.getElementById("bb");
     if(batt) {
@@ -534,13 +543,19 @@ function updateUi() {
     }
   }
   if(json.hasOwnProperty('cs')) {
-     if(json.cs == 'true') { //laedt
+     if(json.cs) { //laedt
         console.log("set on charge: " + json.cs);
         setOn(document.getElementById('charge'));
      } else { //idle
         console.log("set off charge:" + json.cs);
         setOff(document.getElementById('charge'));
      }
+  }
+  if(json.hasOwnProperty('sc')) {
+    htm('SOC2','<b>'+json.sc+'%</b>');
+  }  
+  if(json.hasOwnProperty('bl')) { 
+    document.getElementById('bat2').value=json.bl;
   }
   if(json.hasOwnProperty('wt')) {
      setOff(document.getElementById('wakeup')); //Request ist durch

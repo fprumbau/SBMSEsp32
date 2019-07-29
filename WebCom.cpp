@@ -52,8 +52,10 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         }
         if(perry.hasUpdate()) {
           doc["rts"] = perry.status();
-          doc["cs"] = perry.isCharging();
         }
+        doc["cs"] = perry.isCharging();
+        doc["sc"] = perry.getSoC();
+        doc["bl"] = perry.getSoC();
         doc["dt"]=datetime;
         doc["t"]=temp;
         doc["ta"]=teslaCtrlActive;
@@ -202,7 +204,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
 
         if(doc.containsKey("rts_reset")) { //rts update reset, es werden keine weiteren Daten an den Client gesendet
           perry.reset(); //keine Updates mehr
-          msg+=F("Reset Tesla Request Status ( perry.reset() )");   
+          msg+=F("; Reset Tesla Request Status ( perry.reset() )");   
           yield(); 
         }  
 
@@ -221,16 +223,18 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           if(chargeRequest) {
               update = true;
               rc = perry.startCharge();
-              if(rc == 200) {
-                 wc.sendJson("cs","true");     
+              if(rc == 200) {    
+                 perry.setCharging(true);
+                 updateUi();
               }
               msg+=F("Requested Tesla charge start; Statuscode: ");    
               msg+=rc;            
           } else {
               update = true;
               int rc = perry.stopCharge();  
-              if(rc == 200) {
-                  wc.sendJson("cs","false");    
+              if(rc == 200) { 
+                  perry.setCharging(false); 
+                  updateUi();
               }   
               msg+=F("Requested Tesla charge stop; Statuscode: ");     
               msg+=rc;            
