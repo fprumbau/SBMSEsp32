@@ -135,9 +135,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.87: (5) Bei webcom.updateUi() wird nun immer der letzte Chargingstatus ausgeliefert, nicht nur wenn der Gesamtstatus abgerufen wurde.
 <li>0.9.9.87: (6) Aufnahme einer neuen print()-Methode in der Hauptklasse SBMSEsp32, die erst einmal Temperatur und Ladezustand der Batterie ausgibt.
 <li>0.9.9.87: (7) Ladestandsanzeiger f&uuml;r den Teslabereich
+<li>0.9.9.87: (8) Ein Update des Ladestandes wird nur noch gemacht, wenn rc==200 in perry.readChargeState()
+<li>0.9.9.87: (9) Die Buttons Limit50 und Limit90 setzen nun ein Ladelimit von 50 oder 90%. Endet das Kommando mit Rc==200, wird nach 5s noch eine Statusabfrage gemacht (wenn queryTeslaStateAfter = true)
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
-<li>  Methode zum Einstellen des ChargeLimits einbinden (Buttons sind schon vorhanden)
 <li>  Wird ein Wake/Start charging/Stop charging gemacht, sollte ein 'deeferredStatusRequest'-Flag in der Seite gesetzt und nach einem Rc200 ein Statusupdate gemacht werden (Wait einbauen?)
 <li>  Neues Debugflag 'debugRelais' einbauen, um alle Schaltaktionen von Relais zu dokumentieren; das Ergebnis sollte immer mit log(...) in der Konsole erscheinen
 <li>  Es sollte immer zuerst S1 ausgeschaltet werden, S2 erst dann, wenn 5 Minuten die Lieferung negativ war (S2 regelt selbst herunter bis ca. 1A).
@@ -207,7 +208,7 @@ lt{background: #fa6;}
 .ch0{background:#f00;}
 .date{font-weight:bold;color:#fff;}
 .dbg{font-size:0.7em;margin-top:2px;}
-#console{box-shadow: inset 0px 1px 4px #666;overflow-y:scroll;font-size:0.7em}
+#console{box-shadow: inset 0px 1px 4px #666;overflow-y:scroll;font-size:0.6em}
 div{position: relative;float:left;}
 div2{position: absolute;color:#fed;line-height: 21px;}
 div3{position: relative;height:180px; width:720px;float:left;font-family:Arial,serif;font-weight: bold;font-size:18px;}
@@ -266,7 +267,7 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <div2 style='right:10px;text-align: right;'id='d10'></div2>
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
 
-<div2 style="border:1px solid #505050;left:360px;width:355px;height:160px;">
+<div2 style="border:1px solid #af601a;left:360px;width:355px;height:160px;">
 <meter style='height:10px; left: 202px; top:15px; width: 6px;' min='2' max='8' value='0'></meter>
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
 <div2 style='color:#030;font-size:24px;top:10px;left:87px;text-shadow: -2px -2px 2px #efc;' id='SOC2' >0%</div2>
@@ -291,6 +292,8 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 
 var debug = false;
 var debugJson = false;
+
+var queryTeslaStateAfter = false;
 
 var bitset = "0000000000";
 
@@ -527,6 +530,8 @@ function updateUi() {
     if(debug) log("json.rts="+rts);    
     setOff(document.getElementById('state'));
     setOff(document.getElementById('wakeup'));
+    setOff(document.getElementById('lim50'));
+    setOff(document.getElementById('lim90'));
     var to = document.getElementById("teslaout");
     if(typeof to !== 'undefined') {
       to.innerHTML=rts;
@@ -551,6 +556,14 @@ function updateUi() {
         setOff(document.getElementById('charge'));
      }
   }
+  if(json.hasOwnProperty('lm')) {
+      setOff(document.getElementById('lim50'));
+      setOff(document.getElementById('lim50'));
+      log("Set charge limit, rc: " + json.lm);
+      if(json.lm==200 && queryTeslaStateAfter) {
+        setTimeout("updateServer('state');",5000);
+      }
+  }  
   if(json.hasOwnProperty('sc')) {
     htm('SOC2','<b>'+json.sc+'%</b>');
   }  
@@ -616,6 +629,14 @@ function updateServer(txt) {
         case "wakeup":
           o.wt = true; //request tesla wakeup
         break;
+        case "lim50":
+          o.lm = 50; //charge limit 50%
+          queryTeslaStateAfter = true;
+        break;    
+        case "lim90":
+          o.lm = 90; //charge limit 90%
+          queryTeslaStateAfter = true;
+        break;             
         case "charge":          
           if(isOn(document.getElementById("charge"))) {
             console.log("charge req on");

@@ -199,12 +199,13 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           int rc = perry.readChargeState();     
           msg+=F("Updated tesla status information; status code: ");    
           msg+=rc;
+          msg+=F("; ");
           yield();
         }  
 
         if(doc.containsKey("rts_reset")) { //rts update reset, es werden keine weiteren Daten an den Client gesendet
           perry.reset(); //keine Updates mehr
-          msg+=F("; Reset Tesla Request Status ( perry.reset() )");   
+          msg+=F("Reset Tesla Request Status ( perry.reset() ); ");   
           yield(); 
         }  
 
@@ -213,7 +214,21 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           int rc = perry.wakeup();     
           msg+=F("Requested Tesla wakeup; Statuscode: ");    
           msg+=rc;
+          msg+=F("; ");
           wc.sendJson("wt", String(rc).c_str());  //GUI-Aktualisierung     
+          yield();
+        }
+
+        if(doc.containsKey("lm")) { //lm set charge limit
+          update = true;
+          int limit = doc["lm"];
+          int rc = perry.setChargeLimit(limit);     
+          msg+=F("Requested charge limit ");
+          msg+=limit;
+          msg+=F("%; Statuscode: ");    
+          msg+=rc;
+          msg+=F("; ");
+          wc.sendJson("lm", String(rc).c_str());  //GUI-Aktualisierung     
           yield();
         }
 
@@ -229,6 +244,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               }
               msg+=F("Requested Tesla charge start; Statuscode: ");    
               msg+=rc;            
+              msg+=F("; ");
           } else {
               update = true;
               int rc = perry.stopCharge();  
@@ -237,7 +253,8 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   updateUi();
               }   
               msg+=F("Requested Tesla charge stop; Statuscode: ");     
-              msg+=rc;            
+              msg+=rc;    
+              msg+=F("; ");        
           }     
           yield();    
         }
@@ -257,6 +274,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         msg.reserve(32);
         msg+=F("Cannot process data: ");
         msg+=String((char *)data);
+        msg+=F("; ");
         wc.sendClients(msg.c_str());
       }
       break;
