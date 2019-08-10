@@ -133,7 +133,7 @@ int Charger::calculateDc(float netto) {
  *       variabel zu steuern.
  * 
  */
-void Charger::checkOnIncome(float netto) {
+void Charger::checkOnIncome() {
 
     bool s1on = isChargerOn(1);
     bool s2on = isChargerOn(2); 
@@ -209,7 +209,9 @@ void Charger::checkOnIncome(float netto) {
       if(!s1on) {
         if(netto > 600){         
           netto-=600;
-          //Serial.println(F("Aktiviere Solarcharger 1"));
+          if(debugRelais) {
+              wc.sendClients("Aktiviere Solarcharger 1");
+          }
           toggleCharger(S1,true,false,true);
           s1_countBeforeOff = -1;      
         }
@@ -217,7 +219,7 @@ void Charger::checkOnIncome(float netto) {
           if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
           } else {
-            if(debug) {
+            if(debugRelais) {
                wc.sendClients("Deaktiviere Solarcharger 1");
             }
             netto+=600;
@@ -226,7 +228,11 @@ void Charger::checkOnIncome(float netto) {
       }
     }  
 
-    
+    /*
+     * Der Charger S2 ist selbstregelnd und kann von 1-21A geregelt werden.
+     * Er sollte erst per Relais abgeschaltet werden (0A), wenn länger als
+     * 5Minuten kein Stromüberschuss vorhanden ist, um Schaltzyklen zu verhindern.
+     */
     unsigned long s2Last = now - s2_switched;
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!s2on) {
@@ -238,15 +244,21 @@ void Charger::checkOnIncome(float netto) {
               inverter.starteNetzvorrang(F("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)"));
               return;
           }
-          //Serial.println(F("Aktiviere Solarcharger 2"));
+          if(debugRelais) {
+            wc.sendClients("Aktiviere Solarcharger 2");
+          }
           toggleCharger(S2,true,false,true);
-          s2_countBeforeOff = -1;
+          s2_millisBeforeOff = -1; //Reset des LowNetto-Timers
         } 
       } else if(netto < -400 && !s2override) {
-            if(enableCountBeforeOff && s2_countBeforeOff < smaMeasurementsBeforSwitchoff) {
-              s2_countBeforeOff++; 
-            } else {        
-              if(debug) {
+
+            //0.9.9.88, der Status netto sollte laenger als 5 Min kleiner 0 sein, sonst NICHT ausschalten
+            if(-1 == s2_millisBeforeOff) {
+              s2_millisBeforeOff = millis(); //Start des LowNetto-Timers
+            }
+        
+            if(millis() - s2_millisBeforeOff > 300000) {       
+              if(debugRelais) {
                  wc.sendClients("Deaktiviere Solarcharger 2");
               }
               toggleCharger(S2,false,false,true);
@@ -288,8 +300,6 @@ void Charger::checkOnIncome(float netto) {
      m1+=s2Last;
      m1+=F("; s2_switched: ");
      m1+=s2_switched;
-     m1+=F("; s2_countBeforeOff: ");
-     m1+=s2_countBeforeOff;
      m1+=F("; s2override: ");
      m1+=s2override;
      wc.sendClients(m1.c_str());

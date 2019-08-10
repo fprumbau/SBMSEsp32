@@ -6,6 +6,7 @@
 class SMA {
 
   private:
+    char const lookup[17] = "0123456789ABCDEF";
     bool initialized = false;
     byte buf[601]; //buffer to hold incoming packet
     char hex[1202]; //Hex von buf

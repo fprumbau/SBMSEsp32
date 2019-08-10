@@ -28,6 +28,7 @@ int LED_BLUE = 27;
 bool debug = false;
 bool debug2 = false;
 bool debugJson = false;
+bool debugRelais = false;
 extern String bitset = "00000000";
 
 int RELAY_S1 = 33;
@@ -84,6 +85,7 @@ long timeout = 10000;
 String sbmsData="";
 float bezug=0.0;
 float lieferung=0.0;
+float netto=0.0;
 String datetime;
 
 int dayOfMonthLastRestart = -1; //Wann wurde der ESP zum letzten Mal neu gestartet?

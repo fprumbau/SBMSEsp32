@@ -3,6 +3,7 @@
 
 #include "html.h"
 #include "global.h"
+#include "esp_task_wdt.h"
 
 using namespace ace_button;
 
@@ -43,6 +44,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 /*                                                                    */
 /**********************************************************************/
 void setup() {
+
+  esp_task_wdt_init(999,false); //0.9.9.88
 
   Serial.begin(115200);  //USB Serial1 Pins 4,2, 
   
@@ -123,12 +126,43 @@ void setup() {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", html);
   });
+
+  //Test headers
+  server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
+    //List headers
+    for(int i = 0; i<request->headers(); i++) {
+        Serial.print(request->headerName(i));
+        Serial.print(":");
+        Serial.println(request->header(i));
+    }
+    String header = request->header("User-Agent");
+    if(header.indexOf("Tesla QtCarBrowser")>1) {
+      request->send(200, "text/html", html);
+    } else {
+      if(!request->authenticate(config.webUser(), config.webPass())) {
+        //FIXME: Geht leider nicht mit FormBasedAuth, siehe html.h: request->send(200, "text/html", login);
+        request->requestAuthentication();
+      } else {
+        request->send(200, "text/html", html);
+      }
+    }
+  });
   
   // Zugriff von aussen
   server.on("/sbms", HTTP_GET, [](AsyncWebServerRequest *request){
-    //if(!request->authenticate("admin", "Go8319!"))
-    //    request->redirect("/login");
-    request->send(200, "text/html", html);
+    if(debug) {
+        for(int i = 0; i<request->headers(); i++) {
+            Serial.print(request->headerName(i));
+            Serial.print(":");
+            Serial.println(request->header(i));
+        }
+    }
+    if(!request->authenticate("fprumbau", "714680")) {
+        //FIXME: Geht leider nicht mit FormBasedAuth, siehe html.h: request->send(200, "text/html", login);
+        request->requestAuthentication();
+    } else {
+      request->send(200, "text/html", html);
+    }
   });
 
   server.on("/lbprobe", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -197,7 +231,7 @@ void loop() {
       inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       yield();
       sma.read();       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
-      yield();
+      yield();      
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -292,14 +326,11 @@ void commandLine() {
         debug = false;
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
+        config.print();
         print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
-        //Serial.print("Heap fragmentation: ");
-        //Serial.println(ESP.getHeapFragmentation()); 
-        //Serial.print("Max free blocksize: ");
-        //Serial.println(ESP.getMaxFreeBlockSize()); 
       } else if(cmd.startsWith(F("tesla control on"))) {
         teslaCtrlActive = true;
       } else if(cmd.startsWith(F("tesla control off"))) {
@@ -329,6 +360,10 @@ void commandLine() {
         } else {
           msg = F("please enable 'test on' first");
         }
+      } else if(cmd.startsWith(F("test wifi"))) { 
+        bool ok = WiFi.status() == WL_CONNECTED;
+        Serial.print(F("Wifi status: "));
+        Serial.println(ok);
       } else {
         Serial.println(F("Available commands:"));
         Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
@@ -348,6 +383,7 @@ void commandLine() {
         Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
         Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!)"));
         Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
+        Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;
       }
@@ -360,5 +396,5 @@ void print() {
   Serial.print(F("Temperatur: "));
   Serial.println(temp);  
   Serial.print(F("Ladezustand: "));
-  Serial.println(soc);   
+  Serial.println(soc);     
 }

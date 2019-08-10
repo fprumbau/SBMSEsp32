@@ -20,7 +20,9 @@ class Charger {
     int s2_switched = -1;    
     //Counter, deren Grenzwerte (3...10) ueberschreiten muss, damit die Charger abgeschaltet werden
     int s1_countBeforeOff = -1; 
-    int s2_countBeforeOff = -1;
+    //0.9.9.88 Da der Charger S2 selbstregelnd ist (bis runter auf 1A) sollte er erst wirlich abgeschaltet werden, 
+    //         wenn 5Min, also 300000 Millis zu wenig Ertrag reinkommt
+    int s2_millisBeforeOff = -1;
     //manuelle Schaltung der Solarcharger ermöglichen
     bool s1override = false;
     bool s2override = false;
@@ -32,7 +34,7 @@ class Charger {
     bool isOn();
     void toggleCharger(uint8_t nr, bool onOff, bool override, bool notify);
     bool isChargerOn(uint8_t nr);
-    void checkOnIncome(float netto); //pruefe, ob Solarstrom konsumiert werden kann
+    void checkOnIncome(); //pruefe, ob Solarstrom konsumiert werden kann
     int getRunningMillis(uint8_t nr); //liefere die Millisekunden, die der Charger schon laeuft
 
 };

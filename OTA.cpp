@@ -12,14 +12,14 @@
 void OTA::init(const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
-  Serial.print("Flash Size: ");
+  Serial.print(F("Flash Size: "));
   Serial.println(flashSize);
   if(flashSize > 4000000) {
      //set web UI
      MDNS.begin(host);
      MDNS.addService("http", "tcp", 80);
      Serial.printf("\n\nHTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
-     String _version = "Build : ";
+     String _version = F("Build : ");
      _version += VERSION;
      updater.setUpdaterUi("Title", _version, "SBMS120 Solar Charger", "Branch : master", String(changelog));
      //Optional: Authentifizieren
@@ -67,26 +67,26 @@ void OTA::setup(const char *path, String username, String password) {
         String pageIndex = String(update);
         pageIndex.replace("{title}",_title);
         if(Update.hasError()){
-          pageIndex.replace("{banner}",F("<b><font color=red>Update gescheitert</font></b>"));
+          pageIndex.replace(F("{banner}"),F("<b><font color=red>Update gescheitert</font></b>"));
         } else {
-          pageIndex.replace("{banner}",F("<b><font color=green>Update erfolgreich</font></b>"));
-          pageIndex.replace("{redirect}", "redirect=true;");
+          pageIndex.replace(F("{banner}"),F("<b><font color=green>Update erfolgreich</font></b>"));
+          pageIndex.replace(F("{redirect}"), F("redirect=true;"));
         }
-        pageIndex.replace("{build}",_build);
-        pageIndex.replace("{branch}",_branch);
-        pageIndex.replace("{deviceInfo}",_deviceInfo);
-        pageIndex.replace("{footer}",_footer);
+        pageIndex.replace(F("{build}"),_build);
+        pageIndex.replace(F("{branch}"),_branch);
+        pageIndex.replace(F("{deviceInfo}"),_deviceInfo);
+        pageIndex.replace(F("{footer}"),_footer);
       
       AsyncWebServerResponse *response = request->beginResponse(200, "text/html", pageIndex);
-      response->addHeader("Connection", "close");
-      response->addHeader("Access-Control-Allow-Origin", "*");
+      response->addHeader(F("Connection"), F("close"));
+      response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
       request->send(response);
     },[&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
       //Upload handler chunks in data     
       if(!index){ // if index == 0 then this is the first frame of data
         stopForOTA = true; //stoppt alle Aktionen im loop()
 
-        delay(3000); //geht das hier?? unsicher!!!
+        delay(2000); //geht das hier?? unsicher!!!; 0.9.9.89: -1s
         udp.stop(); //koennte helfen
         
         Serial.printf("UploadStart: %s\n", filename.c_str());
@@ -96,7 +96,7 @@ void OTA::setup(const char *path, String username, String password) {
         
         // calculate sketch space required for the update; 1048576
         uint32_t maxSketchSpace = (1248576 - 0x1000) & 0xFFFFF000;
-        Serial.print("maxSketchSpace: ");
+        Serial.print(F("maxSketchSpace: "));
         Serial.println(maxSketchSpace);
         if(!Update.begin(maxSketchSpace)){//start with max available size
           Update.printError(Serial);
@@ -116,8 +116,8 @@ void OTA::setup(const char *path, String username, String password) {
       if(final){ // if the final flag is set then this is the last frame of data
         if(Update.end(true)){ //true to set the size to the current progress
             t_stop = millis();
-            Serial.print(F("\nTime UPLOAD: ")); Serial.print((t_stop - t_start) / 1000.0); Serial.println(" sec.");
-            Serial.print(F("Speed UPLOAD: ")); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(" Kbit/s");
+            Serial.print(F("\nTime UPLOAD: ")); Serial.print((t_stop - t_start) / 1000.0); Serial.println(F(" sec."));
+            Serial.print(F("Speed UPLOAD: ")); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(F(" Kbit/s"));
             Serial.printf("Upload Success, Rebooting: %u bytes\n", fileSize);
             restartRequired = true;  // Tell the main loop to restart the ESP
         } else {
@@ -129,7 +129,7 @@ void OTA::setup(const char *path, String username, String password) {
 
   //Hmmh not found, gehoert eigentlich nicht hier hin
   server.onNotFound([](AsyncWebServerRequest *request){
-      Serial.printf("NOT_FOUND: ");
+      Serial.print(F("NOT_FOUND: "));
       if(request->method() == HTTP_GET)
         Serial.printf("GET");
       else if(request->method() == HTTP_POST)

@@ -53,44 +53,39 @@ void SMA::read() {
     // read the packet into buf and get the senders IP addr and port number
     udp.read(buf,packetSize);
     yield();
-   
-    static char const lookup[] = "0123456789ABCDEF";
 
     for (std::size_t i = 0; i != packetSize; ++i) {
       hex[2*i  ] = lookup[ buf[i] >> 4  ];
       hex[2*i+1] = lookup[ buf[i] & 0xF ];
     }
 
-    //Summe Wirkleistung Bezug, 64...71
     for(int v=0; v<8; v++) {
-          wlb[v]=hex[v+64];
-    }
-    //Summe Wirkleistung Lieferung, 104...111
-    for(int v=0; v<8; v++) {
-          wll[v]=hex[v+104];
+        //Summe Wirkleistung Bezug, 64...71
+        wlb[v]=hex[v+64];
+        //Summe Wirkleistung Lieferung, 104...111          
+        wll[v]=hex[v+104];
     }
 
     bezug = strtol(wlb, NULL, 16)/10.0; //in Watt
     lieferung = strtol(wll, NULL, 16)/10.0; //in Watt
-
-    float netto = lieferung - bezug;
+    netto = lieferung - bezug;
 
     //v. 0.9.9.38 charger-Klasse regelt Aktivierung
     yield();
-    charger.checkOnIncome(netto);
+    charger.checkOnIncome();
     yield();
   } else {
       //Wird 2 Minuten kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
       long now = millis();
       long lastUdp = now - lastUdpRead;
       //wurde lastUdp millis kein Paket mehr empfangen UND liegt der letzte Resetversuch mind. 10s zurück
-      if(lastUdp > 120000 && (now - lastUdpReset) > 10000) {
+      if(lastUdp > 120000 && (now - lastUdpReset) > 10000) {         
           yield();
           reset();
           lastUdpReset = now;
           yield();
           String msg((char *)0);
-          msg.reserve(80);
+          msg.reserve(42);
           msg += F("Last WiFi UPD-Packet read ");
           msg += lastUdp;
           msg += F("ms ago");

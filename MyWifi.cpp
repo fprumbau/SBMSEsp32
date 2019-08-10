@@ -18,7 +18,7 @@ void MyWifi::connect() {
   while(WiFi.status() != WL_CONNECTED) {
       ct++;
       if(ct>10) {
-        Serial.println("Second attempt");
+        Serial.println(F("Second attempt"));
         ct=0;
         WiFi.disconnect(true);
         WiFi.mode(WIFI_STA);

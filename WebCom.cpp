@@ -39,7 +39,12 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           bitset.setCharAt(2,49);
         } else {
           bitset.setCharAt(2,48);
-        }  
+        } 
+        if(debugRelais) {
+          bitset.setCharAt(3,49);
+        } else {
+          bitset.setCharAt(3,48);
+        } 
         doc["dbg"]=bitset;
         
         doc["s1"]=charger.isChargerOn(1);
@@ -165,7 +170,15 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   update = true;      
                   buildMessage(&msg, "debugJson", String(debugJson).c_str());      
                 }
-                break;                 
+                break;  
+              case 3:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugRelais = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugRelais", String(debugRelais).c_str());      
+                }
+                break; 
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  
@@ -223,7 +236,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           update = true;
           int limit = doc["lm"];
           int rc = perry.setChargeLimit(limit);     
-          msg+=F("Requested charge limit ");
+          msg+=F("Server: Requested charge limit ");
           msg+=limit;
           msg+=F("%; Statuscode: ");    
           msg+=rc;
@@ -242,7 +255,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                  perry.setCharging(true);
                  updateUi();
               }
-              msg+=F("Requested Tesla charge start; Statuscode: ");    
+              msg+=F("Server: Requested Tesla charge start; Statuscode: ");    
               msg+=rc;            
               msg+=F("; ");
           } else {
@@ -252,7 +265,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   perry.setCharging(false); 
                   updateUi();
               }   
-              msg+=F("Requested Tesla charge stop; Statuscode: ");     
+              msg+=F("Server: Requested Tesla charge stop; Statuscode: ");     
               msg+=rc;    
               msg+=F("; ");        
           }     

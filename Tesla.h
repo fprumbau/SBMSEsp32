@@ -62,6 +62,8 @@ class Tesla {
     bool hasUpdate();
     void reset();
     const char* status();
+    const char* vehicleId();
+    const char* authorization();
 };
 
 #endif

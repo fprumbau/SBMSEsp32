@@ -41,6 +41,7 @@ extern int LED_BLUE;
 extern bool debug;
 extern bool debug2;
 extern bool debugJson;
+extern bool debugRelais;
 extern String bitset;
 
 extern int RELAY_S1;
@@ -91,6 +92,7 @@ extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Bat
 extern String sbmsData;
 extern float bezug;
 extern float lieferung;
+extern float netto;
 extern String datetime;
 
 extern int dayOfMonthLastRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?

@@ -1,0 +1,59 @@
+<!DOCTYPE html><html>
+<style>
+body { background-color:#545147;color:beige; }
+input { 
+	background-color:beige; 
+	color:#505050; 
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	padding:5px;
+}
+.button {
+	background-color:#505050;
+	color:beige;
+	border-color:1 solid beige;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	padding:3px;
+}
+#parent {
+   margin-top:200px;
+   display: table;
+   width: 100%;
+}
+#form_login {
+   display: table-cell;
+   text-align: center;
+   vertical-align: middle;
+}
+</style>
+<body>
+<script>
+function submitAuthForm() {
+    var login = document.getElementById('login').value;
+    var pass = document.getElementById('pass').value;
+    location = location.href.replace('://', '://' + encodeURIComponent(login) + ':' + encodeURIComponent(pass) + '@');
+    // might be required to reload on Firefox (FF shows confirmation dialog)
+    setTimeout(function(){
+        location.reload(true);
+    }, 5000);
+}
+</script>
+<div id="parent">
+    <form id="form_login" method="get" onsubmit="submitAuthForm(); return false;">
+        SBMS Login
+        <p>
+            <input type="text" id="login" placeholder="username" />
+        </p>
+        <p>
+            <input type="password" id="pass" placeholder="password" />
+        </p>
+        <p>
+            <input class="button" type="submit" value="&nbsp;&nbsp;Login&nbsp;&nbsp;"/>
+        </p>
+    </form>
+</div>
+</body>
+</html>

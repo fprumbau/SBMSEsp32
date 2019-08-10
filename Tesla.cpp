@@ -65,26 +65,35 @@ int Tesla::authorize(const char* password) {
     yield();
  
     if(rc>0) {
-        if(debug) {
-          Serial.println(_auth_url);
-          String response = http.getString();    
-          Serial.println(response);  
-          wc.sendClients(response.c_str());
-          DynamicJsonDocument doc(256);
-          deserializeJson(doc, response);
-          String rt = doc["refresh_token"];
-          _authorization = new char[rt.length()+1];
-          rt.toCharArray(_authorization, rt.length()+1);           
-          /*
-          {
-            "access_token": "abc123",
-            "token_type": "bearer",
-            "expires_in": 3888000,  //45d 
-            "refresh_token": "cba321",
-            "created_at": 1538359034
-          }
-          */          
+      
+        Serial.println(_auth_url);
+        String response = http.getString();    
+        Serial.println(response);  
+        wc.sendClients(response.c_str());
+        DynamicJsonDocument doc(256); 
+        deserializeJson(doc, response);
+        String rt = doc["refresh_token"];
+        _authorization = new char[rt.length()+1];
+        rt.toCharArray(_authorization, rt.length()+1); 
+               
+        yield();
+        config.save();
+        Serial.println(response);  
+        Serial.print(F("Authorization: "));
+        Serial.println(_authorization); 
+        Serial.print(F("VehicleId: "));
+        Serial.println(_vehicle_id);         
+        Serial.println(F("Der AuthToken wurde erneuert und gespeichert"));       
+        /*
+        {
+          "access_token": "abc123",
+          "token_type": "bearer",
+          "expires_in": 3888000,  //45d 
+          "refresh_token": "cba321",
+          "created_at": 1538359034
         }
+        */          
+
         //200 == OK,
         //401 == Bearer Token abgelaufen oder nicht richtig
 
@@ -300,8 +309,8 @@ void Tesla::init(const char* auth, const char* vehicleid) {
   strcpy(_wakeup_url, wakeupUrl.c_str());
 
   String authUrl((char *)0);
-  authUrl.reserve(80); //spaeter
-  authUrl += _vehicle_base_url;
+  authUrl.reserve(50); //spaeter
+  authUrl += F("https://owner-api.teslamotors.com");
   authUrl += _auth;
   _auth_url = new char[authUrl.length()+1];
   strcpy(_auth_url, authUrl.c_str());
@@ -332,6 +341,10 @@ void Tesla::print() {
   Serial.println(_chargingState);
   Serial.print(F("Ladespannung: "));
   Serial.println(_chargerVoltage);  
+  Serial.print(F("VehicleId: "));
+  Serial.println(_vehicle_id);   
+  Serial.print(F("Bearer Token: "));
+  Serial.println(_authorization);  
 } 
 
 const char* Tesla::status() {
@@ -363,7 +376,11 @@ void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->addHeader(_hd_user_agent, _user_agent);
     client->addHeader(_hd_app_agent, _tesla_user_agent);
     client->addHeader(_hd_content_type, _json_header);
-    client->addHeader(_hd_authorization, _authorization);   
+    String bearerToken = String((char*)0);
+    bearerToken.reserve(96);
+    bearerToken+=F("Bearer ");
+    bearerToken+=_authorization;
+    client->addHeader(_hd_authorization, bearerToken);   
 }
 
 bool Tesla::isCharging() {
@@ -392,4 +409,12 @@ bool Tesla::hasUpdate() {
 
 void Tesla::reset() {
   _hasUpdate = false;
+}
+
+const char* Tesla::vehicleId() {
+  return _vehicle_id;
+}
+
+const char* Tesla::authorization() {
+  return _authorization;
 }

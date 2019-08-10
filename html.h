@@ -85,8 +85,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.69: Ist Netto positiv, aber der Inverter laeuft, sollte dieser gestoppt werden, BEVOR die Charger geschaltet werden  
 <li>0.9.9.70: Beim Schalten des Netzvorrangs einen Offset von 100W Lieferung beachten (wenn weniger als 100W, dann wird Batterie nicht abgeschaltet)       
 <li>0.9.9.71: S1 vor S2 bewerten und schalten. Damit l&auml;sst muss der Nettoabzug (600W) nicht mehr berechnet werden, S2 ist immer als Tuning der Lieferung vorhanden, nicht nur zwischen 0...600W.
-<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) f&uuml;r S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird (Upload geht NICHT, SBMS einlesen auch nicht; Was hat sich hier geändert?; => hier war sbms.readSbms();  auskommentiert!)
-<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenrückseite auf GPIO15 umgelegt werden muss. Wird da eine Brücke zwischen GPIO15 und GPIO16 gelegt, m&uuml;ssten beide Chips arbeiten. (Upload kein Binary)
+<li>0.9.9.72: Vor der Bewertung (charger.checkOnIncome) f&uuml;r S1 und S2 sollte geprueft werden, ob die Batterie genutzt wird (Upload geht NICHT, SBMS einlesen auch nicht; Was hat sich hier ge&auml;ndert?; => hier war sbms.readSbms();  auskommentiert!)
+<li>0.9.9.73: <Wrover-B> Switch auf Wrover-B, wo SBMS-In(RX2) auf GPIO16 nicht belegt und auf Platinenr&uuml;ckseite auf GPIO15 umgelegt werden muss. Wird da eine Br&uuml;cke zwischen GPIO15 und GPIO16 gelegt, m&uuml;ssten beide Chips arbeiten. (Upload kein Binary)
 <li>0.9.9.74: <Wroom> isAlive Url geschaltet: /lbprobe liefert 'online', Rollback 0.9.9.72 (charger.cpp), es darf auch im Batterieberieb geladen werden (Upload kein Binary)
 <li>0.9.9.75: Loop0-Taskmethode integriert, um bisher ungenutzten Core zu nutzen (Upload kein Binary)
 <li>0.9.9.76: Beginn der Steuerung der Teslaladeregelung, Tesla.h und Tesla.cpp hinzugefuegt, Status, Wakeup, Ladestart und Ladestop, alles implementiert, aber noch nicht angesteuert (Upload geht, SBMS einlesen aber nicht mehr => hier war sbms.readSbms();  auskommentiert!)
@@ -94,7 +94,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.78: Der mit 0.9.9.58 eingef&uuml;hrte ESP.restart() um 06:00 morgens wird wieder herausgenommen.
 <li>0.9.9.79: In charger.cpp wurde nun die Tesla-Ladesteuerung aktiviert, bei >500 und allen Ladern an wird nun versucht, den Ladevorgang zu starten, bei <-1000W wird gestoppt. Minimale Schaltzeit ist 5Min.
 <li>0.9.9.80: Beim startCharge wird nun zwischen Limitsetzung und Chartstart 8s statt 5s gewartet. Eine Schaltung bedingt nun ausserdem mindestens 10 positive Messungen.
-<li>0.9.9.81: Tesla Chargestate zeichnet nun die wichtigsten Grössen auf.
+<li>0.9.9.81: Tesla Chargestate zeichnet nun die wichtigsten Gr&ouml;ssen auf.
 <li>0.9.9.82: Anfang eines GUI-Controls (Web) um die Teslasteuerung ein-/bzw. auszuschalten
 <li>0.9.9.83: (1) Das Flag teslaCtrlActive wird nun permanent im SPIFFS abgelegt
 <li>0.9.9.83: (2) Die Konfiguration wird nun lokal im CFG vorgehalten, Konfig nun &uuml;ber Kommandozeile speicherbar
@@ -109,7 +109,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.84: (2) Hintergrundfarben der deaktivierten Buttons S1,S2 etc angepasst.
 <li>0.9.9.84: (3) Auskunftsfenstern div:id='teslaout' hinzugef&uuml;gt.
 <li>0.9.9.84: (4) Die L&uuml;fter sollten laufen, solange die Grenztemperatur nicht um 2 Grand unterschritten wurde (TEMP_THRESHOLD_HIGH/_LOW) (verhindert Relayklickmarathon) 
-<li>0.9.9.84: (5) Fehlermeldung fixed: 'Cannot process data: Connect Wed Jul 24 2019 10:17:46 GMT+0200 (Mitteleuropäische Sommerzeit)' (aus onopen-Event in Webseite; jetzt nur noch lokal).
+<li>0.9.9.84: (5) Fehlermeldung fixed: 'Cannot process data: Connect Wed Jul 24 2019 10:17:46 GMT+0200 (Mitteleurop&auml;ische Sommerzeit)' (aus onopen-Event in Webseite; jetzt nur noch lokal).
 <li>0.9.9.84: (6) Moeglichkeit geschaffen, &uuml;ber die Kommandozeile Konfigwerte zu setzen (um sie dann mit einem config.save) sp&auml;ter speichern zu k&ouml;nnen. 
 <li>0.9.9.84: (7) Wird ein Tesla-Statusupdate empfangen, dann wurde die maximale Nachrichtengroesse von 300Byte ueberschritten (392), Max wurde nun auf 512 erh&uuml;ht
 <li>0.9.9.84: (8) Fehler bei Namen WakeUp-Button behoben, Styling, 'teslaout' wird nun bef&uuml;llt.
@@ -137,18 +137,88 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.87: (7) Ladestandsanzeiger f&uuml;r den Teslabereich
 <li>0.9.9.87: (8) Ein Update des Ladestandes wird nur noch gemacht, wenn rc==200 in perry.readChargeState()
 <li>0.9.9.87: (9) Die Buttons Limit50 und Limit90 setzen nun ein Ladelimit von 50 oder 90%. Endet das Kommando mit Rc==200, wird nach 5s noch eine Statusabfrage gemacht (wenn queryTeslaStateAfter = true)
+<li>0.9.9.88: (1) Die Wartezeit bis zur Statusabfrage nach Setzen eines Limits wird von 5s auf 10s erhoeht
+<li>0.9.9.88: (2) Neues Debugflag 'debugRelais' einbauen, um alle Schaltaktionen von Relais zu dokumentieren; das Ergebnis sollte immer mit log(...) in der Konsole erscheinen (work in progress)
+<li>0.9.9.88: (3) Es sollte immer zuerst S1 ausgeschaltet werden, S2 erst dann, wenn 5 Minuten die Lieferung negativ war (S2 regelt selbst herunter bis ca. 1A).
+<li>0.9.9.88: (4) Ein wenig umr&auml;umen/optimieren in SMA.cpp/SCM.h 
+<li>0.9.9.88: (5) BasisUrl zur Re-Authentifizierung gefixed, wurde ein neues Token geholt, wird es im SPIFFS gesichert.
+<li>0.9.9.88: (6) Watchdogtimer abstellen (999s, no panic handler).
+<li>0.9.9.88: (7) Fix: Bei der Anforderung, das Teslaladen zu starten, wurde immer ein false übermittelt.
+<li>0.9.9.88: (8) Die Config konnte nicht gespeichert werden, wenn bei ihrem Laden zum Programmstart ein Fehler passiert war (_configRead=false), dies wurde entfernt.
+<li>0.9.9.88: (9) Authentication für Aufrufe über /sbms-Kontext von Remote
+<li>0.9.9.88: (10) Formatierung des Tesladivs ge&auml;ndert
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
-<li>  Wird ein Wake/Start charging/Stop charging gemacht, sollte ein 'deeferredStatusRequest'-Flag in der Seite gesetzt und nach einem Rc200 ein Statusupdate gemacht werden (Wait einbauen?)
-<li>  Neues Debugflag 'debugRelais' einbauen, um alle Schaltaktionen von Relais zu dokumentieren; das Ergebnis sollte immer mit log(...) in der Konsole erscheinen
-<li>  Es sollte immer zuerst S1 ausgeschaltet werden, S2 erst dann, wenn 5 Minuten die Lieferung negativ war (S2 regelt selbst herunter bis ca. 1A).
 <li>  
 )=====";
 
-#define VERSION "0.9.9.87"
+#define VERSION "0.9.9.88"
+
+const char login[] PROGMEM = R"=====(
+<!DOCTYPE html><html>
+<style>
+body { background-color:#545147;color:beige; }
+input {
+        background-color:beige;
+        color:#505050;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        padding:5px;
+}
+.button {
+        background-color:#505050;
+        color:beige;
+        border-color:1 solid beige;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        padding:3px;
+}
+#parent {
+   margin-top:200px;
+   display: table;
+   width: 100%;
+}
+#form_login {
+   display: table-cell;
+   text-align: center;
+   vertical-align: middle;
+}
+</style>
+<body>
+<script>
+function submitAuthForm() {
+    var login = document.getElementById('login').value;
+    var pass = document.getElementById('pass').value;
+    location = location.href.replace('://', '://' + encodeURIComponent(login) + ':' + encodeURIComponent(pass) + '@');
+    console.log(location);
+    // might be required to reload on Firefox (FF shows confirmation dialog)
+    setTimeout(function(){
+        location.reload(true);
+    }, 5000);
+}
+</script>
+<div id="parent">
+    <form id="form_login" method="post" onsubmit="submitAuthForm(); return false;">
+        SBMS Login
+        <p>
+            <input type="text" id="login" placeholder="username" />
+        </p>
+        <p>
+            <input type="password" id="pass" placeholder="password" />
+        </p>
+        <p>
+            <input class="button" type="submit" value="&nbsp;&nbsp;Login&nbsp;&nbsp;"/>
+        </p>
+    </form>
+</div>
+</body>
+</html>
+)=====";
 
 const char update[] PROGMEM = R"=====(
-<!DOCTYPE html><html lang="en" style="height:100%;"><head>
+<!DOCTYPE html><html lang="de" style="height:100%;"><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
 <title>{title}</title>
 <style>
@@ -244,6 +314,7 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
       <option name="0">Debug Web (Client)</option>
       <option name="1">Debug Websckts (Srv)</option>
       <option name="2">Debug Json</option>
+      <option name="3">Debug Relais</option>
     </select>
 </input>
 
@@ -272,11 +343,13 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
 <div2 style='color:#030;font-size:24px;top:10px;left:87px;text-shadow: -2px -2px 2px #efc;' id='SOC2' >0%</div2>
 <input type="checkbox" id="teslaactive" onchange='updateServer();' style="margin-top:45px;"></input>Tesla Ladestrg.
-<input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);"/><br>
-<input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="margin-top:12px;margin-left:3px;"/>
-<input type="button" class="bs" id="charge" value="Laden" onclick="setOn(this);updateServer(this.id);"/>
-<input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);"/>
-<input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);"/>
+<input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);" style="width:53px;"/>
+<br>
+<input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="margin-top:22px;margin-left:5px;width:100px;"/>
+<input type="button" class="bs" id="charge" value="Laden" onclick="updateServer(this.id);" style="width:100px;"/>
+<br>
+<input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);" style="margin-top:22px;margin-left:5px;width:100px;"/>
+<input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);" style="width:100px;"/>
 
 <div2 id="teslaout" class="bt">
 ...
@@ -544,15 +617,15 @@ function updateUi() {
   } else {
     if(rts_reset) {
       console.log("Setting rts_reset to false"); //for debug only
-      rts_reset = false; //es kommen keine Teslastatusdaten mehr, also kann Resetflag zurückgesetzt werden
+      rts_reset = false; //es kommen keine Teslastatusdaten mehr, also kann Resetflag zur&uuml;ckgesetzt werden
     }
   }
   if(json.hasOwnProperty('cs')) {
      if(json.cs) { //laedt
-        console.log("set on charge: " + json.cs);
+        console.log("Client: Just received from server: Charging: " + json.cs);
         setOn(document.getElementById('charge'));
      } else { //idle
-        console.log("set off charge:" + json.cs);
+        console.log("Client: Just received from server: Charging:" + json.cs);
         setOff(document.getElementById('charge'));
      }
   }
@@ -561,7 +634,7 @@ function updateUi() {
       setOff(document.getElementById('lim50'));
       log("Set charge limit, rc: " + json.lm);
       if(json.lm==200 && queryTeslaStateAfter) {
-        setTimeout("updateServer('state');",5000);
+        setTimeout("updateServer('state');",10000);
       }
   }  
   if(json.hasOwnProperty('sc')) {
@@ -637,13 +710,16 @@ function updateServer(txt) {
           o.lm = 90; //charge limit 90%
           queryTeslaStateAfter = true;
         break;             
-        case "charge":          
-          if(isOn(document.getElementById("charge"))) {
-            console.log("charge req on");
-            o.ch = false;  //request charge stop   
+        case "charge":    
+          var charge = document.getElementById("charge");      
+          if(isOn(charge)) {
+            setOff(charge);
+            console.log("Client: About to issue charge stop req");
+            o.ch = false;    
           } else {
-            console.log("charge req off");
-            o.ch = true; //request charge start
+            setOn(charge);
+            console.log("Client: About to issue charge start req");
+            o.ch = true;
           }
         break;        
      }
