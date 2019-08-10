@@ -12,7 +12,7 @@ void CFG::load() {
     return;
   }
   size_t size = configFile.size();
-  if(size>1024) {
+  if(size>4192) {
      Serial.println(F("Config file is to large"));
      return;
   }
@@ -25,7 +25,7 @@ void CFG::load() {
   configFile.readBytes(buf.get(), size);
   if(debug) Serial.println(buf.get());
   
-  auto error = deserializeJson(doc, buf.get());
+  auto error = deserializeJson(cfgDoc, buf.get());
 
   if(error) {
     Serial.println(F("Failed to parse config file"));
@@ -37,10 +37,10 @@ void CFG::load() {
 void CFG::init() {
   //Konfigwerte initialisieren 
 
-  if(doc.containsKey("authorization") && doc.containsKey("authorization")) {
+  if(cfgDoc.containsKey("authorization") && cfgDoc.containsKey("vehicleId")) {
     
-      String auth = doc["authorization"];
-      String vehicleId = doc["vehicleId"];
+      const char* auth = cfgDoc["authorization"];
+      const char* vehicleId = cfgDoc["vehicleId"];
     
       Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
       Serial.print(auth);
@@ -48,21 +48,21 @@ void CFG::init() {
       Serial.print(vehicleId);
       Serial.println(F("|"));
     
-      perry.init(auth.c_str(), vehicleId.c_str());
+      perry.init(auth, vehicleId);
   }
 
-  if(doc.containsKey("authorization") && doc.containsKey("authorization")) {
+  if(cfgDoc.containsKey("webuser") && cfgDoc.containsKey("webpass")) {
     //Webzugang
-    const char* webUser = doc["webuser"];
+    const char* webUser = cfgDoc["webuser"];
     _webUser = new char[strlen(webUser)+1];
     strcpy(_webUser, webUser);
   
-    const char* webPass = doc["webpass"];
+    const char* webPass = cfgDoc["webpass"];
     _webPass = new char[strlen(webPass)+1];
     strcpy(_webPass, webPass);
   
     //Lese andere Konfigwerte fuer global.h
-    teslaCtrlActive = doc["teslaCtrlActive"];
+    teslaCtrlActive = cfgDoc["teslaCtrlActive"];
     if(debug) {
       Serial.print("teslaCtrlActive=");
       Serial.println(teslaCtrlActive);  
@@ -75,19 +75,19 @@ bool CFG::save() {
     return false;
   }
   
-  doc["vehicleId"] = perry.vehicleId();
-  doc["authorization"] = perry.authorization();
-  doc["teslaCtrlActive"] = teslaCtrlActive;
-  doc["webUser"] = _webUser;
-  doc["webPass"] = _webPass;
+  cfgDoc["vehicleId"] = perry.vehicleId();
+  cfgDoc["authorization"] = perry.authorization();
+  cfgDoc["teslaCtrlActive"] = teslaCtrlActive;
+  cfgDoc["webUser"] = _webUser;
+  cfgDoc["webPass"] = _webPass;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println(F("Failed to open config file for writing"));
     return false;
   }
-  serializeJson(doc, Serial);
-  serializeJson(doc, configFile);
+  serializeJson(cfgDoc, Serial);
+  serializeJson(cfgDoc, configFile);
   Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
   
   return true;
@@ -98,7 +98,7 @@ void CFG::set(const String& keyVal) {
   String key = getValue(keyVal, ':', 0);
   String val = getValue(keyVal, ':', 1);
   
-  doc[key] = val;
+  cfgDoc[key] = val;
   Serial.print(F("Set config value '"));
   Serial.print(key);
   Serial.print(F("' to '"));

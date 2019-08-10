@@ -109,4 +109,5 @@ int teslaChargeStartThreshold = 500;
 int teslaChargeStopThreshold = -1000;
 int lowIncomeCount = 0; //Der Tesla sollte erst abgeschaltet werden, nachdem 10 Messpunkte 
 int highIncomeCount = 0;
+DynamicJsonDocument cfgDoc(1024);
 CFG config;

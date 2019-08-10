@@ -6,7 +6,6 @@ class CFG {
         //SPIFFS
         char* _webUser;
         char* _webPass;
-        StaticJsonDocument<1024> doc;
   public:
         void load();
         void init();

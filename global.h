@@ -109,6 +109,7 @@ extern String TESLA_CLIENT_ID;
 extern String TESLA_CLIENT_SECRET;
 extern boolean teslaCtrlActive;
 extern Tesla perry;
+extern DynamicJsonDocument cfgDoc;
 extern CFG config;
 extern long lastTeslaLoadSwitch;
 extern long TESLA_LOAD_SWITCH_MIN_MILLIS; //hoechstens alle 5 Minuten schalten

@@ -145,14 +145,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.88: (6) Watchdogtimer abstellen (999s, no panic handler).
 <li>0.9.9.88: (7) Fix: Bei der Anforderung, das Teslaladen zu starten, wurde immer ein false übermittelt.
 <li>0.9.9.88: (8) Die Config konnte nicht gespeichert werden, wenn bei ihrem Laden zum Programmstart ein Fehler passiert war (_configRead=false), dies wurde entfernt.
-<li>0.9.9.88: (9) Authentication für Aufrufe über /sbms-Kontext von Remote
+<li>0.9.9.88: (9) Authentication f&uuml;r Aufrufe &ber /sbms-Kontext von Remote
 <li>0.9.9.88: (10) Formatierung des Tesladivs ge&auml;ndert
+<li>0.9.9.88: (11) Statt StaticJsonDocument (Inhalt gemischt auf stack) wird in CFG nun DynamicJsonDocument verwendet.
+<li>0.9.9.89: (1) 
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
 <li>  
 )=====";
 
-#define VERSION "0.9.9.88"
+#define VERSION "0.9.9.89"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
