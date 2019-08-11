@@ -45,13 +45,36 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(3,48);
         } 
+        if(debugSma) {
+          bitset.setCharAt(4,49);
+        } else {
+          bitset.setCharAt(4,48);
+        }        
+        if(debugSbms) {
+          bitset.setCharAt(5,49);
+        } else {
+          bitset.setCharAt(5,48);
+        }    
+        if(debugCharger) {
+          bitset.setCharAt(6,49);
+        } else {
+          bitset.setCharAt(6,48);
+        }   
+        if(debugBattery) {
+          bitset.setCharAt(7,49);
+        } else {
+          bitset.setCharAt(7,48);
+        }  
+        if(debugInverter) {
+          bitset.setCharAt(8,49);
+        } else {
+          bitset.setCharAt(8,48);
+        }                 
         doc["dbg"]=bitset;
-        
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
         doc["b"]=battery.isOn();
-        doc["l"]=lieferung;
-        doc["z"]=bezug;
+        doc["n"]=netto;
         if(sbmsData != NULL && sbmsData.length() > 10) {
            doc["d"]=sbmsData;
         }
@@ -179,6 +202,46 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "debugRelais", String(debugRelais).c_str());      
                 }
                 break; 
+              case 4:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugSma = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugSma", String(debugSma).c_str());      
+                }
+                break;  
+              case 5:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugSbms = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugSbms", String(debugSbms).c_str());      
+                }
+                break;
+              case 6:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugCharger = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugCharger", String(debugCharger).c_str());      
+                }
+                break;         
+              case 7:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugBattery = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugBattery", String(debugBattery).c_str());      
+                }
+                break; 
+              case 8:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugInverter = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugInverter", String(debugInverter).c_str());      
+                }
+                break;                                                                          
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  
@@ -189,6 +252,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           if(update) {
             Serial.print(F("Aktualisierung von Bitset: "));
             Serial.println(bitset);
+            Serial.println(msg);
           }
           yield();
         }     

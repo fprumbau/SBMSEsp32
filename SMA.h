@@ -6,6 +6,7 @@
 class SMA {
 
   private:
+    unsigned int portMulti = 9522; 
     char const lookup[17] = "0123456789ABCDEF";
     bool initialized = false;
     byte buf[601]; //buffer to hold incoming packet
@@ -13,11 +14,10 @@ class SMA {
     char wlb[9]; //Wirkleistung Bezug
     char wll[9]; //Wirkleistung Lieferung
     void reset();
-    void ping();
     
   public:
     void init();
-    void read();
+    bool read();
 };
 
 #endif

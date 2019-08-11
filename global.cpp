@@ -29,6 +29,12 @@ bool debug = false;
 bool debug2 = false;
 bool debugJson = false;
 bool debugRelais = false;
+bool debugSma = false;
+bool debugSbms = false;
+bool debugCharger = false;
+bool debugBattery = false;
+bool debugInverter = false;
+
 extern String bitset = "00000000";
 
 int RELAY_S1 = 33;
@@ -66,7 +72,6 @@ WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
 long lastUdpReset = -1;
-long lastPingUdp = -1;
 AsyncWebSocket ws("/ws");
 
 long soc = -1; //aktueller Wert State Of Charge
@@ -80,11 +85,8 @@ bool testFixed = false;
 String testData = F("#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(");
 const char* hostName = "esp32a";
 unsigned long lastReceivedMillis = -1;
-long timeout = 10000;
 
 String sbmsData="";
-float bezug=0.0;
-float lieferung=0.0;
 float netto=0.0;
 String datetime;
 
@@ -109,5 +111,4 @@ int teslaChargeStartThreshold = 500;
 int teslaChargeStopThreshold = -1000;
 int lowIncomeCount = 0; //Der Tesla sollte erst abgeschaltet werden, nachdem 10 Messpunkte 
 int highIncomeCount = 0;
-DynamicJsonDocument cfgDoc(1024);
 CFG config;

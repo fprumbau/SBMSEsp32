@@ -12,7 +12,7 @@ void CFG::load() {
     return;
   }
   size_t size = configFile.size();
-  if(size>4192) {
+  if(size>8192) {
      Serial.println(F("Config file is to large"));
      return;
   }
@@ -24,23 +24,19 @@ void CFG::load() {
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
   if(debug) Serial.println(buf.get());
+
+  DynamicJsonDocument doc(1024);
   
-  auto error = deserializeJson(cfgDoc, buf.get());
+  auto error = deserializeJson(doc, buf.get());
 
   if(error) {
     Serial.println(F("Failed to parse config file"));
   }
 
-  init();
-}
-
-void CFG::init() {
-  //Konfigwerte initialisieren 
-
-  if(cfgDoc.containsKey("authorization") && cfgDoc.containsKey("vehicleId")) {
+  if(doc.containsKey("authorization") && doc.containsKey("vehicleId")) {
     
-      const char* auth = cfgDoc["authorization"];
-      const char* vehicleId = cfgDoc["vehicleId"];
+      const char* auth = doc["authorization"];
+      const char* vehicleId = doc["vehicleId"];
     
       Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
       Serial.print(auth);
@@ -48,21 +44,22 @@ void CFG::init() {
       Serial.print(vehicleId);
       Serial.println(F("|"));
     
-      perry.init(auth, vehicleId);
+      perry.vehicleId(vehicleId);
+      perry.authorization(auth);
   }
 
-  if(cfgDoc.containsKey("webuser") && cfgDoc.containsKey("webpass")) {
+  if(doc.containsKey("webuser") && doc.containsKey("webpass")) {
     //Webzugang
-    const char* webUser = cfgDoc["webuser"];
+    const char* webUser = doc["webuser"];
     _webUser = new char[strlen(webUser)+1];
-    strcpy(_webUser, webUser);
+    strcpy(_webUser, webUser); 
   
-    const char* webPass = cfgDoc["webpass"];
+    const char* webPass = doc["webpass"];
     _webPass = new char[strlen(webPass)+1];
     strcpy(_webPass, webPass);
   
     //Lese andere Konfigwerte fuer global.h
-    teslaCtrlActive = cfgDoc["teslaCtrlActive"];
+    teslaCtrlActive = doc["teslaCtrlActive"];
     if(debug) {
       Serial.print("teslaCtrlActive=");
       Serial.println(teslaCtrlActive);  
@@ -71,23 +68,26 @@ void CFG::init() {
 }
 
 bool CFG::save() {
+  
   if(!SPIFFS.begin()) {
     return false;
   }
+
+  DynamicJsonDocument doc(1024);
   
-  cfgDoc["vehicleId"] = perry.vehicleId();
-  cfgDoc["authorization"] = perry.authorization();
-  cfgDoc["teslaCtrlActive"] = teslaCtrlActive;
-  cfgDoc["webUser"] = _webUser;
-  cfgDoc["webPass"] = _webPass;
+  doc["vehicleId"] = perry.vehicleId();
+  doc["authorization"] = perry.authorization();
+  doc["teslaCtrlActive"] = teslaCtrlActive;
+  doc["webUser"] = _webUser;
+  doc["webPass"] = _webPass;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println(F("Failed to open config file for writing"));
     return false;
   }
-  serializeJson(cfgDoc, Serial);
-  serializeJson(cfgDoc, configFile);
+  serializeJson(doc, Serial);
+  serializeJson(doc, configFile);
   Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
   
   return true;
@@ -97,19 +97,44 @@ void CFG::set(const String& keyVal) {
 
   String key = getValue(keyVal, ':', 0);
   String val = getValue(keyVal, ':', 1);
+
+  set(key.c_str(), val.c_str());
+}
+
+void CFG::set(const char* key, const char* val) {
   
-  cfgDoc[key] = val;
   Serial.print(F("Set config value '"));
   Serial.print(key);
   Serial.print(F("' to '"));
   Serial.print(val);
   Serial.println(F("'; Still has to be saved"));
-  
-  //Konfiginitialisierung durchfuehren
-  init();
+
+  String keyStr = String(key);
+
+  if(keyStr == "vehicleId") {
+    perry.vehicleId(val);
+  } else if(keyStr == "authorization") {
+    perry.authorization(val);
+  } else if(keyStr == "webUser") {
+    _webUser = new char[strlen(val)+1];
+    strcpy(_webUser, val);    
+  } else if(keyStr == "webPass") {
+    _webPass = new char[strlen(val)+1];
+    strcpy(_webPass, val);
+  } else if(keyStr == "teslaCtrlActive") {
+    if(strcmp(val,"1") || strcmp(val,"true")) {
+      teslaCtrlActive=true;
+    } else {
+      teslaCtrlActive=false;
+    }
+  } else {
+    Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
+    Serial.println(key);
+  }
 }
 
 String CFG::getValue(String data, char separator, int index) {
+  
     int found = 0;
     int strIndex[] = { 0, -1 };
     int maxIndex = data.length() - 1;
@@ -135,4 +160,22 @@ void CFG::print() {
   Serial.println(_webUser);  
   Serial.print(F("_webPass: "));
   Serial.println(_webPass); 
+  Serial.print(F("debug: "));
+  Serial.println(debug); 
+  Serial.print(F("debug2: "));
+  Serial.println(debug2);   
+  Serial.print(F("debugJson: "));
+  Serial.println(debugJson); 
+  Serial.print(F("debugRelais: "));
+  Serial.println(debugRelais);    
+  Serial.print(F("debugSma: "));
+  Serial.println(debugSma); 
+  Serial.print(F("debugSbms: "));
+  Serial.println(debugSbms);   
+  Serial.print(F("debugCharger: "));
+  Serial.println(debugCharger); 
+  Serial.print(F("debugBattery: "));
+  Serial.println(debugBattery); 
+  Serial.print(F("debugInverter: "));
+  Serial.println(debugInverter);  
 }

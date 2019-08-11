@@ -240,7 +240,7 @@ void Charger::checkOnIncome() {
           //0.9.9.69 ERST pruefen, ob Inverter gerade auf Batterie laeuft         
           // (und der Solarertrag groesser als 100W ist, da sonst abends bei z.B. netto = -400 eingeschaltet wird und dann +500 erzeugt wird, also netto>30 wird )
           // Die 100 entprechen dem, was Mama&Papa verbrauchen
-          if(battery.isOn() && lieferung > 100) {
+          if(battery.isOn() && netto > 100) {
               inverter.starteNetzvorrang(F("Deaktiviere Batteriemodus, weil Nettoertrag positiv (S2 Bewertung)"));
               return;
           }

@@ -42,7 +42,7 @@ unsigned int SBMS::char_off(char c) {
   return 0;
 }
 
-void SBMS::readSbms() {
+bool SBMS::read() {
 
   String sread;
 
@@ -71,9 +71,9 @@ void SBMS::readSbms() {
 
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
-  if (len > 1 || ( millis() - lastReceivedMillis ) > timeout ) {
-    if (( millis() - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
-      if (debug && len > 0) {
+  long now = millis();
+  if (( now - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
+      if (debugSbms && len > 0) {
         Serial.print(".____");
         Serial.print(sread);
         Serial.println("____.");
@@ -89,7 +89,7 @@ void SBMS::readSbms() {
       if (len > 0) {
 
         sbmsData = sread;
-        wc.updateUi(NULL, true); //ab 0.9.9.22 wird data per JSon uebermittelt
+        wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
 
         const char* txt = sread.c_str();
 
@@ -118,25 +118,17 @@ void SBMS::readSbms() {
         }
         yield();
 
-        //Werte
-        if (debug) {
+        if (debugSbms) {
           Serial.println(outString);
           Serial.print(F("StopBattery: "));
           Serial.println(inverter.stopBattery);
           Serial.println(F("_______________________________________"));
         }
 
-        if (debug) {
-          String mem((char *)0);
-          mem.reserve(64);
-          mem += F(" Heap (free): ");
-          mem += ESP.getFreeHeap();
-          wc.sendClients(mem.c_str());
-        }
-
         //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
         lastReceivedMillis = millis();
+        return true;
       }
-    }
   }
+  return false;
 }

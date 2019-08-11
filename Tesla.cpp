@@ -259,9 +259,14 @@ int Tesla::setChargeLimit(int percent) {
   return rc;
 }
 
-void Tesla::init(const char* auth, const char* vehicleid) {
+void Tesla::authorization(const char* auth) {
+  
   _authorization = new char[strlen(auth)+1];
   strcpy(_authorization, auth);
+}
+
+void Tesla::vehicleId(const char* vehicleid) {
+
   _vehicle_id = new char[strlen(vehicleid)+1];
   strcpy(_vehicle_id, vehicleid);
   

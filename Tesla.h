@@ -48,7 +48,8 @@ class Tesla {
     void beginRequest(HTTPClient *client, char *url);
         
   public:
-    void init(const char* auth, const char* vehicleid);
+    void vehicleId(const char* vehicleId);
+    void authorization(const char* auth);
     int authorize(const char* password);
     int wakeup();
     int startCharge();

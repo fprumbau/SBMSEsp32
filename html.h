@@ -147,8 +147,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.88: (8) Die Config konnte nicht gespeichert werden, wenn bei ihrem Laden zum Programmstart ein Fehler passiert war (_configRead=false), dies wurde entfernt.
 <li>0.9.9.88: (9) Authentication f&uuml;r Aufrufe &ber /sbms-Kontext von Remote
 <li>0.9.9.88: (10) Formatierung des Tesladivs ge&auml;ndert
-<li>0.9.9.88: (11) Statt StaticJsonDocument (Inhalt gemischt auf stack) wird in CFG nun DynamicJsonDocument verwendet.
-<li>0.9.9.89: (1) 
+<li>0.9.9.89: (1) Statt StaticJsonDocument (Inhalt gemischt auf stack) wird in CFG nun DynamicJsonDocument verwendet und dies dann nur noch Methodenlokal.
+<li>0.9.9.89: (2) Fix bei der Verwendung des gesch&uuml;tzten Webzugangs, hier war User/Pass f&uuml;r den /sbms-Kontext noch hart kodiert.
+<li>0.9.9.89: (3) UDP Ping entfernt (kein Stabilit&auml;tsgewinn)
+<li>0.9.9.89: (4) Statt mit bezug+lieferung zu arbeiten und diese auch ins GUI zu liefern, wird nun nur noch json.n = netto verarbeitet.
+<li>0.9.9.89: (5) Die Methoden sbms.read() (vorher readSbms) und sma.read() geben nun true im Erfolgsfall zur&uuml;ck, nur dann wird inverter.check() (sbms) bzw. charger.checkOnIncome() ausgef&uuml;hrt.
+<li>0.9.9.89: (6) U&uml;ber die Kommandozeile kann der maximale Loglevel angeschaltet werden.
+<li>0.9.9.89: (7) Alle UDP-Pakete m&uuml;ssen 600Byte lang sein, das ist nun hart kodiert. Damit wird auch verhindert, dass ein evtl. laengeres Packet den auf 601Byte vorbereiteten Buffer &uuml;berschreiben kann (Crashpotential)
+<li>0.9.9.89: (8) Es wird jede Sekunde ein UDP-Paket gelesen, aber nur alle 3s eines ausgewertet, dies wird nun angeglichen (udp auch 3s)
+<li>0.9.9.89: (9) Neue Debugflags aufgenommen: debugSma,debugSbms,debugCharger,debugBattery,debugInverter
+<li>0.9.9.89: (10) Falsch dokumentierter Timeout in global.cpp wurde in sbms.read() verwendet, um nur alle 10s eine Verarbeitung eines SBMS-Pakets zu triggern: entfernt
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
 <li>  
@@ -317,6 +325,11 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
       <option name="1">Debug Websckts (Srv)</option>
       <option name="2">Debug Json</option>
       <option name="3">Debug Relais</option>
+      <option name="4">Debug SMA</option>
+      <option name="5">Debug SBMS</option>
+      <option name="6">Debug Charger</option>
+      <option name="7">Debug Battery</option>
+      <option name="8">Debug Inverter</option>
     </select>
 </input>
 
@@ -585,9 +598,7 @@ function updateUi() {
         bb.innerHTML='Netzvorrang';
       }
   }  
-  var lieferung = json.l;
-  var bezug = json.z;
-  var sum = lieferung - bezug;
+  var sum = json.n;
   var elem = document.getElementById("lieferung");
   if(sum > 0) {
     elem.style.color='lightgreen';    

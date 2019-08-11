@@ -13,7 +13,7 @@ class SBMS {
      * Wird 'testFixed' gesetzt (s.o.), dann wird
      * hier immer nur ein fester Werte ausgewertet.
      */
-    void readSbms();
+    bool read();
     long dcmp(int loc, int size,  const char* sbms, int sbmsLen);
   
 };

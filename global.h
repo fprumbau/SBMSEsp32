@@ -42,6 +42,11 @@ extern bool debug;
 extern bool debug2;
 extern bool debugJson;
 extern bool debugRelais;
+extern bool debugSma;
+extern bool debugSbms;
+extern bool debugCharger;
+extern bool debugBattery;
+extern bool debugInverter;
 extern String bitset;
 
 extern int RELAY_S1;
@@ -74,7 +79,6 @@ extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 extern long lastUdpReset; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
-extern long lastPingUdp;
 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen
@@ -87,11 +91,8 @@ extern bool testFixed;
 extern String testData;
 extern const char* hostName;
 extern unsigned long lastReceivedMillis;
-extern long timeout; //Empfangstimeout ( wird 10s nichts empfangen, muss die Batterie abgeschaltet werden )
 
 extern String sbmsData;
-extern float bezug;
-extern float lieferung;
 extern float netto;
 extern String datetime;
 
@@ -109,7 +110,6 @@ extern String TESLA_CLIENT_ID;
 extern String TESLA_CLIENT_SECRET;
 extern boolean teslaCtrlActive;
 extern Tesla perry;
-extern DynamicJsonDocument cfgDoc;
 extern CFG config;
 extern long lastTeslaLoadSwitch;
 extern long TESLA_LOAD_SWITCH_MIN_MILLIS; //hoechstens alle 5 Minuten schalten

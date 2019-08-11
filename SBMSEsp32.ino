@@ -157,7 +157,7 @@ void setup() {
             Serial.println(request->header(i));
         }
     }
-    if(!request->authenticate("fprumbau", "714680")) {
+    if(!request->authenticate(config.webUser(), config.webPass())) {
         //FIXME: Geht leider nicht mit FormBasedAuth, siehe html.h: request->send(200, "text/html", login);
         request->requestAuthentication();
     } else {
@@ -226,12 +226,15 @@ void loop() {
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();
       //FIXME das folgende Statmement blockiert, wenn keine Daten kommen...
-      sbms.readSbms();  //SMBS-Werte auslesen (State of Charge, Cell voltages)
-      yield();
-      inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
-      yield();
-      sma.read();       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
-      yield();      
+      //SMBS-Werte auslesen (State of Charge, Cell voltages)
+      if(sbms.read()) { 
+        yield();
+        inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
+      }
+      if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
+        yield();
+        charger.checkOnIncome();     
+      }
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -364,6 +367,8 @@ void commandLine() {
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
         Serial.println(ok);
+      } else if(cmd.startsWith(F("verbose"))) { 
+        esp_log_level_set("*", ESP_LOG_VERBOSE);
       } else {
         Serial.println(F("Available commands:"));
         Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
@@ -375,8 +380,8 @@ void commandLine() {
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
         Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
         Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
-        Serial.println(F(" - tesla status :: Check Tesla charge state"));
-        Serial.println(F(" - tesla wakeup :: Wake your tesla"));
+        Serial.println(F(" - tesla status :: Check tesla charge state"));
+        Serial.println(F(" - tesla wakeup :: Wake tesla"));
         Serial.println(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));
         Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
@@ -384,6 +389,7 @@ void commandLine() {
         Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!)"));
         Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
         Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
+        Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;
       }

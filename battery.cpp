@@ -66,9 +66,7 @@ void Battery::controlFans() {
     m += F("; isOnS2: ");
     m += charger.isChargerOn(2);
     m += F("\nBez/Lief: ");
-    m += bezug;
-    m += F(" / ");
-    m += lieferung;
+    m += netto;
     wc.sendClients(m.c_str());
   }
   String msg;
