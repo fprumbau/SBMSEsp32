@@ -69,7 +69,12 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           bitset.setCharAt(8,49);
         } else {
           bitset.setCharAt(8,48);
-        }                 
+        }            
+        if(debugConfig) {
+          bitset.setCharAt(9,49);
+        } else {
+          bitset.setCharAt(9,48);
+        }        
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -241,7 +246,15 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   update = true;      
                   buildMessage(&msg, "debugInverter", String(debugInverter).c_str());      
                 }
-                break;                                                                          
+                break;   
+              case 9:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugConfig = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugConfig", String(debugConfig).c_str());      
+                }
+                break;    
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  

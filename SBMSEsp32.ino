@@ -157,11 +157,16 @@ void setup() {
             Serial.println(request->header(i));
         }
     }
-    if(!request->authenticate(config.webUser(), config.webPass())) {
-        //FIXME: Geht leider nicht mit FormBasedAuth, siehe html.h: request->send(200, "text/html", login);
-        request->requestAuthentication();
-    } else {
+    String header = request->header("User-Agent");
+    if(header.indexOf("Tesla QtCarBrowser")>1) {
       request->send(200, "text/html", html);
+    } else {
+      if(!request->authenticate(config.webUser(), config.webPass())) {
+          //FIXME: Geht leider nicht mit FormBasedAuth, siehe html.h: request->send(200, "text/html", login);
+          request->requestAuthentication();
+      } else {
+        request->send(200, "text/html", html);
+      }
     }
   });
 

@@ -34,6 +34,7 @@ bool debugSbms = false;
 bool debugCharger = false;
 bool debugBattery = false;
 bool debugInverter = false;
+bool debugConfig = false;
 
 extern String bitset = "00000000";
 

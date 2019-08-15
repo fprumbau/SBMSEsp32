@@ -47,6 +47,7 @@ extern bool debugSbms;
 extern bool debugCharger;
 extern bool debugBattery;
 extern bool debugInverter;
+extern bool debugConfig;
 extern String bitset;
 
 extern int RELAY_S1;

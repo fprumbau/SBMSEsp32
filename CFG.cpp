@@ -37,12 +37,14 @@ void CFG::load() {
     
       const char* auth = doc["authorization"];
       const char* vehicleId = doc["vehicleId"];
-    
-      Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
-      Serial.print(auth);
-      Serial.print(F("|; vehicleId:|"));
-      Serial.print(vehicleId);
-      Serial.println(F("|"));
+
+      if(debugConfig) {
+        Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
+        Serial.print(auth);
+        Serial.print(F("|; vehicleId:|"));
+        Serial.print(vehicleId);
+        Serial.println(F("|"));
+      }
     
       perry.vehicleId(vehicleId);
       perry.authorization(auth);
@@ -57,6 +59,14 @@ void CFG::load() {
     const char* webPass = doc["webpass"];
     _webPass = new char[strlen(webPass)+1];
     strcpy(_webPass, webPass);
+
+    if(debugConfig) {
+      Serial.print(F("Initialisiere User/Pw: user:|"));
+      Serial.print(_webUser);
+      Serial.print(F("|; password:|"));
+      Serial.print(_webPass);
+      Serial.println(F("|"));
+    }
   
     //Lese andere Konfigwerte fuer global.h
     teslaCtrlActive = doc["teslaCtrlActive"];
@@ -89,6 +99,9 @@ bool CFG::save() {
   serializeJson(doc, Serial);
   serializeJson(doc, configFile);
   Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
+
+  configFile.flush();
+  configFile.close();
   
   return true;
 }
@@ -102,12 +115,14 @@ void CFG::set(const String& keyVal) {
 }
 
 void CFG::set(const char* key, const char* val) {
-  
-  Serial.print(F("Set config value '"));
-  Serial.print(key);
-  Serial.print(F("' to '"));
-  Serial.print(val);
-  Serial.println(F("'; Still has to be saved"));
+
+  if(debugConfig) {
+    Serial.print(F("Set config value '"));
+    Serial.print(key);
+    Serial.print(F("' to '"));
+    Serial.print(val);
+    Serial.println(F("'; Still has to be saved"));
+  }
 
   String keyStr = String(key);
 

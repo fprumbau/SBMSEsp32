@@ -157,12 +157,15 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.89: (8) Es wird jede Sekunde ein UDP-Paket gelesen, aber nur alle 3s eines ausgewertet, dies wird nun angeglichen (udp auch 3s)
 <li>0.9.9.89: (9) Neue Debugflags aufgenommen: debugSma,debugSbms,debugCharger,debugBattery,debugInverter
 <li>0.9.9.89: (10) Falsch dokumentierter Timeout in global.cpp wurde in sbms.read() verwendet, um nur alle 10s eine Verarbeitung eines SBMS-Pakets zu triggern: entfernt
+<li>0.9.9.90: (1) Im normalen Kontext ('/sbms') konnte der Tesla nicht zugreifen, fixed
+<li>0.9.9.90: (2) DebugKonfig aufgenommen (Flag 9), Upgrade 100AH auf 260AH.
+<li>0.9.9.90: (3) Nach einem Speichern des SPIFFS config files sollte auch ein flush() und ein close() angeschlossen werden.
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
 <li>  
 )=====";
 
-#define VERSION "0.9.9.89"
+#define VERSION "0.9.9.90"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
@@ -330,6 +333,7 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
       <option name="6">Debug Charger</option>
       <option name="7">Debug Battery</option>
       <option name="8">Debug Inverter</option>
+      <option name="9">Debug Konfig</option>
     </select>
 </input>
 
@@ -598,15 +602,19 @@ function updateUi() {
         bb.innerHTML='Netzvorrang';
       }
   }  
-  var sum = json.n;
   var elem = document.getElementById("lieferung");
+  var sum = 0;
+  if(json.hasOwnProperty("n")) {
+    sum = json.n;
+    elem.innerHTML=''+sum.toFixed(1)+' W';
+  } else {
+    elem.innerHTML='-';
+  }  
   if(sum > 0) {
     elem.style.color='lightgreen';    
   } else {
     elem.style.color='#F1948A';
   }
-  elem.innerHTML=''+sum.toFixed(1)+' W';
-
   if(json.hasOwnProperty('fh')) {
     log("ESP32 free heap: " + json.fh);
   }
@@ -883,7 +891,7 @@ function updateSbmsData(){
         for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
           htm('d'+i,w[i-3]);
         }
-        htm('d'+12,'Typ: LiIon Kap: 100Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val> V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
+        htm('d'+12,'Typ: LiIon Kap: 260Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
       }
   } catch(err) {
     log("ERROR_595: " + err.message);
