@@ -178,9 +178,9 @@ void Inverter::check()  {
       Serial.println(secs);    
       wc.sendClients(datetime.c_str());
   }
-  //ab v.0.9.9.29 zwischen 20Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
+  //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
   if(!stop) {
-    if(hours>=20 || hours < 9) {
+    if(hours>=18 || hours < 9) {
       if(!nacht) {
         if(!isBatOn) { 
             wc.sendClients(datetime.c_str());
@@ -199,14 +199,15 @@ void Inverter::check()  {
       }
     }
   }
-  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten (nur volle Minute)
   /*
+  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten (nur volle Minute)
   if(hours == 6 && mins == 0 && dayOfMonthLastRestart != day)  {
      dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
      wc.sendClients(F("Restarte ESP um 6:00 Uhr").c_str());
      delay(200); //Warte, bis Nachricht verschickt ist
      ESP.restart();
   }*/
+  //0.9.9.90 Steigt die Erzeugung (PV2) über 10A, dann ist der Tag sicher nicht fern :-); siehe SBMS.cpp
 }
 
 /**

@@ -44,24 +44,6 @@ unsigned int SBMS::char_off(char c) {
 
 bool SBMS::read() {
 
-  String sread;
-
-  if (testFixed) {
-    //sread = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
-    //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-    //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-    //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
-    //sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
-    sread = testData;    
-  } else {
-    while (Serial1.available()) {
-      sread = Serial1.readString();      
-    }
-  }
-  yield();
-  sread.trim();
-  int len = sread.length();
-
   /**
      Solange etwas empfangen wird (sread gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
@@ -73,6 +55,39 @@ bool SBMS::read() {
   */
   long now = millis();
   if (( now - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
+    
+      String sread;
+      if (testFixed) {
+        //sread = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
+        //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+        //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+        //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
+        //sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
+        sread = testData;    
+      } else {
+
+        static int index;
+        const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
+        char stringBuffer[STRING_BUFFER_SIZE];
+        while (Serial1.available() > 0) {            
+            char c = Serial1.read();
+            if(c >= 32 && index < STRING_BUFFER_SIZE - 1) {
+              stringBuffer[index++] = c;
+            } else {
+              if(index > 0) {
+                stringBuffer[index] = '\0';
+                index=0;
+              }
+              break;
+            }       
+        }
+        sread = String(stringBuffer);
+      }
+    
+      yield();
+      sread.trim();
+      int len = sread.length();
+    
       if (debugSbms && len > 0) {
         Serial.print(".____");
         Serial.print(sread);
@@ -116,6 +131,20 @@ bool SBMS::read() {
           //((dcmp(24,2,data)/10)-45)
           temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
         }
+
+
+/*
+ * TODO PV2 in A ermitteln
+ * 
+  var SOC = dcmp(6,2,data);
+  soc = sbms.dcmp(6, 2, txt, len);
+
+  var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
+  x1 1..8
+  var enA=dcmp(x1*6,6,eA);
+*/
+
+        
         yield();
 
         if (debugSbms) {
@@ -131,4 +160,11 @@ bool SBMS::read() {
       }
   }
   return false;
+}
+
+void SBMS::print() {
+  Serial.print(F("SBMS.lastReceivedMillis: "));
+  Serial.println(lastReceivedMillis);  
+  Serial.print(F("SBMS.testFixed: "));
+  Serial.println(testFixed);  
 }

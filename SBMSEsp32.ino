@@ -204,6 +204,7 @@ void setup() {
   //0.9.9.76 Load config SPIFFS
   //config.save(); //NUR mit vorher eingestellten Werten einkommentieren!!!, siehe CFG.save(..)
   config.load();
+
 }
 
 /**********************************************************************/
@@ -230,7 +231,6 @@ void loop() {
     if(!updater.stopForOTA) {
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();
-      //FIXME das folgende Statmement blockiert, wenn keine Daten kommen...
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
         yield();
@@ -313,7 +313,7 @@ void commandLine() {
         testFixed = false;        
         wc.updateUi();
       } else if(cmd.startsWith(F("data "))) {      
-        msg = F("Setze Testdaten");     
+        msg = F("Setze Testdaten: ");     
         testData = cmd.substring(5); 
         msg+=testData;     
       } else if(cmd.startsWith(F("tesla status"))) {          
@@ -335,6 +335,7 @@ void commandLine() {
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
         config.print();
+        sbms.print();
         print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
@@ -407,5 +408,7 @@ void print() {
   Serial.print(F("Temperatur: "));
   Serial.println(temp);  
   Serial.print(F("Ladezustand: "));
-  Serial.println(soc);     
+  Serial.println(soc);    
+  Serial.print(F("Now (millis): "));
+  Serial.println(millis());        
 }

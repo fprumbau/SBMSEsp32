@@ -14,6 +14,7 @@ class SBMS {
      * hier immer nur ein fester Werte ausgewertet.
      */
     bool read();
+    void print();
     long dcmp(int loc, int size,  const char* sbms, int sbmsLen);
   
 };

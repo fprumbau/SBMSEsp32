@@ -160,6 +160,12 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.90: (1) Im normalen Kontext ('/sbms') konnte der Tesla nicht zugreifen, fixed
 <li>0.9.9.90: (2) DebugKonfig aufgenommen (Flag 9), Upgrade 100AH auf 260AH.
 <li>0.9.9.90: (3) Nach einem Speichern des SPIFFS config files sollte auch ein flush() und ein close() angeschlossen werden.
+<li>0.9.9.90: (4) Wird anfangs kein Netto-Ertragswert per Json geliefert, wird der toFixed(1)-Fehler auf undefined jetzt abgefangen.
+<li>0.9.9.90: (5) Laden von User/Pass f&uuml;r den Webzugang repariert
+<li>0.9.9.90: (6) Das Setzen von Bitsetvariablen 9 und 10 ging nicht, da Bitset nur 8 Stellen lang initialisiert war (global.cpp) 
+<li>0.9.9.90: (7) In der Webseite wurde +r mit +'</br>' ersetzt und optimiert
+<li>0.9.9.90: (8) Blockingproblem von sbms.read mit readString() gel&ouml;st
+<li>0.9.9.90: (9) Die Anzeige der Werte für Batt, PV1, PV2 etc. wurde um die Spalte der Wh ergänzt (zur&uuml;ckgenommen), die gesamte Berechtung im Html vereinfacht.
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
 <li>  
@@ -321,7 +327,6 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <button id="bb" onclick="updateServer(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="updateServer(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="updateServer(this.innerHTML);">S2off</button>
-
 <br><input type='checkbox' id='dbg' onchange='updateBitset();'>
     <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;">
       <option name="0">Debug Web (Client)</option>
@@ -336,7 +341,6 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
       <option name="9">Debug Konfig</option>
     </select>
 </input>
-
 </div2>
 </div3>
 <div3>
@@ -350,13 +354,10 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <div2 style='left:510px;' id='mt1'></div2> 
 </div3>
 <div3>
-<div2 style='left:5px;color:#ea8;top:22px;'id='d6'></div2>
-<div2 style='right:530px;text-align: right;'id='d7'></div2>
-<div2 style='right:430px;text-align: right;'id='d8'></div2>
-<div2 style='right:220px;text-align: right;'id='d9'></div2>
-<div2 style='right:10px;text-align: right;'id='d10'></div2>
+<div2 style='left:5px;color:#ea8;top:22px;'id='d6'>[Source]</div2>
+<div2 style='right:580px;text-align: right;'id='d7'>[A]</div2>
+<div2 style='right:490px;text-align: right;'id='d8'>[W]</div2>
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
-
 <div2 style="border:1px solid #af601a;left:360px;width:355px;height:160px;">
 <meter style='height:10px; left: 202px; top:15px; width: 6px;' min='2' max='8' value='0'></meter>
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
@@ -369,32 +370,24 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <br>
 <input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);" style="margin-top:22px;margin-left:5px;width:100px;"/>
 <input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);" style="width:100px;"/>
-
 <div2 id="teslaout" class="bt">
 ...
 </div2>
 </div2>
-
 </div3>
-
 <br>
 <div id="console" style="width:707px;height:150px;background-color:#505050;border:1px solid #606060;color:beige;padding:5px;">
 </div>
 <script id='smain2'>
-
 var debug = false;
 var debugJson = false;
-
 var queryTeslaStateAfter = false;
-
 var bitset = "0000000000";
-
 String.prototype.replaceAt=function(index, char) {
     var a = this.split("");
     a[index] = char;
     return a.join("");
 }
-
 //Aktualisierung vom Server    
 function updateFromBitset() {
   var selIndex = document.getElementById("dbgsel").selectedIndex;
@@ -438,7 +431,6 @@ function updateFromBitset() {
     log("Vom Server: " + bitset);
   }
 }
-
 //Aktualisierung des Bitsets auf dem Weg zum Server
 function updateBitset() {
   var selIndex = document.getElementById("dbgsel").selectedIndex;
@@ -454,7 +446,6 @@ function updateBitset() {
   }
   updateServer();
 }
-
 function log(msg) {
   cs = document.getElementById('console');
   cs.appendChild(document.createElement('br'));
@@ -466,7 +457,6 @@ function log(msg) {
   cs.appendChild(t);
   cs.scrollTop = cs.scrollHeight;
 }
-
 function updatePage() {
   var origin = document.location.origin;
   if(origin.indexOf("prumbaum") !== -1) {
@@ -475,7 +465,6 @@ function updatePage() {
   var url = origin + '/update';
   document.location.href=url;
 }
-
 //Reconnecting-websocket
 !function(a,b){"function"==typeof define&&define.amd?define([],b):"undefined"!=typeof module&&module.exports?module.exports=b():a.ReconnectingWebSocket=b()}(this,function(){function a(b,c,d){function l(a,b){var c=document.createEvent("CustomEvent");
 return c.initCustomEvent(a,!1,!1,b),c}var e={debug:!1,automaticOpen:!0,reconnectInterval:1e3,maxReconnectInterval:3e4,reconnectDecay:1.5,timeoutInterval:2e3};d||(d={});for(var f in e)this[f]="undefined"!=typeof d[f]?d[f]:e[f];
@@ -490,13 +479,10 @@ var c=l("message");c.data=b.data,k.dispatchEvent(c)},h.onerror=function(b){(g.de
 return(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","send",g.url,b),h.send(b);throw"INVALID_STATE_ERR : Pausing to reconnect websocket"},this.close=function(a,b){"undefined"==typeof a&&(a=1e3),i=!0,h&&h.close(a,b)},this.refresh=function(){h&&h.close()}}
 return a.prototype.onopen=function(){},a.prototype.onclose=function(){},a.prototype.onconnecting=function(){},a.prototype.onmessage=function(){},
 a.prototype.onerror=function(){},a.debugAll=!1,a.CONNECTING=WebSocket.CONNECTING,a.OPEN=WebSocket.OPEN,a.CLOSING=WebSocket.CLOSING,a.CLOSED=WebSocket.CLOSED,a});
-
 var ip = location.host;
 var connection = new ReconnectingWebSocket('ws://' + ip + '/ws', null, { debug:true, reconnectInterval: 6000, reconnectDecay: 1.1, maxReconnectInterval: 10000 });
-
 console.log('Trying to open Webclient socket');
 log('Trying to open Webclient socket');
-
 //var timerID=0;
 connection.onopen = function () { 
   log('Serververbindung aufgebaut: ' + new Date()); 
@@ -505,7 +491,6 @@ connection.onerror = function (error) {
   console.log('wsServer Error ', error);
   log('wsServer Error ' + error);
 };
-
 //vom Server empfangen
 var server = '';
 var json = null;
@@ -521,17 +506,11 @@ connection.onmessage = function (e) {
             if(debugJson) {
               log(data);
             }
-            //try {
-              json = JSON.parse(data); 
-              updateUi();      
-              if(json.hasOwnProperty('d')) {       
-                updateSbmsData();    
-              }
-            /*} catch(err) {
-              log("ERROR_324 : " + err.message);
-              console.log("ERROR_325: " + err);
-              console.log(data);
-            }*/
+            json = JSON.parse(data); 
+            updateUi();      
+            if(json.hasOwnProperty('d')) {       
+              updateSbmsData();    
+            }
           break;
       default:
             console.log('Nachricht: ', data);
@@ -542,9 +521,7 @@ connection.onmessage = function (e) {
 };
 console.log('End trying to open Webclient socket');
 log('End trying to open webclient socket');
-
 var rts_reset = false;
-
 /**
  * Akualisierung nach Empfang von Serverdaten
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
@@ -669,7 +646,6 @@ function updateUi() {
      log("Tesla wakeup StatusCode: " + json.wt);
   }  
 }
-
 function setOn(elem) {
     if(typeof elem !== 'undefined') {
         var cl = elem.classList;
@@ -691,7 +667,6 @@ function isOn(elem) {
     }  
     return false;
 }
-
 //Sende Daten zum Server
 function updateServer(txt) {
   var o = {};
@@ -748,7 +723,6 @@ function updateServer(txt) {
   
   o.ta = document.getElementById("teslaactive").checked;
   o.dbg=bitset;
-
   //Wurden Teslastatusdaten verarbeitet, sende Signal an Server, damit dieser keine Wiederholung mehr sendet
   if(rts_reset) {
     console.log("Sending rts_reset=true to server"); //for debug only
@@ -765,26 +739,20 @@ function updateServer(txt) {
   console.log("Sending to Server: " + data)
   connection.send(data);
 }
-
 function htm(id,s){document.getElementById(id).innerHTML =s;};
 function pad(n, width, z) {z=z || '0';n=n+'';return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;}
 function dcmp(p,s,d){xx=0; for (z=0;z<s;z++){xx = xx + ((d.charCodeAt((p+s-1)-z)-35)*Math.pow(91,z));}return xx;}
-function fN(nm){return nm.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1 , ')}
-
+function fN(nm){
+  return nm.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+}
 var lg1="#B33A33B##333333B##B33A33B##B33333B##B''''''##A44A544##B44444B##;75444A##144B444##B33333B##444444B##2331$$A##B8:B:8B#";
 var xsbms="01d&u%u$#'G";
-var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
-var eW="##T_###$1---#%2---empty-#&1&2-#$#x#$#&#z##";
-var sbms1=['','Batt','PV1','PV2','ExtLd','PV1+PV2','Load','ExtLd'];
 var sbms2=[0,0,0,0,0,0,0,0,3,7,1,1];
-
 function updateSbmsData(){
    
   var c = document.getElementById('Lg');
   var ctx = c.getContext('2d');
-  var r ='</br>'
   var data = json.d;
-
   try {
       var SOC = dcmp(6,2,data);
       htm('SOC','<b>'+SOC+'%</b>');
@@ -819,7 +787,7 @@ function updateSbmsData(){
       }}}
       
       mt8();
-      
+
       function mt8() {
         var w = new Array();
         for (i=0;i<20;i++){w[i]='';}
@@ -841,10 +809,10 @@ function updateSbmsData(){
           var cv=cvs[x1];
           if (sbms2[9]==x1+1){min1=cv;n='<mn1>';n1='</mn1>';};
           if (sbms2[8]==x1+1){max1=cv;n='<mx1>';n1='</mx1>';};
-          w[0] +=n+'Cell. '+ (x1+1)+n1+r ;
-          w[1] +=n+cv.toFixed(3)+n1+r;
-          if (sbms2[x1]!=1){w[2] +='<txt>V</txt>'+r;}
-          else {w[2] +='<lt><</lt>'+r;};
+          w[0] +=n+'Cell. '+ (x1+1)+n1+'</br>';
+          w[1] +=n+cv.toFixed(3)+n1+'</br>';
+          if (sbms2[x1]!=1){w[2] +='<txt>V</txt></br>';}
+          else {w[2] +='<lt><</lt></br>';};
           bv +=cv;
           var mt = document.querySelector('#mt1');
           var x = document.createElement('meter');
@@ -860,38 +828,66 @@ function updateSbmsData(){
           mt.appendChild(x);
         } 
         for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
-        for (x1=0;x1<8;x1++) {
-          col = sbms1[x1+1];
-          if(col == 'Load') continue; //Load nicht mehr benoetigt  
-          var n2=w[8]=w[9]=w[10]=w[11]='';
-          var cv=dcmp((x1*3)+29,3,data)/1000;
-          var enW=dcmp(x1*6,6,eW);
-          var enA=dcmp(x1*6,6,eA);
-          if (x1==0){
-            n2=data.charAt(28);
-            w[8]='[A]'+r;
-            w[9]='[W]'+r;
-            w[10]='[MAh][kAh][Ah][mAh]'+r;
-            w[11]='[MWh][kWh][Wh]'+r;
-          };
-          if (x1==1||x1==2){pv3 +=cv;};
-          if (x1==3){sv=cv;}
-          if (x1==4){cv=pv3;}
-          if (x1==5){cv=dcmp(0,3,xsbms)/1000;}
-          if (x1==6){cv=sv;}  
-          if(x1!=3){
-          w[3] +=col+r ;
-          w[4] +=w[8]+n2+cv.toFixed(3)+r;
-          w[5] +=w[9]+n2+(cv*bv).toFixed(1)+r;
-          w[6] +=w[10]+fN(enA)+r;
-          w[7] +=w[11]+fN((enW/10).toFixed(1))+r;
-          }
-            
-        }   
-        for (i=6;i<9;i++){ //Spalten MAh,kAh,Ah,mAh | MWh, kWh, Wh weg ( i<11 vorher)
-          htm('d'+i,w[i-3]);
-        }
-        htm('d'+12,'Typ: LiIon Kap: 260Ah Status: '+dcmp(56,3,data)+r+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451'+r+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
+
+        //Batt
+        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var cv=dcmp(29,3,data)/1000;
+        n2=data.charAt(28);
+        w[8]='[A]</br>';
+        w[9]='[W]</br>';
+        w[10]='[Ah]</br>';
+        w[11]='[Wh]</br>';
+        w[3] +='Batt</br>' ;
+        w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
+        w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';       
+        
+        //PV1
+        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var cv=dcmp(32,3,data)/1000;
+        pv3 +=cv;
+        w[3] +='PV1</br>' ;
+        w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
+        w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
+  
+        
+        //PV2
+        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var cv=dcmp(35,3,data)/1000;     
+        pv3 +=cv;
+        w[3] +='PV2</br>' ;
+        w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
+        w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
+
+        //Mmmmh....
+        var cv=dcmp(38,3,data)/1000;
+        sv=cv;
+
+        //PV1+PV2
+        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var cv=dcmp(41,3,data)/1000;
+        cv=pv3;
+        w[3] +='PV1+2</br>' ;
+        w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
+        w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
+
+        //Ext.Load
+        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var cv=dcmp(47,3,data)/1000;
+        cv=sv;
+        w[3] +='ExtLd</br>';
+        w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
+        w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
+
+        //div2#d6 Spalte mit 'Batt', 'PV1' etc....
+        htm('d6',w[3]);
+
+        //div2#d7 Spalte mit Stromwerten
+        htm('d7',w[4]);
+
+        //div2#d8 Spalte mit Wattwerten
+        htm('d8',w[5]);
+
+        htm('d'+12,'Typ: LiIon Kap: 260Ah Status: '+dcmp(56,3,data)+'</br>'+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451</br>'+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
       }
   } catch(err) {
     log("ERROR_595: " + err.message);
@@ -899,11 +895,9 @@ function updateSbmsData(){
     console.log(data);
   }
 }
-
 //anfangs sollten die Checkbox nicht selektiert sein 
 document.getElementById("dbg").checked=false;
 </script>
-
 </body>
 </html>
 )=====";

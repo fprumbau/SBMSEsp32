@@ -2,6 +2,12 @@
 
 #include "global.h"
 
+#define WEBUSER "webUser"
+#define WEBPASS "webPass"
+#define VEHICLEID "vehicleId"
+#define AUTHORIZATION "authorization"
+#define TESLAACTIVE "teslaCtrlActive"
+
 void CFG::load() {
 
   if(!SPIFFS.begin()) {
@@ -23,7 +29,9 @@ void CFG::load() {
   // to be mutable. if you don't use ArduionJson, you may as well use
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
-  if(debug) Serial.println(buf.get());
+  if(debugConfig) {
+    Serial.println(buf.get());
+  }
 
   DynamicJsonDocument doc(1024);
   
@@ -33,12 +41,13 @@ void CFG::load() {
     Serial.println(F("Failed to parse config file"));
   }
 
-  if(doc.containsKey("authorization") && doc.containsKey("vehicleId")) {
+  if(doc.containsKey(AUTHORIZATION) && doc.containsKey(VEHICLEID)) {
     
-      const char* auth = doc["authorization"];
-      const char* vehicleId = doc["vehicleId"];
+      const char* auth = doc[AUTHORIZATION];
+      const char* vehicleId = doc[VEHICLEID];
 
       if(debugConfig) {
+        serializeJson(doc, Serial);
         Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
         Serial.print(auth);
         Serial.print(F("|; vehicleId:|"));
@@ -50,13 +59,13 @@ void CFG::load() {
       perry.authorization(auth);
   }
 
-  if(doc.containsKey("webuser") && doc.containsKey("webpass")) {
+  if(doc.containsKey(WEBUSER) && doc.containsKey(WEBPASS)) {
     //Webzugang
-    const char* webUser = doc["webuser"];
+    const char* webUser = doc[WEBUSER];
     _webUser = new char[strlen(webUser)+1];
     strcpy(_webUser, webUser); 
   
-    const char* webPass = doc["webpass"];
+    const char* webPass = doc[WEBPASS];
     _webPass = new char[strlen(webPass)+1];
     strcpy(_webPass, webPass);
 
@@ -69,9 +78,9 @@ void CFG::load() {
     }
   
     //Lese andere Konfigwerte fuer global.h
-    teslaCtrlActive = doc["teslaCtrlActive"];
+    teslaCtrlActive = doc[TESLAACTIVE];
     if(debug) {
-      Serial.print("teslaCtrlActive=");
+      Serial.print(TESLAACTIVE);
       Serial.println(teslaCtrlActive);  
     }
   }
@@ -85,11 +94,11 @@ bool CFG::save() {
 
   DynamicJsonDocument doc(1024);
   
-  doc["vehicleId"] = perry.vehicleId();
-  doc["authorization"] = perry.authorization();
-  doc["teslaCtrlActive"] = teslaCtrlActive;
-  doc["webUser"] = _webUser;
-  doc["webPass"] = _webPass;
+  doc[VEHICLEID] = perry.vehicleId();
+  doc[AUTHORIZATION] = perry.authorization();
+  doc[TESLAACTIVE] = teslaCtrlActive;
+  doc[WEBUSER] = _webUser;
+  doc[WEBPASS] = _webPass;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -126,17 +135,17 @@ void CFG::set(const char* key, const char* val) {
 
   String keyStr = String(key);
 
-  if(keyStr == "vehicleId") {
+  if(keyStr == VEHICLEID) {
     perry.vehicleId(val);
-  } else if(keyStr == "authorization") {
+  } else if(keyStr == AUTHORIZATION) {
     perry.authorization(val);
-  } else if(keyStr == "webUser") {
+  } else if(keyStr == WEBUSER) {
     _webUser = new char[strlen(val)+1];
     strcpy(_webUser, val);    
-  } else if(keyStr == "webPass") {
+  } else if(keyStr == WEBPASS) {
     _webPass = new char[strlen(val)+1];
     strcpy(_webPass, val);
-  } else if(keyStr == "teslaCtrlActive") {
+  } else if(keyStr == TESLAACTIVE) {
     if(strcmp(val,"1") || strcmp(val,"true")) {
       teslaCtrlActive=true;
     } else {

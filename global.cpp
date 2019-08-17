@@ -36,7 +36,7 @@ bool debugBattery = false;
 bool debugInverter = false;
 bool debugConfig = false;
 
-extern String bitset = "00000000";
+extern String bitset = "0000000000";
 
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
@@ -83,9 +83,9 @@ int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft 
 
 //nicht auf Serial1 warten, Feste Werte annehmen
 bool testFixed = false;
-String testData = F("#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(");
+String testData = F("#$$(I?#\\GOGSGSGQGQGPGPGR+<##+#_:%[6#.4%(@###6Of6O_######%N(");
 const char* hostName = "esp32a";
-unsigned long lastReceivedMillis = -1;
+unsigned long lastReceivedMillis = 0;
 
 String sbmsData="";
 float netto=0.0;
