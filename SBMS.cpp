@@ -66,6 +66,7 @@ bool SBMS::read() {
         sread = testData;    
       } else {
 
+        /*
         static int index;
         const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
         char stringBuffer[STRING_BUFFER_SIZE];
@@ -74,6 +75,12 @@ bool SBMS::read() {
             if(c >= 32 && index < STRING_BUFFER_SIZE - 1) {
               stringBuffer[index++] = c;
             } else {
+              if(debugSbms) {
+                Serial.print(F("Empfangenes String-Endezeichen / aktueller Index: "));
+                Serial.print((int)c);
+                Serial.print(F(" / "));
+                Serial.println(index);
+              }
               if(index > 0) {
                 stringBuffer[index] = '\0';
                 index=0;
@@ -82,11 +89,17 @@ bool SBMS::read() {
             }       
         }
         sread = String(stringBuffer);
+        */
+        while (Serial1.available()) {
+          sread = Serial1.readString();      
+        }
+        
       }
     
       yield();
       sread.trim();
       int len = sread.length();
+
     
       if (debugSbms && len > 0) {
         Serial.print(".____");
@@ -95,6 +108,19 @@ bool SBMS::read() {
         Serial.print("Length 'sread': ");
         Serial.println(len);
       };
+
+      if(len<50) {
+        if(debugSbms) {
+          String errData = String((char*)0);
+          errData.reserve(100);
+          errData+="Fehler, SBMS-Daten scheinen zu kurz zu sein: (len: ";
+          errData+=len;
+          errData+="); Inhalt: ";
+          errData+=sread;        
+          wc.sendClients(errData.c_str());
+          return false;
+        }
+      }
 
       //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also sread.length=0,dann muss erst der failureCount
       // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
@@ -113,7 +139,7 @@ bool SBMS::read() {
           soc = sbms.dcmp(6, 2, txt, len);
           outString += soc;
           outString += " ( Limit: ";
-          outString += SOC_LIMIT;
+          outString += socLimit;
           outString += " ) \n";
         }
         if (len >= 24) {

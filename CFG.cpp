@@ -7,6 +7,7 @@
 #define VEHICLEID "vehicleId"
 #define AUTHORIZATION "authorization"
 #define TESLAACTIVE "teslaCtrlActive"
+#define SOCLIMIT "socLimit"
 
 void CFG::load() {
 
@@ -77,12 +78,21 @@ void CFG::load() {
       Serial.println(F("|"));
     }
   
-    //Lese andere Konfigwerte fuer global.h
-    teslaCtrlActive = doc[TESLAACTIVE];
-    if(debug) {
-      Serial.print(TESLAACTIVE);
-      Serial.println(teslaCtrlActive);  
+    //Lese andere Konfigwerte fuer global.h    
+    if(doc.containsKey(TESLAACTIVE) {
+      teslaCtrlActive = doc[TESLAACTIVE];
+      if(debug) {
+        Serial.print(TESLAACTIVE);
+        Serial.println(teslaCtrlActive);  
+      }
     }
+    if(doc.containsKey(SOCLIMIT) {
+      socLimit = doc[SOCLIMIT];
+      if(debug) {
+        Serial.print(SOCLIMIT);
+        Serial.println(socLimit);  
+      }
+    }    
   }
 }
 
@@ -151,6 +161,8 @@ void CFG::set(const char* key, const char* val) {
     } else {
       teslaCtrlActive=false;
     }
+  } else if (keyStr = SOCLIMIT) {
+     socLimit = atoi(val);
   } else {
     Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
     Serial.println(key);

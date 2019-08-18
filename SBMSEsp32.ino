@@ -392,7 +392,7 @@ void commandLine() {
         Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
         Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
-        Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!)"));
+        Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!), z.B. socLimit"));
         Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
         Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
         Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));

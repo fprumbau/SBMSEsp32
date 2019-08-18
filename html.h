@@ -165,13 +165,17 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.90: (6) Das Setzen von Bitsetvariablen 9 und 10 ging nicht, da Bitset nur 8 Stellen lang initialisiert war (global.cpp) 
 <li>0.9.9.90: (7) In der Webseite wurde +r mit +'</br>' ersetzt und optimiert
 <li>0.9.9.90: (8) Blockingproblem von sbms.read mit readString() gel&ouml;st
-<li>0.9.9.90: (9) Die Anzeige der Werte für Batt, PV1, PV2 etc. wurde um die Spalte der Wh ergänzt (zur&uuml;ckgenommen), die gesamte Berechtung im Html vereinfacht.
+<li>0.9.9.90: (9) Die Anzeige der Werte f&uuml;r Batt, PV1, PV2 etc. wurde um die Spalte der Wh erg&aauml;nzt (zur&uuml;ckgenommen), die gesamte Berechtung im Html vereinfacht.
+<li>0.9.9.91: (1) Die neue Read-Funktion verursacht auch fehlerhafte Verarbeitungen mit Zellspannung von 0V, es werden nur noch Paket mit >50 Zeichen angenommen.
+<li>0.9.9.91: (2) Weil in Sbms.read() immer wieder falsche Werte (Temperatur 283°C) gelesen wurden, wird erst einmal wieder auf Serial1.readString() zur&uuml;ckgestellt
+<li>0.9.9.91: (3) Aus SOC_LIMIT wird socLimit, der sich aus der CFG ueberschreiben l&aauml;sst; die Hysterese wird nun von 5 auf 2% heruntergenommen (testen!!!)
 <h2>TODO</h2>
+<li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
 <li>  
 )=====";
 
-#define VERSION "0.9.9.90"
+#define VERSION "0.9.9.91"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>

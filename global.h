@@ -24,7 +24,7 @@
 
 //findet die Checkmethode falsche Werte vor, so wird noch einmal
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
-extern int SOC_LIMIT; 
+extern int socLimit; 
 extern int SOC_HYST;
 extern int LOW_VOLTAGE_MILLIS; 
 extern int CV_HYST;

@@ -13,8 +13,8 @@
 int failureCount = 0;
 const int errLimit = 5;   
 const int smaMeasurementsBeforSwitchoff = 10;
-int SOC_LIMIT = 30; //wird aus Config ueberschrieben
-int SOC_HYST = 5; //5% Hysterese
+int socLimit = 30; //wird aus Config ueberschrieben
+int SOC_HYST = 2; //2% Hysterese
 int LOW_MINIMAL_CV_MILLIS = 2700; //darunter wird Charger S2 für 5Min aktiviert
 int LOW_VOLTAGE_MILLIS = 3100; //darunter wird die Batterie abgeschaltet  
 int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_VOLTAGE_MILLIS + CV_HYST ist

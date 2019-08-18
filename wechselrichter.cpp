@@ -103,10 +103,10 @@ void Inverter::check()  {
   boolean isBatOn = battery.isOn();
   int limit;
   if(isBatOn) {
-    limit = SOC_LIMIT;
+    limit = socLimit;
   } else {
     //v.0.9.9.36 ist die Batterie aus, dann muss um SOC_HYST (z.B. 5%) hoehere Ladung zur Verfuegung stehen
-    limit = SOC_LIMIT + SOC_HYST;
+    limit = socLimit + SOC_HYST;
   }
   //a) Teste State-Of-Charge
   boolean stop = false;
@@ -178,7 +178,7 @@ void Inverter::check()  {
       Serial.println(secs);    
       wc.sendClients(datetime.c_str());
   }
-  //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur SOC_LIMIT) beruecksichtigen)
+  //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
   if(!stop) {
     if(hours>=18 || hours < 9) {
       if(!nacht) {
