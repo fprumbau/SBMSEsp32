@@ -198,9 +198,7 @@ void CFG::print() {
   Serial.print(F("_webPass: "));
   Serial.println(_webPass); 
   Serial.print(F("debug: "));
-  Serial.println(debug); 
-  Serial.print(F("debug2: "));
-  Serial.println(debug2);   
+  Serial.println(debug);  
   Serial.print(F("debugJson: "));
   Serial.println(debugJson); 
   Serial.print(F("debugRelais: "));

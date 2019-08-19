@@ -171,6 +171,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (3) Aus SOC_LIMIT wird socLimit, der sich aus der CFG ueberschreiben l&aauml;sst; die Hysterese wird nun von 5 auf 2% heruntergenommen (testen!!!)
 <li>0.9.9.91: (4) Formatierung Steuerungsbuttons Tesla in Webseite (rounded, height, position)
 <li>0.9.9.91: (5) Fix: socLimit wurde nie in Konfig geschrieben
+<li>0.9.9.91: (6) Debug2 ist jetzt 'debugWeb'
+<li>0.9.9.91: (7) Bisher wurde S2 erst bei -400W &uuml;ber mehr als 5 Minuten abgeschaltet, nun wurde dies auf 100W heruntergesetzt
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden
@@ -286,7 +288,7 @@ const char html[] PROGMEM = R"=====(
 <meta http-equiv='expires' content='0'>
 <meta http-equiv='pragma' content='no-cache'>
 <style media='screen' type='text/css'>
-meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;}
+meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;border-radius:3px;}
 .bar{position:absolute;bottom:0px;display:inline-block;}
 mx1{border:1px solid #fff;color:#fff;padding:0px 3px}
 mn1{border:1px solid #fe9;color:#fe9;padding:0px 3px}

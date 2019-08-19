@@ -184,15 +184,15 @@ void Charger::checkOnIncome() {
     if((now - checkOnIncomeMinIntervalMillis) > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
       checkOnIncomeMinIntervalMillis = now; 
     } else {
-      /*if(debug) {
-        String msg = "Skipping checkonIncome for now... ( CHECK_INCOME_MIN_INTERVAL_MILLIS ); now / last / diff: ";
-        msg+=lastCheckDiff;
-        msg+=" / ";
+      if(debugCharger) {
+        String msg = String((char*)0);
+        msg.reserve(100);
+        msg+=F("Skipping checkonIncome for now... ( CHECK_INCOME_MIN_INTERVAL_MILLIS ); checkOnIncomeMinIntervalMillis / now: ");
         msg+=checkOnIncomeMinIntervalMillis;
-        msg+=" / ";
+        msg+=F(" / ");
         msg+=now;            
         Serial.println(msg);
-      }*/
+      }
       return;
     }
 
@@ -231,7 +231,7 @@ void Charger::checkOnIncome() {
     /*
      * Der Charger S2 ist selbstregelnd und kann von 1-21A geregelt werden.
      * Er sollte erst per Relais abgeschaltet werden (0A), wenn länger als
-     * 5Minuten kein Stromüberschuss vorhanden ist, um Schaltzyklen zu verhindern.
+     * 5 Minuten kein Stromüberschuss vorhanden ist, um Schaltzyklen zu verhindern.
      */
     unsigned long s2Last = now - s2_switched;
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
@@ -250,14 +250,14 @@ void Charger::checkOnIncome() {
           toggleCharger(S2,true,false,true);
           s2_millisBeforeOff = -1; //Reset des LowNetto-Timers
         } 
-      } else if(netto < -400 && !s2override) {
+      } else if(netto < -100 && !s2override) {
 
             //0.9.9.88, der Status netto sollte laenger als 5 Min kleiner 0 sein, sonst NICHT ausschalten
             if(-1 == s2_millisBeforeOff) {
-              s2_millisBeforeOff = millis(); //Start des LowNetto-Timers
+              s2_millisBeforeOff = now; //Start des LowNetto-Timers
             }
         
-            if(millis() - s2_millisBeforeOff > 300000) {       
+            if(now - s2_millisBeforeOff > 300000) {       
               if(debugRelais) {
                  wc.sendClients("Deaktiviere Solarcharger 2");
               }
@@ -272,16 +272,16 @@ void Charger::checkOnIncome() {
       dutyCycle = calculateDc(netto);
       ledcWrite(GPIO05, dutyCycle);
       //Grobe Naeherung: dutycycle von 500 entspricht 250W (0.5) 
-      if(debug2) {
+      if(debugCharger) {
           String ms = F("Regulating Dutycycle: ( netto / dutyCycle ) | ");
           ms+=netto;
-          ms+=" / ";
+          ms+=F(" / ");
           ms+=dutyCycle;
           wc.sendClients(ms.c_str()); 
       }     
     } 
 
-   if(debug) {
+   if(debugCharger) {
      String m1((char *)0);
      m1.reserve(128);
      m1+=F("; Netto: ");
@@ -312,8 +312,8 @@ int Charger::getRunningMillis(uint8_t nr) {
       return 0;
    }
    if(nr == 1) {
-      return millis() - s1_switched; 
+      return now - s1_switched; 
    } else {
-      return millis() - s2_switched;  
+      return now - s2_switched;  
    }
 }

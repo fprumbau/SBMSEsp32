@@ -30,7 +30,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(0,48);
         }
-        if(debug2) {
+        if(debugWeb) {
           bitset.setCharAt(1,49);
         } else {
           bitset.setCharAt(1,48);
@@ -98,7 +98,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         if(debugJson) {
           Serial.println(str);
         }
-        if(debug2) {
+        if(debugWeb) {
           doc["fh"]=ESP.getFreeHeap();
         }
         if (all) {
@@ -186,9 +186,9 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               case 1:
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);
-                  debug2 = (c == 49);   
+                  debugWeb = (c == 49);   
                   update = true;      
-                  buildMessage(&msg, "debug2", String(debug2).c_str());      
+                  buildMessage(&msg, "debugWeb", String(debugWeb).c_str());      
                 }
                 break;      
               case 2:

@@ -39,7 +39,7 @@ extern int LED_GREEN;
 extern int LED_BLUE;    
 
 extern bool debug;
-extern bool debug2;
+extern bool debugWeb;
 extern bool debugJson;
 extern bool debugRelais;
 extern bool debugSma;

@@ -26,7 +26,7 @@ int LED_GREEN = 14;
 int LED_BLUE = 27;    
 
 bool debug = false;
-bool debug2 = false;
+bool debugWeb = false;
 bool debugJson = false;
 bool debugRelais = false;
 bool debugSma = false;
