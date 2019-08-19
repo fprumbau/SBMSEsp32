@@ -79,14 +79,14 @@ void CFG::load() {
     }
   
     //Lese andere Konfigwerte fuer global.h    
-    if(doc.containsKey(TESLAACTIVE) {
+    if(doc.containsKey(TESLAACTIVE)) {
       teslaCtrlActive = doc[TESLAACTIVE];
       if(debug) {
         Serial.print(TESLAACTIVE);
         Serial.println(teslaCtrlActive);  
       }
     }
-    if(doc.containsKey(SOCLIMIT) {
+    if(doc.containsKey(SOCLIMIT)) {
       socLimit = doc[SOCLIMIT];
       if(debug) {
         Serial.print(SOCLIMIT);

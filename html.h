@@ -169,6 +169,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (1) Die neue Read-Funktion verursacht auch fehlerhafte Verarbeitungen mit Zellspannung von 0V, es werden nur noch Paket mit >50 Zeichen angenommen.
 <li>0.9.9.91: (2) Weil in Sbms.read() immer wieder falsche Werte (Temperatur 283°C) gelesen wurden, wird erst einmal wieder auf Serial1.readString() zur&uuml;ckgestellt
 <li>0.9.9.91: (3) Aus SOC_LIMIT wird socLimit, der sich aus der CFG ueberschreiben l&aauml;sst; die Hysterese wird nun von 5 auf 2% heruntergenommen (testen!!!)
+<li>0.9.9.91: (4) Formatierung Steuerungsbuttons Tesla in Webseite (rounded, height, position)
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
@@ -309,11 +310,11 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height:22px;}
+button{background:#505050;color:beige;width:92px;height:22px;border-radius:13px;font-weight:bold;}
 .bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:130px;height:160px;font-size:10px;line-height:13px;}
-.bs{background-color:#D7CCC8;color:#505050;width:50px;border:1px solid white;}
+.bs{background:#505050;color:beige;width:50px;border:1px solid white;height:38px;border-radius:5px;font-weight:bold;padding:0px;}
 .onc{color:#ff0;background:#f00}
-.off{color:#505050;background:#d8d8d8}
+.off{color:beige;background:#505050;}
 </style>
 </head>
 <body style='background: #000;'>
@@ -331,8 +332,8 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <button id="bb" onclick="updateServer(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="updateServer(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="updateServer(this.innerHTML);">S2off</button>
-<br><input type='checkbox' id='dbg' onchange='updateBitset();'>
-    <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;">
+<br><input type='checkbox' id='dbg' onchange='updateBitset();' style="background-color:#505050;">
+    <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;font-weight:bold;border-radius:5px;height:22px;margin-top:5px;">
       <option name="0">Debug Web (Client)</option>
       <option name="1">Debug Websckts (Srv)</option>
       <option name="2">Debug Json</option>
@@ -367,13 +368,12 @@ button{color:#505050;background:#D7CCC8;border:1px solid white;width:85px;height
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
 <div2 style='color:#030;font-size:24px;top:10px;left:87px;text-shadow: -2px -2px 2px #efc;' id='SOC2' >0%</div2>
 <input type="checkbox" id="teslaactive" onchange='updateServer();' style="margin-top:45px;"></input>Tesla Ladestrg.
-<input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);" style="width:53px;"/>
-<br>
-<input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="margin-top:22px;margin-left:5px;width:100px;"/>
-<input type="button" class="bs" id="charge" value="Laden" onclick="updateServer(this.id);" style="width:100px;"/>
-<br>
-<input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);" style="margin-top:22px;margin-left:5px;width:100px;"/>
-<input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);" style="width:100px;"/>
+
+<input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);" style="margin-top:5px;margin-bottom:8px;margin-left:3px;width:215px;"><br>
+<input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="margin-top:1px;margin-left:3px;">
+<input type="button" class="bs" id="charge" value="Laden" onclick="updateServer(this.id);">
+<input type="button" class="bs" id="lim50" value="Lim50" onclick="setOn(this);updateServer(this.id);">
+<input type="button" class="bs" id="lim90" value="Lim90" onclick="setOn(this);updateServer(this.id);">
 <div2 id="teslaout" class="bt">
 ...
 </div2>
@@ -552,8 +552,8 @@ function updateUi() {
       b1.style.color='#ff0';
       b1.innerHTML='S1on';
     } else {
-      b1.style.background='#D8D8D8';
-      b1.style.color='#505050';
+      b1.style.background='#505050';
+      b1.style.color='beige';
       b1.innerHTML='S1off';      
     }
   }
@@ -565,8 +565,8 @@ function updateUi() {
       b2.style.color='#ff0';
       b2.innerHTML='S2on';
     } else {
-      b2.style.background='#D8D8D8';
-      b2.style.color='#505050';
+      b2.style.background='#505050';
+      b2.style.color='beige';
       b2.innerHTML='S2off';
     }
   }
@@ -578,8 +578,8 @@ function updateUi() {
         bb.style.color='#ff0';
         bb.innerHTML='Batterie';
       } else {
-        bb.style.background='#D8D8D8';
-        bb.style.color='#505050';
+        bb.style.background='#505050';
+        bb.style.color='beige';
         bb.innerHTML='Netzvorrang';
       }
   }  
