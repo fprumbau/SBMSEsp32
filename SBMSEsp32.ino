@@ -408,7 +408,9 @@ void print() {
   Serial.print(F("Temperatur: "));
   Serial.println(temp);  
   Serial.print(F("Ladezustand: "));
-  Serial.println(soc);    
+  Serial.println(soc); 
+  Serial.print(F("SOC-Limit: "));
+  Serial.println(socLimit);  
   Serial.print(F("Now (millis): "));
   Serial.println(millis());        
 }

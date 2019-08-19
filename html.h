@@ -170,10 +170,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (2) Weil in Sbms.read() immer wieder falsche Werte (Temperatur 283°C) gelesen wurden, wird erst einmal wieder auf Serial1.readString() zur&uuml;ckgestellt
 <li>0.9.9.91: (3) Aus SOC_LIMIT wird socLimit, der sich aus der CFG ueberschreiben l&aauml;sst; die Hysterese wird nun von 5 auf 2% heruntergenommen (testen!!!)
 <li>0.9.9.91: (4) Formatierung Steuerungsbuttons Tesla in Webseite (rounded, height, position)
+<li>0.9.9.91: (5) Fix: socLimit wurde nie in Konfig geschrieben
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
-<li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467
-<li>  
+<li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden
+<li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
 #define VERSION "0.9.9.91"
@@ -302,7 +303,6 @@ lt{background: #fa6;}
 .ch0{background:#f00;}
 .date{font-weight:bold;color:#fff;}
 .dbg{font-size:0.7em;margin-top:2px;}
-#console{box-shadow: inset 0px 1px 4px #666;overflow-y:scroll;font-size:0.6em}
 div{position: relative;float:left;}
 div2{position: absolute;color:#fed;line-height: 21px;}
 div3{position: relative;height:180px; width:720px;float:left;font-family:Arial,serif;font-weight: bold;font-size:18px;}
@@ -310,30 +310,63 @@ div1h{position:absolute;width: 179px;height: 160px;left:360px;color:#300;backgro
 div1m{position:absolute;width: 180px;height: 160px;left:540px;color:#300;background: rgba(30,70,0,0.5);}
 div4{position:absolute;width: 236px;height: 22px;bottom:9px;color:#211;background: #fa5;}
 div5{position:absolute;background: rgba(120,90,0,0.4);}
-button{background:#505050;color:beige;width:92px;height:22px;border-radius:13px;font-weight:bold;}
+button{background:#505050;color:beige;width:92px;height:25px;border-width:1px;border-radius:13px;font-weight:bold;}
 .bt{position:absolute;top:0;right:0;border-left:1px solid #505050;background-color:rgba(120,90,0,0.4);color:#ea8;width:130px;height:160px;font-size:10px;line-height:13px;}
 .bs{background:#505050;color:beige;width:50px;border:1px solid white;height:38px;border-radius:5px;font-weight:bold;padding:0px;}
 .onc{color:#ff0;background:#f00}
 .off{color:beige;background:#505050;}
+input[type=checkbox] {
+     background: #505050;
+     color:beige;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border:1px solid beige;
+    margin-bottom:0px;
+    height:11px;
+    width: 11px;
+}
+input[type=checkbox]:checked {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAQAAABuW59YAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAB2SURBVHjaAGkAlv8A3QDyAP0A/QD+Dam3W+kCAAD8APYAAgTVZaZCGwwA5wr0AvcA+Dh+7UX/x24AqK3Wg/8nt6w4/5q71wAAVP9g/7rTXf9n/+9N+AAAtpJa/zf/S//DhP8H/wAA4gzWj2P4lsf0JP0A/wADAHB0Ngka6UmKAAAAAElFTkSuQmCC'), linear-gradient(135deg, #B1B6BE 0%, #FFF 100%);
+    background-position: center center;
+    background-size: 80% 80%;
+    background-repeat: no-repeat;
+}
+#console{
+  box-shadow: inset 0px 1px 4px #666;overflow-y:scroll;
+  font-size:0.6em;
+  width:707px;
+  height:150px;
+  background-color:#505050;
+  color:beige;
+  padding:5px;
+  border-radius:5px;
+  border:1px solid #918263;
+}
+div::-webkit-scrollbar {
+  width: 12px;
+}
+div::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
 </style>
 </head>
 <body style='background: #000;'>
 <div3 style='height: 135px;'>
 <canvas id='Lg' width='70' height='120' style='position:relative; top:11px; left:12px; z-index:2; float: left;'></canvas>
-<div2 style="top:12px; left:360px;" id="id"><span ondblclick='updatePage();'>SBMS120</span>
-<div2 style="top:0px;left:200px;top:-6px;width:138px;font-family:'Arial';font-size:28px;color:lightgreen;background-color:#505050;border:1px solid white;padding:5px;text-align:right;white-space:pre" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
+<div2 style="top:12px; left:360px;" id="id"><span ondblclick='updatePage();' style="font-size:32px;font-weight:Bold">SBMS120</span>
+<div2 style="top:0px;left:205px;top:-6px;width:138px;font-family:'Arial';font-size:28px;color:lightgreen;background-color:#505050;border:1px solid white;padding:5px;text-align:right;white-space:pre;border-radius:5px;" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'>
 <div2 style='margin-top:-20px' id="datetime">2018-12-27</div2>
 <div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="updatePage();">www.ElectroDacus.com</div></div2>
-<div2 id="demo"></div2>
-<div2 style='width:350px; top:82px; left:520px;'>
+<div2 style='width:350px; top:45px; left:520px;'>
 <button id="bb" onclick="updateServer(this.innerHTML);">Netzvorrang</button>
 <button id="b1" style="width:47px" onclick="updateServer(this.innerHTML);">S1off</button>
 <button id="b2" style="width:47px" onclick="updateServer(this.innerHTML);">S2off</button>
 <br><input type='checkbox' id='dbg' onchange='updateBitset();' style="background-color:#505050;">
-    <select id="dbgsel" onchange='updateFromBitset()' style="width:164px;background-color:#505050;color:beige;font-weight:bold;border-radius:5px;height:22px;margin-top:5px;">
+    <select id="dbgsel" onchange='updateFromBitset()' style="width:172px;background-color:#505050;color:beige;font-weight:bold;border-radius:5px;height:22px;margin-top:5px;">
       <option name="0">Debug Web (Client)</option>
       <option name="1">Debug Websckts (Srv)</option>
       <option name="2">Debug Json</option>
@@ -363,7 +396,7 @@ button{background:#505050;color:beige;width:92px;height:22px;border-radius:13px;
 <div2 style='right:580px;text-align: right;'id='d7'>[A]</div2>
 <div2 style='right:490px;text-align: right;'id='d8'>[W]</div2>
 <div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
-<div2 style="border:1px solid #af601a;left:360px;width:355px;height:160px;">
+<div2 style="border:1px solid #918263;left:360px;width:355px;height:160px;border-radius:5px;">
 <meter style='height:10px; left: 202px; top:15px; width: 6px;' min='2' max='8' value='0'></meter>
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
 <div2 style='color:#030;font-size:24px;top:10px;left:87px;text-shadow: -2px -2px 2px #efc;' id='SOC2' >0%</div2>
@@ -380,7 +413,7 @@ button{background:#505050;color:beige;width:92px;height:22px;border-radius:13px;
 </div2>
 </div3>
 <br>
-<div id="console" style="width:707px;height:150px;background-color:#505050;border:1px solid #606060;color:beige;padding:5px;">
+<div id="console">
 </div>
 <script id='smain2'>
 var debug = false;

@@ -71,7 +71,7 @@ void CFG::load() {
     strcpy(_webPass, webPass);
 
     if(debugConfig) {
-      Serial.print(F("Initialisiere User/Pw: user:|"));
+      Serial.print(F("\nInitialisiere User/Pw: user:|"));
       Serial.print(_webUser);
       Serial.print(F("|; password:|"));
       Serial.print(_webPass);
@@ -109,6 +109,7 @@ bool CFG::save() {
   doc[TESLAACTIVE] = teslaCtrlActive;
   doc[WEBUSER] = _webUser;
   doc[WEBPASS] = _webPass;
+  doc[SOCLIMIT] = socLimit;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -146,26 +147,26 @@ void CFG::set(const char* key, const char* val) {
   String keyStr = String(key);
 
   if(keyStr == VEHICLEID) {
-    perry.vehicleId(val);
+      perry.vehicleId(val);
   } else if(keyStr == AUTHORIZATION) {
-    perry.authorization(val);
+      perry.authorization(val);
   } else if(keyStr == WEBUSER) {
-    _webUser = new char[strlen(val)+1];
-    strcpy(_webUser, val);    
+      _webUser = new char[strlen(val)+1];
+      strcpy(_webUser, val);    
   } else if(keyStr == WEBPASS) {
-    _webPass = new char[strlen(val)+1];
-    strcpy(_webPass, val);
+      _webPass = new char[strlen(val)+1];
+      strcpy(_webPass, val);
   } else if(keyStr == TESLAACTIVE) {
     if(strcmp(val,"1") || strcmp(val,"true")) {
       teslaCtrlActive=true;
     } else {
       teslaCtrlActive=false;
     }
-  } else if (keyStr = SOCLIMIT) {
-     socLimit = atoi(val);
+  } else if(keyStr == SOCLIMIT) {
+      socLimit = String(val).toInt();
   } else {
-    Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
-    Serial.println(key);
+      Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
+      Serial.println(key);
   }
 }
 
