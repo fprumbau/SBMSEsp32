@@ -173,6 +173,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (5) Fix: socLimit wurde nie in Konfig geschrieben
 <li>0.9.9.91: (6) Debug2 ist jetzt 'debugWeb'
 <li>0.9.9.91: (7) Bisher wurde S2 erst bei -400W &uuml;ber mehr als 5 Minuten abgeschaltet, nun wurde dies auf 100W heruntergesetzt
+<li>0.9.9.91: (8) charger.getRunningMillis arbeitet nun mit long.
+<li>0.9.9.91: (9) Laufen S1 und S2 mehr als eine Stunde UND befindet sich der Wechselrichter im Batteriemodus, wird er umgeschaltet in den Netzvorrang
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden

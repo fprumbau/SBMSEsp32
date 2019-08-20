@@ -1,6 +1,8 @@
  #include "charger.h"
 #include "global.h"
 
+#define ONE_HOUR_MILLIS 3600000
+
 /**
  * An-/Ausschalten der Solarcharger S1 und S2.
  * Erfolgt die Schaltung manuell, dann wird beim
@@ -212,6 +214,7 @@ void Charger::checkOnIncome() {
           if(debugRelais) {
               wc.sendClients("Aktiviere Solarcharger 1");
           }
+          s1on=true;
           toggleCharger(S1,true,false,true);
           s1_countBeforeOff = -1;      
         }
@@ -223,6 +226,7 @@ void Charger::checkOnIncome() {
                wc.sendClients("Deaktiviere Solarcharger 1");
             }
             netto+=600;
+            s1on=false;
             toggleCharger(S1,false,false,true);
           }
       }
@@ -247,6 +251,7 @@ void Charger::checkOnIncome() {
           if(debugRelais) {
             wc.sendClients("Aktiviere Solarcharger 2");
           }
+          s2on=true;
           toggleCharger(S2,true,false,true);
           s2_millisBeforeOff = -1; //Reset des LowNetto-Timers
         } 
@@ -261,11 +266,17 @@ void Charger::checkOnIncome() {
               if(debugRelais) {
                  wc.sendClients("Deaktiviere Solarcharger 2");
               }
+              s2on=false;
               toggleCharger(S2,false,false,true);
             }
       }
     }
     yield();
+
+    //0.9.9.1 laufen Charger S1 UND S2 seit 1h, dann schalte Batteriebetrieb ab
+    if(s1on && s2on && getRunningMillis(S1) > ONE_HOUR_MILLIS && getRunningMillis(S2) > ONE_HOUR_MILLIS && battery.isOn()) {
+        inverter.starteNetzvorrang(F("Deaktiviere Batteriemodus, weil S1 UND S2 schon mehr als eine Stunde laufen"));
+    }
     
     //Nun Ladelevel ueber GPIO5 einstellen.
     if(s2on) {      
@@ -307,13 +318,13 @@ void Charger::checkOnIncome() {
 }
 
 //liefere die Millisekunden, die der Charger schon laeuft
-int Charger::getRunningMillis(uint8_t nr) {
+unsigned long Charger::getRunningMillis(uint8_t nr) {
    if(!isChargerOn(nr)) {
       return 0;
    }
    if(nr == 1) {
-      return now - s1_switched; 
+      return millis() - s1_switched; 
    } else {
-      return now - s2_switched;  
+      return millis() - s2_switched;  
    }
 }
