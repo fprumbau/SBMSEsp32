@@ -175,13 +175,15 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (7) Bisher wurde S2 erst bei -400W &uuml;ber mehr als 5 Minuten abgeschaltet, nun wurde dies auf 100W heruntergesetzt
 <li>0.9.9.91: (8) charger.getRunningMillis arbeitet nun mit long.
 <li>0.9.9.91: (9) Laufen S1 und S2 mehr als eine Stunde UND befindet sich der Wechselrichter im Batteriemodus, wird er umgeschaltet in den Netzvorrang
+<li>0.9.9.92: (1) Aus 0.9.9.69: Wenn S2 nicht lädt und Netto >100W, wird Batteriemodus abgeschaltet, das macht aber nun Probleme, wenn Abends der Batteriemodus früher online geht => wurde auskommentiert
+<li>0.9.9.92: (2) SMA.cpp: Wird mehr als 1h kein gültiges UDP-Paket (600Byte) mehr empfangen, leite einen Wifi-Reconnect ein! 
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.91"
+#define VERSION "0.9.9.92"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
@@ -928,7 +930,8 @@ function updateSbmsData(){
         //div2#d8 Spalte mit Wattwerten
         htm('d8',w[5]);
 
-        htm('d'+12,'Typ: LiIon Kap: 260Ah Status: '+dcmp(56,3,data)+'</br>'+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451</br>'+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
+        //Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451
+        htm('d'+12,'Typ: LiIon <val>260</val>Ah Status: <val>'+dcmp(56,3,data)+'</val></br>'+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451</br>'+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
       }
   } catch(err) {
     log("ERROR_595: " + err.message);

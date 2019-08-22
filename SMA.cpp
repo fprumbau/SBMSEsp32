@@ -77,11 +77,17 @@ bool SMA::read() {
       return true;
       
   } else {
-      
-      //Wird 2 Minuten kein udp Paket des Energymeters gelesen, dann initialisiere WiFi-Reconnect
+
       long now = millis();
       long lastUdp = now - lastUdpRead;
-      //wurde lastUdp millis kein Paket mehr empfangen UND liegt der letzte Resetversuch mind. 10s zurück
+      
+      //0.9.9.91 Manchmal bricht der Wifistack zusammen, dann kann nur ein Restart desselben helfen.
+      if(lastUdp > 3600000) {
+        Serial.println(F("Das letzte UDP-Paket wurde vor mehr als einer Stunde empfangen, restarte Wifi jetzt..."));
+        myWifi.reconnect();
+        return false;
+      }
+
       if(lastUdp > 120000 && (now - lastUdpReset) > 10000) {         
           yield();
           reset();

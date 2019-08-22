@@ -30,9 +30,8 @@ int Tesla::wakeup() {
     } else {
         Serial.println(F("Error sending wakeup POST"));
     }
-  
+    yield();
     http.end();
-
     yield();
     return rc;
 }
@@ -100,15 +99,10 @@ int Tesla::authorize(const char* password) {
     } else {
         Serial.println(F("Error sending wakeup POST"));
     }
-  
+    yield();
     http.end();
-
     yield();
     return rc;
-
-
-  
-  return 0;
 }
 
 int Tesla::readChargeState() {
@@ -128,6 +122,7 @@ int Tesla::readChargeState() {
       String response = http.getString();    
       Serial.println(response);  
       wc.sendClients(response.c_str());
+      yield();
 
       //Update
       if(rc==200) {
@@ -164,9 +159,10 @@ int Tesla::readChargeState() {
       Serial.print(F("Error sending GET charge state; rc="));
       Serial.println(rc);
   }
-
+  
   yield();
   http.end();
+  yield();
   return rc;
 }
     
@@ -191,7 +187,7 @@ int Tesla::startCharge() {
     } else {
         Serial.println(F("Error sending POST charge start"));
     }
-  
+    yield();
     http.end();
     yield();
     return rc;   
@@ -218,7 +214,7 @@ int Tesla::stopCharge() {
     } else {
         Serial.println(F("Error sending POST charge stop"));
     }
-  
+    yield();
     http.end();
     yield();
     return rc;    
@@ -238,8 +234,10 @@ int Tesla::setChargeLimit(int percent) {
   reqData.reserve(32);
   serializeJson(doc, reqData);
   Serial.println(reqData);
+  yield();
 
   int rc = http.POST(reqData);
+  yield();
   Serial.print(F("Trying to issue set charge limit: "));
   Serial.println(rc);
   
@@ -253,7 +251,7 @@ int Tesla::setChargeLimit(int percent) {
   } else {
       Serial.println(F("Error sending POST charge limit"));
   }  
-
+  yield();
   http.end();
   yield();
   return rc;
