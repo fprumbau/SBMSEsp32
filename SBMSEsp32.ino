@@ -413,4 +413,6 @@ void print() {
   Serial.println(socLimit);  
   Serial.print(F("Now (millis): "));
   Serial.println(millis());        
+  Serial.print(F("Udp resets: "));
+  Serial.println(udpResets);       
 }

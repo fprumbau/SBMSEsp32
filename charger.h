@@ -29,6 +29,7 @@ class Charger {
     void enableCharger(uint8_t nr, bool active, bool notify);
     void disableCharger(uint8_t nr, bool active, bool notify);
     int calculateDc(float netto);
+    int getS2Power(); //S2 ist variabel
     
   public:
     bool isOn();
@@ -36,7 +37,6 @@ class Charger {
     bool isChargerOn(uint8_t nr);
     void checkOnIncome(); //pruefe, ob Solarstrom konsumiert werden kann
     unsigned long getRunningMillis(uint8_t nr); //liefere die Millisekunden, die der Charger schon laeuft
-
 };
 
 #endif

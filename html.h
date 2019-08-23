@@ -177,6 +177,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (9) Laufen S1 und S2 mehr als eine Stunde UND befindet sich der Wechselrichter im Batteriemodus, wird er umgeschaltet in den Netzvorrang
 <li>0.9.9.92: (1) Aus 0.9.9.69: Wenn S2 nicht lädt und Netto >100W, wird Batteriemodus abgeschaltet, das macht aber nun Probleme, wenn Abends der Batteriemodus früher online geht => wurde auskommentiert
 <li>0.9.9.92: (2) SMA.cpp: Wird mehr als 1h kein gültiges UDP-Paket (600Byte) mehr empfangen, leite einen Wifi-Reconnect ein! 
+<li>0.9.9.92: (3) Läuft S2 und ist Netto + S2Power > 600W, dann sollte statt dessen S1 aktiviert werden und S2 eine Neubewertung erfahren.
+<li>0.9.9.92: (4) Es werden nun udp.resets und wifi.reconnects gez&aauml;hlt. Nach 10 wifi.reconnects wird ein Esp.restart() getriggert.
+<li>0.9.9.92: (5) Wird auf eine Teslaanfrage ein 408 versendet, werden die Aktivstati aller Teslabuttons resettet werden. 
+<li>0.9.9.92: (6) Wird ein inkorrekter Json-String in der GUI empfangen, dann werden nun der Stacktrace UND die Daten ausgegeben.
+<li>0.9.9.92: (7) Die 1h aus (2) wurde in 10Min ge&auml;ndert, nach >10 Reconnects wird nun ein ESP.restart durchgef&uuml;hrt.
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden
@@ -546,16 +551,30 @@ connection.onmessage = function (e) {
     data = e.data;
     switch(data[0]) {
        case '{':
-            if(debugJson) {
-              log(data);
-            }
-            json = JSON.parse(data); 
-            updateUi();      
-            if(json.hasOwnProperty('d')) {       
-              updateSbmsData();    
+            try {
+              if(debugJson) {
+                log(data);
+              }
+              json = JSON.parse(data); 
+              updateUi();      
+              if(json.hasOwnProperty('d')) {       
+                updateSbmsData();    
+              }
+            } catch(error) {
+              console.log( "Fehler in connection.onmessage: ", error.message );
+              console.log( error.stack );
+              console.log( data );
+              log( error.stack );
+              log( data );
             }
           break;
       default:
+            if(data.indexOf('408') !== -1) {
+                setOff(document.getElementById('state'));
+                setOff(document.getElementById('wakeup'));
+                setOff(document.getElementById('lim50'));
+                setOff(document.getElementById('lim90'));
+            }
             console.log('Nachricht: ', data);
             log(data);      
           break;          

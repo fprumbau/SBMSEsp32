@@ -205,19 +205,36 @@ void Charger::checkOnIncome() {
 
     /**
      * 0.9.9.71 Zuerst S1 bewerten
+     * s2MinRestMillis==60s
+     * 
      */     
     unsigned long s1Last = now - s1_switched;
     if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
       if(!s1on) {
-        if(netto > 600){         
-          netto-=600;
-          if(debugRelais) {
-              wc.sendClients("Aktiviere Solarcharger 1");
-          }
-          s1on=true;
-          toggleCharger(S1,true,false,true);
-          s1_countBeforeOff = -1;      
-        }
+        //Läuft S2 noch nicht, dann wird S1 gestartet, wenn netto > 600, also der Max-Wert von S1
+        if(!s2on) {
+          if(netto > 600){         
+            netto-=600;
+            if(debugRelais) {
+                wc.sendClients("Aktiviere Solarcharger 1 weil netto > 600 und s2 off");
+            }
+            s1on=true;
+            toggleCharger(S1,true,false,true);
+            s1_countBeforeOff = -1;      
+          } 
+        } else {
+            //S1 sollte gestartet werden, wenn der aktuelle Power von S2 + netto > 600W betragen. 
+            if((netto + getS2Power()) > 600) {
+              s1on=true;
+              netto-=600;
+              toggleCharger(S1,true,false,true);
+              s1_countBeforeOff = -1;    
+              if(debugRelais) {
+                wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...");
+              }  
+            }
+          } 
+       
       } else if(netto < -300 && !s1override) {        
           if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
@@ -327,4 +344,32 @@ unsigned long Charger::getRunningMillis(uint8_t nr) {
    } else {
       return millis() - s2_switched;  
    }
+}
+
+int Charger::getS2Power(){
+  if(dutyCycle<50) {
+    return 0;
+  } else if(dutyCycle<100) {
+    return 100;
+  } else if(dutyCycle<200) {
+    return 150;
+  } else if(dutyCycle<300) {
+    return 200;
+  } else if(dutyCycle<400) {
+    return 250;
+  } else if(dutyCycle<500) {
+    return 300;
+  } else if(dutyCycle<600) {
+    return 350;
+  } else if(dutyCycle<700) {
+    return 400;
+  } else if(dutyCycle<800) {
+    return 450;
+  } else if(dutyCycle<900) {
+    return 500;
+  } else if(dutyCycle<950) {
+    return 550;
+  } else {
+    return 600;
+  }
 }

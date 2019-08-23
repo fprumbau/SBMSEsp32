@@ -80,6 +80,8 @@ extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 extern long lastUdpReset; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
+extern int udpResets; //0.9.9.92 Zaehlen von Resets
+extern int wifiReconnects; //0.9.9.92 Zaehlen von Wifi Reconnects
 
 extern long soc; //aktueller Wert State Of Charge
 extern int cv[]; //aktuelle Zellspannungen

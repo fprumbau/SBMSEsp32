@@ -73,6 +73,9 @@ WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
 long lastUdpReset = -1;
+int udpResets = 0;
+int wifiReconnects = 0; //0.9.9.92 Zaehlen von Wifi Reconnects
+
 AsyncWebSocket ws("/ws");
 
 long soc = -1; //aktueller Wert State Of Charge

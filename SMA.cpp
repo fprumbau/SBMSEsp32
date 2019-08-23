@@ -81,9 +81,9 @@ bool SMA::read() {
       long now = millis();
       long lastUdp = now - lastUdpRead;
       
-      //0.9.9.91 Manchmal bricht der Wifistack zusammen, dann kann nur ein Restart desselben helfen.
-      if(lastUdp > 3600000) {
-        Serial.println(F("Das letzte UDP-Paket wurde vor mehr als einer Stunde empfangen, restarte Wifi jetzt..."));
+      //0.9.9.91 Manchmal bricht der Wifistack zusammen, dann kann nur ein Reconnect desselben helfen.
+      if(lastUdp > 600000) {
+        Serial.println(F("Das letzte UDP-Paket wurde vor mehr als 10Min empfangen, restarte Wifi jetzt..."));
         myWifi.reconnect();
         return false;
       }
@@ -97,9 +97,11 @@ bool SMA::read() {
           msg.reserve(42);
           msg += F("Last WiFi UPD-Packet read ");
           msg += lastUdp;
-          msg += F("ms ago");
+          msg += F("ms ago; ReconnectCount: ");
+          msg += udpResets;
           Serial.println(msg);
           wc.sendClients(msg.c_str());
+          udpResets++;
       }
   }
   return false;

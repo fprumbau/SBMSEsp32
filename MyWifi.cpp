@@ -7,25 +7,20 @@ void MyWifi::connect() {
   WiFi.disconnect(true);
   WiFi.setSleep(false);
   WiFi.enableSTA(true);
-  Serial.print("WIFI status = ");
+  Serial.print(F("WIFI status = "));
   Serial.println(WiFi.getMode());
   WiFi.mode(WIFI_STA);
   //Ende silly mode 
  
   WiFi.begin(_ssid, _password); 
 
-  int ct = 0;
-  while(WiFi.status() != WL_CONNECTED) {
-      ct++;
-      if(ct>10) {
-        Serial.println(F("Second attempt"));
-        ct=0;
+  while(WiFi.status() != WL_CONNECTED && wifiReconnects < 10) {
+        wifiReconnects++;
         WiFi.disconnect(true);
         WiFi.mode(WIFI_STA);
         WiFi.begin(_ssid, _password);
-      }
-      Serial.print(".");
-      delay(500); 
+        Serial.print(F("."));
+        delay(100); 
   }
   Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
   Serial.print(F("Ip Address: "));
@@ -48,7 +43,13 @@ IPAddress MyWifi::localIP() {
 }
 
 void MyWifi::reconnect() {
-  Serial.println(F("Restarting WiFi..."));
-  WiFi.disconnect();
-  connect();
+  if(wifiReconnects>=10) {
+    String msg = F("Nach 10 Wifi Reconnects: Esp.restart()");
+    wc.sendClients(msg.c_str());
+    Serial.println(msg);
+    ESP.restart();
+  } else {    
+    Serial.println(F("Restarting WiFi..."));
+    connect();
+  }
 }
