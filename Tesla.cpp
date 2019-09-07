@@ -320,6 +320,7 @@ void Tesla::vehicleId(const char* vehicleid) {
 }
 
 void Tesla::print() {
+  Serial.println(F("--------------------------------"));
   Serial.println(_set_charge_limit_url);
   Serial.println(_charge_start_url);
   Serial.println(_charge_stop_url);

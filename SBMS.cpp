@@ -189,8 +189,9 @@ bool SBMS::read() {
 }
 
 void SBMS::print() {
-  Serial.print(F("SBMS.lastReceivedMillis: "));
-  Serial.println(lastReceivedMillis);  
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("SBMS.lastReceivedMillis (in Sekunden): "));
+  Serial.println(utils.secondsSince(lastReceivedMillis));  
   Serial.print(F("SBMS.testFixed: "));
   Serial.println(testFixed);  
 }

@@ -15,6 +15,7 @@ class WebCom {
     void updateUi(AsyncWebSocketClient *client, bool all);
     void updateUi();
     void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
+    void print();
    
 };
 

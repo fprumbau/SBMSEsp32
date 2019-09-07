@@ -14,13 +14,14 @@ void MyWifi::connect() {
  
   WiFi.begin(_ssid, _password); 
 
-  while(WiFi.status() != WL_CONNECTED && wifiReconnects < 10) {
+  while(WiFi.status() != WL_CONNECTED && wifiReconnects < myWifiRestartLimit) {
         wifiReconnects++;
+        lastReconnectMillis = millis();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_STA);
         WiFi.begin(_ssid, _password);
         Serial.print(F("."));
-        delay(100); 
+        delay(3000); 
   }
   Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
   Serial.print(F("Ip Address: "));
@@ -32,6 +33,13 @@ void MyWifi::connect() {
 
   Serial.println(F("Initializing sma.init"));
   sma.init();
+
+  //Running since
+  while(!timeClient.update()) {
+    yield();
+    timeClient.forceUpdate();
+  }
+  runningSince = timeClient.getFormattedDate();
 }
 
 String MyWifi::getIpAddress() {
@@ -43,13 +51,17 @@ IPAddress MyWifi::localIP() {
 }
 
 void MyWifi::reconnect() {
-  if(wifiReconnects>=10) {
-    String msg = F("Nach 10 Wifi Reconnects: Esp.restart()");
-    wc.sendClients(msg.c_str());
-    Serial.println(msg);
-    ESP.restart();
-  } else {    
-    Serial.println(F("Restarting WiFi..."));
-    connect();
+  long now = millis();
+  if((now - lastReconnectMillis) > 300000) { //Ein Reconnect max. alle 5 Minuten
+    if(wifiReconnects >= myWifiRestartLimit) {
+      String msg = F("Nach {myWifiRestartLimit} Wifi Reconnects: Esp.restart()");
+      wc.sendClients(msg.c_str());
+      Serial.println(msg);
+      wifiReconnects=0;
+      ESP.restart();
+    } else {    
+      Serial.println(F("Restarting WiFi..."));
+      connect();
+    }
   }
 }

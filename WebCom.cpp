@@ -377,3 +377,9 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(F(" to "));
     msg->concat(value);
 }
+
+void WebCom::print() {
+    Serial.println(F("--------------------------------"));
+    Serial.print(F("WebCom clients: "));
+    Serial.println(ws.count());  
+}

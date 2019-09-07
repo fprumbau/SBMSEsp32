@@ -143,7 +143,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.88: (4) Ein wenig umr&auml;umen/optimieren in SMA.cpp/SCM.h 
 <li>0.9.9.88: (5) BasisUrl zur Re-Authentifizierung gefixed, wurde ein neues Token geholt, wird es im SPIFFS gesichert.
 <li>0.9.9.88: (6) Watchdogtimer abstellen (999s, no panic handler).
-<li>0.9.9.88: (7) Fix: Bei der Anforderung, das Teslaladen zu starten, wurde immer ein false übermittelt.
+<li>0.9.9.88: (7) Fix: Bei der Anforderung, das Teslaladen zu starten, wurde immer ein false &uuml;bermittelt.
 <li>0.9.9.88: (8) Die Config konnte nicht gespeichert werden, wenn bei ihrem Laden zum Programmstart ein Fehler passiert war (_configRead=false), dies wurde entfernt.
 <li>0.9.9.88: (9) Authentication f&uuml;r Aufrufe &ber /sbms-Kontext von Remote
 <li>0.9.9.88: (10) Formatierung des Tesladivs ge&auml;ndert
@@ -175,20 +175,29 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.91: (7) Bisher wurde S2 erst bei -400W &uuml;ber mehr als 5 Minuten abgeschaltet, nun wurde dies auf 100W heruntergesetzt
 <li>0.9.9.91: (8) charger.getRunningMillis arbeitet nun mit long.
 <li>0.9.9.91: (9) Laufen S1 und S2 mehr als eine Stunde UND befindet sich der Wechselrichter im Batteriemodus, wird er umgeschaltet in den Netzvorrang
-<li>0.9.9.92: (1) Aus 0.9.9.69: Wenn S2 nicht lädt und Netto >100W, wird Batteriemodus abgeschaltet, das macht aber nun Probleme, wenn Abends der Batteriemodus früher online geht => wurde auskommentiert
-<li>0.9.9.92: (2) SMA.cpp: Wird mehr als 1h kein gültiges UDP-Paket (600Byte) mehr empfangen, leite einen Wifi-Reconnect ein! 
-<li>0.9.9.92: (3) Läuft S2 und ist Netto + S2Power > 600W, dann sollte statt dessen S1 aktiviert werden und S2 eine Neubewertung erfahren.
-<li>0.9.9.92: (4) Es werden nun udp.resets und wifi.reconnects gez&aauml;hlt. Nach 10 wifi.reconnects wird ein Esp.restart() getriggert.
+<li>0.9.9.92: (1) Aus 0.9.9.69: Wenn S2 nicht l&auml;dt und Netto >100W, wird Batteriemodus abgeschaltet, das macht aber nun Probleme, wenn Abends der Batteriemodus fr&uuml;her online geht => wurde auskommentiert
+<li>0.9.9.92: (2) SMA.cpp: Wird mehr als 1h kein g&uuml;ltiges UDP-Paket (600Byte) mehr empfangen, leite einen Wifi-Reconnect ein! 
+<li>0.9.9.92: (3) L&auml;uft S2 und ist Netto + S2Power > 600W, dann sollte statt dessen S1 aktiviert werden und S2 eine Neubewertung erfahren.
+<li>0.9.9.92: (4) Es werden nun udp.resets und wifi.reconnects gez&auml;hlt. Nach 10 wifi.reconnects wird ein Esp.restart() getriggert.
 <li>0.9.9.92: (5) Wird auf eine Teslaanfrage ein 408 versendet, werden die Aktivstati aller Teslabuttons resettet werden. 
 <li>0.9.9.92: (6) Wird ein inkorrekter Json-String in der GUI empfangen, dann werden nun der Stacktrace UND die Daten ausgegeben.
 <li>0.9.9.92: (7) Die 1h aus (2) wurde in 10Min ge&auml;ndert, nach >10 Reconnects wird nun ein ESP.restart durchgef&uuml;hrt.
+<li>0.9.9.93: (1) Die Klasse WebCom bekommt eine print()-Methode (nachdem das System nun 5d stabil gelaufen ist, wenn alle Browser immer geschlossen werden).
+<li>0.9.9.93: (2) Die Beachtung von socLimit in wechselrichter.check() wurde herausgenommen, da a) der SOC nie genau war, b) ein Zugriff auf die Reserve auch bei Stromausfall nie m&oouml;glich war
+<li>0.9.9.93: (3) Ein ESP.restart() wird nur noch nach 50 Wifi.reconnects() durchgef&uuml;hrt (revert, wegen Instabilitaet!!!); fr&uuml;her wurde nach 1h kein UDP empfangen, ein Wifi-Reconnect gemacht, jetzt nach 10 Minuten. 
+<li>0.9.9.93: (4) Die Wartezeit in der while-Schleife beim MyWifi.begin() wurde von 100ms auf 3000ms angehoben
+<li>0.9.9.93: (5) Ein Wifi-Reconnect wurde immer dann getriggert, wenn UDP l&aauml;nger als 10 Minuten kein Paket empfangen hat. Da das alle 3 Sekunden gepr&uuml;ft wurde, also ggfls. alle 3 Sekunden einmal bis zum ESP.restart(), wird dies auf max. alle 5 Minuten begrenzt
+<li>0.9.9.93: (6) Der Count f&uuml;r maximale Wifi-Reconnects bis zum ESP-Restart wurde wieder erh&ouml;ht, nun von 10 auf 25 
+<li>0.9.9.93: (7) Im Main-Loop wird nun - wenn >1h keine SBMS-Aktualisierung gekommen ist, der Batteriemodus beendet, der Inverter in StopBatt-Modus geflagged, die rote LED geschaltet und eine lastStatusMsg global (fuer print) gelogged).
+<li>0.9.9.93: (8) Debugausgaben im Mainloop, um H&auml;nger feststellen zu k&ouml;nnen, Utils-Klasse hinzu, Ausgabe battery.isOn()
+<li>0.9.9.93: (9) Die Laufzeitüberwachung (Abschaltung Batterie, wenn >1h keine SBMS-Aktualisierung erfolgte), wird nun auf die andere CPU verlegt
+<li>0.9.9.93: (10) Die Batterie l&aauml;sst sich nun &uuml;ber die Kommandozeile schalten (also auch &uuml;ber die andere CPU) 
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
-<li>  TODO: Kommt bei einer Tesla-Statusabfrage (oder einer anderen Aktion) ein 408, sollte die Meldung 'Sleep mode aktive' kommen und die aktive Anfage (Button) gelöscht werden
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.92"
+#define VERSION "0.9.9.93"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>

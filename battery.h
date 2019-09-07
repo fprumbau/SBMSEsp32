@@ -8,6 +8,7 @@ class Battery {
 
     
   public:
+    void print();
     bool isOn();
     void controlFans();
     void checkCellVoltages();

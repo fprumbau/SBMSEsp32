@@ -18,6 +18,7 @@
 #include "SMA.h"
 #include "battery.h"
 #include "charger.h"
+#include "Utils.h"
 
 #include "Tesla.h"
 #include "CFG.h"
@@ -78,6 +79,7 @@ extern WiFiUDP udp;
 extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+extern Utils utils; 
 extern long lastUdpRead; //letztes, erfolgreiches lesen eines UDP-Paketes (WiFi isAlive)
 extern long lastUdpReset; //verhindert Stackoverflow, senden von zu vielen Websocketpaketen 0.9.9.24
 extern int udpResets; //0.9.9.92 Zaehlen von Resets
@@ -121,5 +123,6 @@ extern int teslaChargeStartThreshold; //0.9.9.80
 extern int teslaChargeStopThreshold; //0.9.9.80
 extern int lowIncomeCount; //0.9.9.80
 extern int highIncomeCount; //0.9.9.80
-
+extern String lastStatusMsg; //0.9.9.93
+extern String runningSince; //0.9.9.93
 #endif

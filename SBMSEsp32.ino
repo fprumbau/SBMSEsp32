@@ -217,7 +217,15 @@ void loop0(void * parameter) {
   for(;;) {
       commandLine();    //Pruefen, ob eine Kommandozeileneingabe vorhanden ist
       vTaskDelay(10);   //if not: Task watchdog got triggered. The following tasks did not feed the watchdog in time
-    //xSemaphoreGive(semaphore);
+      //0.9.9.94 Wird mehr als 1h keine SBMS-Nachricht mehr empfangen und läuft der Batteriemodus, dann beende diesen
+      long now = millis();
+      if(battery.isOn() && ( now - lastReceivedMillis ) > 3600000 && !inverter.stopBattery) {
+        inverter.stopBattery = true; //verhindert wiederanlaufen und die Wiederholung der Stopaufforderung ( loop geht vielfach pro Sekunde!!! )
+        lastStatusMsg = F("Seit mehr als einer Stunde wurde keine SBMS-Aktualisierung mehr empfangen, beende Batteriemodus");
+        inverter.starteNetzvorrang(lastStatusMsg);
+        inverter.setRed();
+      }      
+      //xSemaphoreGive(semaphore);
   }
 }
 
@@ -228,18 +236,31 @@ void loop0(void * parameter) {
 /**********************************************************************/
 void loop() {
 
+    if(debug) Serial.print("1");
+
     if(!updater.stopForOTA) {
+
+      if(debug) Serial.print("2");
+      
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
-      yield();
+      yield();      
+
+      if(debug) Serial.print("4");
+      
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
         yield();
         inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       }
+
+      if(debug) Serial.print("5");
+      
       if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
         charger.checkOnIncome();     
       }
+
+      if(debug) Serial.println("6");
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -332,10 +353,20 @@ void commandLine() {
         debug = true;
       } else if(cmd.startsWith(F("debug off"))) {         
         debug = false;
+      } else if(cmd.startsWith(F("battery off"))) {        
+        inverter.stopBattery = true;
+        inverter.starteNetzvorrang(F("Schalte Batterie ueber Kommandozeile ab"));
+        inverter.setRed();        
+      } else if(cmd.startsWith(F("battery on"))) {         
+        inverter.stopBattery = false;
+        inverter.starteNetzvorrang(F("Schalte Batterie ueber Kommandozeile an"));
+        inverter.setGreen();
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
         config.print();
         sbms.print();
+        wc.print();
+        battery.print();
         print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
@@ -377,6 +408,7 @@ void commandLine() {
         esp_log_level_set("*", ESP_LOG_VERBOSE);
       } else {
         Serial.println(F("Available commands:"));
+        Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
         Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
         Serial.println(F(" - restart esp   :: restarting whole ESP32"));
         Serial.println(F(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W"));
@@ -405,6 +437,9 @@ void commandLine() {
 } 
 
 void print() {
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("Running since: "));
+  Serial.println(runningSince);
   Serial.print(F("Temperatur: "));
   Serial.println(temp);  
   Serial.print(F("Ladezustand: "));
@@ -414,5 +449,10 @@ void print() {
   Serial.print(F("Now (millis): "));
   Serial.println(millis());        
   Serial.print(F("Udp resets: "));
-  Serial.println(udpResets);       
+  Serial.println(udpResets);  
+  Serial.print(F("Wifi reconnects: "));
+  Serial.println(wifiReconnects);
+  Serial.print(F("Last status message: "));
+  Serial.println(lastStatusMsg );
+  Serial.println(F(""));
 }

@@ -10,6 +10,8 @@ class MyWifi {
       const char* _password = "5785340536886787";
       String _ip;
       IPAddress _localIP;
+      long lastReconnectMillis;
+      const int myWifiRestartLimit = 25;
     public:
       void connect();
       String getIpAddress();

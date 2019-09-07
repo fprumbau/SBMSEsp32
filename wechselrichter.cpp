@@ -101,23 +101,23 @@ void Inverter::check()  {
   }
   
   boolean isBatOn = battery.isOn();
-  int limit;
+  /*int limit;
   if(isBatOn) {
     limit = socLimit;
   } else {
     //v.0.9.9.36 ist die Batterie aus, dann muss um SOC_HYST (z.B. 5%) hoehere Ladung zur Verfuegung stehen
     limit = socLimit + SOC_HYST;
-  }
+  }*/
   //a) Teste State-Of-Charge
   boolean stop = false;
   String message((char *)0);
   message.reserve(128);
-  if (soc < limit) {
+  /*if (soc < limit) {
     message = F("State of charge below ");
     message += limit;
     message += "%";
     stop = true;
-  }
+  }*/
   //b) Ist jetzt noch kein Stopflag aktiv, teste die einzelnen Zellspannungen
   if (!stop) {
     int limit = LOW_VOLTAGE_MILLIS;   

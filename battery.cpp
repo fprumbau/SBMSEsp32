@@ -2,6 +2,12 @@
 
 #include "global.h"
 
+void Battery::print() {
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("Batterie: "));
+  Serial.println(isOn()); 
+}
+
 void Battery::checkCellVoltages() {
 
   //c) 0.9.9.37: Egal, ob stop aktiv oder nicht, Teste Zellspannungen und aktiviere ggfls. S2(175W) für 5Min

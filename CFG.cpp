@@ -193,6 +193,7 @@ char* CFG::webPass() {
   return _webPass;
 }
 void CFG::print() {
+  Serial.println(F("--------------------------------"));
   Serial.print(F("_webUser: "));
   Serial.println(_webUser);  
   Serial.print(F("_webPass: "));
