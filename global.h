@@ -97,7 +97,6 @@ extern String testData;
 extern const char* hostName;
 extern unsigned long lastReceivedMillis;
 
-extern String sbmsData;
 extern float netto;
 extern String datetime;
 
@@ -125,4 +124,5 @@ extern int lowIncomeCount; //0.9.9.80
 extern int highIncomeCount; //0.9.9.80
 extern String lastStatusMsg; //0.9.9.93
 extern String runningSince; //0.9.9.93
+extern int loopAnalyzer; //0.9.9.94
 #endif

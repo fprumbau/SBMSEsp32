@@ -91,7 +91,6 @@ String testData = F("#$$(I?#\\GOGSGSGQGQGPGPGR+<##+#_:%[6#.4%(@###6Of6O_######%N
 const char* hostName = "esp32a";
 unsigned long lastReceivedMillis = 0;
 
-String sbmsData="";
 float netto=0.0;
 String datetime;
 
@@ -119,3 +118,4 @@ int highIncomeCount = 0;
 CFG config;
 String lastStatusMsg = "";
 String runningSince = "";
+int loopAnalyzer = -1; //0.9.9.94

@@ -190,14 +190,23 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.93: (6) Der Count f&uuml;r maximale Wifi-Reconnects bis zum ESP-Restart wurde wieder erh&ouml;ht, nun von 10 auf 25 
 <li>0.9.9.93: (7) Im Main-Loop wird nun - wenn >1h keine SBMS-Aktualisierung gekommen ist, der Batteriemodus beendet, der Inverter in StopBatt-Modus geflagged, die rote LED geschaltet und eine lastStatusMsg global (fuer print) gelogged).
 <li>0.9.9.93: (8) Debugausgaben im Mainloop, um H&auml;nger feststellen zu k&ouml;nnen, Utils-Klasse hinzu, Ausgabe battery.isOn()
-<li>0.9.9.93: (9) Die Laufzeitüberwachung (Abschaltung Batterie, wenn >1h keine SBMS-Aktualisierung erfolgte), wird nun auf die andere CPU verlegt
-<li>0.9.9.93: (10) Die Batterie l&aauml;sst sich nun &uuml;ber die Kommandozeile schalten (also auch &uuml;ber die andere CPU) 
+<li>0.9.9.93: (9) Die Laufzeit&uuml;berwachung (Abschaltung Batterie, wenn >1h keine SBMS-Aktualisierung erfolgte), wird nun auf die andere CPU verlegt
+<li>0.9.9.93: (10) Die Batterie l&auml;sst sich nun &uuml;ber die Kommandozeile schalten (also auch &uuml;ber die andere CPU) 
+<li>0.9.9.94: (1) Fehler aus letztem Commit korrigiert: Batterie war nur abschaltbar &uuml;ber Kommandozeile
+<li>0.9.9.94: (2) Der Timeout des SBMS-Serial1-Streams wurde von 1000ms auf 100ms nach unten gestellt
+<li>0.9.9.94  (3) Die Zeit, nach der bei fehlender SBMS-Aktualisierung die laufende Batterie abgeschaltet wird, wurde ge&auml;ndert: 1h -> 10min; damit sollten weniger Lockups stattfinden
+<li>0.9.9.94  (4) LoopAnalyzer-int hinzugef&uuml;gt, der anzeigt, wo der letzte ausgef&uuml;hrte Schritt in der loop()-Ausf&uuml;hrung steht 
+<li>0.9.9.94  (5) Kommandozeile erweitert: cmd + NR, als erstes f&uuml;r Nummer 1 :: Serial2.flush(), 2 :: fansOn(), 3 :: fansOff(); 
+<li>0.9.9.94  (6) Wird 10 Minuten keine SBMS-Aktualisierung empfangen, wird der Batteriebetrieb jetzt mit erweitertem Debugging beendet
+<li>0.9.9.94  (7) Die Standard-SBMS-Aktualisierung ist 61Byte, weicht der Wert ab, wird er in SBMS.cpp verworfen und der Buffer geleert.
+<li>0.9.9.94  (8) Das SBMS-Interval wird von 3 auf 2s heruntergesetzt (das SBMS sendet alle 3s)
+<li>0.9.9.94  (9) SBMS: readString wieder ersetzt, verzicht auf globales sbmsData, stattdessen sbms.data
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.93"
+#define VERSION "0.9.9.94"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>

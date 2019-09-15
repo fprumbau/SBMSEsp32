@@ -10,21 +10,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="688fe3da-a399-414e-913f-e5ae167bec02" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CFG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CFG.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MyWifi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MyWifi.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MyWifi.h" beforeDir="false" afterPath="$PROJECT_DIR$/MyWifi.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SBMS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/SBMS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SBMSEsp32.ino" beforeDir="false" afterPath="$PROJECT_DIR$/SBMSEsp32.ino" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tesla.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Tesla.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebCom.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/WebCom.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebCom.h" beforeDir="false" afterPath="$PROJECT_DIR$/WebCom.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/battery.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/battery.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/battery.h" beforeDir="false" afterPath="$PROJECT_DIR$/battery.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/global.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/global.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/global.h" beforeDir="false" afterPath="$PROJECT_DIR$/global.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/html.h" beforeDir="false" afterPath="$PROJECT_DIR$/html.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wechselrichter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/wechselrichter.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -77,8 +66,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="683" />
-    <option name="y" value="160" />
+    <option name="x" value="924" />
+    <option name="y" value="281" />
     <option name="width" value="1400" />
     <option name="height" value="1000" />
   </component>
@@ -87,8 +76,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -126,9 +115,9 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="683" y="160" width="1400" height="1000" extended-state="0" />
+    <frame x="924" y="281" width="1400" height="1000" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25703704" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26074073" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />

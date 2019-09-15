@@ -1,13 +1,15 @@
 #ifndef SBMS_H
 #define SBMS_H
 
+#include <Arduino.h>
+
 class SBMS {
 
   private:
     unsigned int char_off(char c);    
 
   public:
-
+    String data = String((char*)0);
     /**
      * SBMS über serielle Schnittstelle auslesen.
      * Wird 'testFixed' gesetzt (s.o.), dann wird

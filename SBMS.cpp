@@ -45,7 +45,7 @@ unsigned int SBMS::char_off(char c) {
 bool SBMS::read() {
 
   /**
-     Solange etwas empfangen wird (sread gefuellt) sollte ausgewertet werden.
+     Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
      Werte, dazu, soc und cv[] zurueckzusetzen, woraufhin der naechste Lauf der
      Interruptmethode isrHandler(..) dazu, dass die Status-LED auf rot schaltet.
@@ -54,22 +54,30 @@ bool SBMS::read() {
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
   long now = millis();
-  if (( now - lastReceivedMillis ) > 3000) { //Verarbeitung hoechstens alle 3 Sekunden
+  if (( now - lastReceivedMillis ) > 2000) { //Verarbeitung hoechstens alle 2 Sekunden
     
-      String sread;
+      int len;
       if (testFixed) {
-        //sread = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
-        //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-        //sread = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
-        //sread = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
-        //sread = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
-        sread = testData;    
+        //data = "5+'/,D$+HNGpGtGuGkH9H5HD+J##-#$'#####&##################$|(";
+        //data = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+        //data = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
+        //data = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
+        //data = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
+        data = testData;   
+        len = data.length(); 
       } else {
 
-        /*
+        
         static int index;
         const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
         char stringBuffer[STRING_BUFFER_SIZE];
+        if(Serial1.available()>61) {
+          while(Serial1.available()>0) {
+            //bis zum nächsten String-Start ( \0 ) vorlesen
+            char c = Serial1.read();
+            if(c == '\0' || c == '\r' || c == '\n') break;
+          }        
+        }
         while (Serial1.available() > 0) {            
             char c = Serial1.read();
             if(c >= 32 && index < STRING_BUFFER_SIZE - 1) {
@@ -88,24 +96,45 @@ bool SBMS::read() {
               break;
             }       
         }
-        sread = String(stringBuffer);
-        */
-        while (Serial1.available()) {
-          sread = Serial1.readString();      
+        data = String(stringBuffer);
+        
+        /*
+        int ct = Serial1.available();
+        if(ct > 80) {
+          ct+=61; //max. obere Grenze, um Lockup zu verhindern
+          while(Serial1.available() && ct>0) {
+            Serial1.read();
+            ct--;
+          }
+          return false;
         }
+        if (Serial1.available()) {
+          data = Serial1.readString();      
+        }
+        data.trim();
+        len = data.length();
+        
+        if(debugSbms) {
+          Serial.print(F("Empfangener SBMS-String: "));
+          Serial.println(data);
+          Serial.print(F("Laenge; "));
+          Serial.println(len);
+        }
+        */
         
       }
-    
-      yield();
-      sread.trim();
-      int len = sread.length();
 
+      if(len == 0) {
+        return false;
+      }
+
+      yield();
     
       if (debugSbms && len > 0) {
         Serial.print(".____");
-        Serial.print(sread);
+        Serial.print(data);
         Serial.println("____.");
-        Serial.print("Length 'sread': ");
+        Serial.print("Length 'data': ");
         Serial.println(len);
       };
 
@@ -116,74 +145,58 @@ bool SBMS::read() {
           errData+="Fehler, SBMS-Daten scheinen zu kurz zu sein: (len: ";
           errData+=len;
           errData+="); Inhalt: ";
-          errData+=sread;        
+          errData+=data;        
           wc.sendClients(errData.c_str());
           return false;
         }
       }
 
-      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also sread.length=0,dann muss erst der failureCount
+      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount
       // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
       soc = 0;
 
       //Werte nun lesen
-      if (len > 0) {
+      wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
 
-        sbmsData = sread;
-        wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
+      const char* txt = data.c_str();
 
-        const char* txt = sread.c_str();
-
-        String outString = "\nSOC: ";
-        if (len >= 8) {
-          soc = sbms.dcmp(6, 2, txt, len);
-          outString += soc;
-          outString += " ( Limit: ";
-          outString += socLimit;
-          outString += " ) \n";
-        }
-        if (len >= 24) {
-          for (int k = 0; k < 8; k++) {
-            int loc = k * 2 + 8;
-            cv[k] = sbms.dcmp(loc, 2, txt, len);
-
-            outString += "\ncv";
-            outString += ( k + 1 );
-            outString += ": ";
-            outString += cv[k];
-          }
-        }
-        if (len >=26) {
-          //((dcmp(24,2,data)/10)-45)
-          temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
-        }
-
-
-/*
- * TODO PV2 in A ermitteln
- * 
-  var SOC = dcmp(6,2,data);
-  soc = sbms.dcmp(6, 2, txt, len);
-
-  var eA="##lh###v1---$v2---empty-%v1&2-#+#y#$1u#y##";
-  x1 1..8
-  var enA=dcmp(x1*6,6,eA);
-*/
-
-        
-        yield();
-
-        if (debugSbms) {
-          Serial.println(outString);
-          Serial.print(F("StopBattery: "));
-          Serial.println(inverter.stopBattery);
-          Serial.println(F("_______________________________________"));
-        }
-
-        //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
-        lastReceivedMillis = millis();
-        return true;
+      String outString = "\nSOC: ";
+      if (len >= 8) {
+        soc = sbms.dcmp(6, 2, txt, len);
+        outString += soc;
+        outString += " ( Limit: ";
+        outString += socLimit;
+        outString += " ) \n";
       }
+      if (len >= 24) {
+        for (int k = 0; k < 8; k++) {
+          int loc = k * 2 + 8;
+          cv[k] = sbms.dcmp(loc, 2, txt, len);
+
+          outString += "\ncv";
+          outString += ( k + 1 );
+          outString += ": ";
+          outString += cv[k];
+        }
+      }
+      if (len >=26) {
+        //((dcmp(24,2,data)/10)-45)
+        temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
+      }
+      
+      yield();
+
+      if (debugSbms) {
+        Serial.println(outString);
+        Serial.print(F("StopBattery: "));
+        Serial.println(inverter.stopBattery);
+        Serial.println(F("_______________________________________"));
+      }
+
+      //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
+      lastReceivedMillis = millis();
+      return true;
+  
   }
   return false;
 }

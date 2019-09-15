@@ -32,6 +32,13 @@ void commandLine();
 void print();
 
 /**
+ * Solange es fuer die Lüfter keine eigene Klasse hat...
+ */
+bool fansRunning();
+void fansOn();
+void fansOff(); 
+
+/**
  * Registriere Eventhandler für WebSocketEvents in WebCom
  */
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
@@ -51,6 +58,7 @@ void setup() {
   
   //WROOM hat 16/17 auf RX2/TX2 verbunden
   Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
+  Serial1.setTimeout(100); //Default 1000ms; 0.9.9.94; ( 9600 baud ist ca. 800 Byte/s, da nur ca 100 Byte benoetigt werden, kann es schneller gehen)
 
   //WROVER-B hier sind die Pins 16+17 disabled, 
   //Serial1.begin(9600, SERIAL_8N1, 15, 17); //TX2 wird nicht gebraucht (Kommunikation -> SBMS), RX2 auf GPIO15, hierfür muss dann in der Schaltung GPIO16 auf GPIO15 gebrückt werden!
@@ -217,11 +225,22 @@ void loop0(void * parameter) {
   for(;;) {
       commandLine();    //Pruefen, ob eine Kommandozeileneingabe vorhanden ist
       vTaskDelay(10);   //if not: Task watchdog got triggered. The following tasks did not feed the watchdog in time
-      //0.9.9.94 Wird mehr als 1h keine SBMS-Nachricht mehr empfangen und läuft der Batteriemodus, dann beende diesen
+      //0.9.9.94 Wird mehr als 10Min keine SBMS-Nachricht mehr empfangen und läuft der Batteriemodus, dann beende diesen
       long now = millis();
-      if(battery.isOn() && ( now - lastReceivedMillis ) > 3600000 && !inverter.stopBattery) {
+      long lrm = lastReceivedMillis;
+      long diff = now - lrm;
+      if(battery.isOn() && diff > 600000 && !inverter.stopBattery) {
+        lastStatusMsg = F("Seit mehr als 10 Minuten wurde keine SBMS-Aktualisierung mehr empfangen, beende Batteriemodus");
+        Serial.println(lastStatusMsg);
+        Serial.print(F("now: "));
+        Serial.println(now);
+        Serial.print(F("lastReceivedMillis: "));
+        Serial.println(lastReceivedMillis);
+        Serial.print(F("diff: "));
+        Serial.println(diff);
+        Serial.print(F("lrm: "));
+        Serial.println(lrm);
         inverter.stopBattery = true; //verhindert wiederanlaufen und die Wiederholung der Stopaufforderung ( loop geht vielfach pro Sekunde!!! )
-        lastStatusMsg = F("Seit mehr als einer Stunde wurde keine SBMS-Aktualisierung mehr empfangen, beende Batteriemodus");
         inverter.starteNetzvorrang(lastStatusMsg);
         inverter.setRed();
       }      
@@ -236,16 +255,16 @@ void loop0(void * parameter) {
 /**********************************************************************/
 void loop() {
 
-    if(debug) Serial.print("1");
+    loopAnalyzer = 1;
 
     if(!updater.stopForOTA) {
 
-      if(debug) Serial.print("2");
+      loopAnalyzer = 2;
       
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();      
 
-      if(debug) Serial.print("4");
+      loopAnalyzer = 3;
       
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
@@ -253,14 +272,19 @@ void loop() {
         inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       }
 
-      if(debug) Serial.print("5");
+      loopAnalyzer = 4;
       
       if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
         charger.checkOnIncome();     
       }
 
-      if(debug) Serial.println("6");
+      loopAnalyzer = 5;
+    }
+
+    if(debug) {
+      Serial.print(F("Loopanalyzer steht auf: "));
+      Serial.println(loopAnalyzer);
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -359,7 +383,7 @@ void commandLine() {
         inverter.setRed();        
       } else if(cmd.startsWith(F("battery on"))) {         
         inverter.stopBattery = false;
-        inverter.starteNetzvorrang(F("Schalte Batterie ueber Kommandozeile an"));
+        inverter.starteBatterie(F("Schalte Batterie ueber Kommandozeile an"));
         inverter.setGreen();
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
@@ -400,6 +424,31 @@ void commandLine() {
         } else {
           msg = F("please enable 'test on' first");
         }
+      } else if(cmd.startsWith(F("cmd"))) {  
+        String nrStr = cmd.substring(3);
+        nrStr.trim();
+        int nr = nrStr.toInt();
+        switch(nr) {
+          case 0:
+            Serial.println(F("Serial1.flush();"));
+            Serial1.flush();
+            break;
+          case 1:
+            Serial.println(F("Serial.println(Serial1.available());"));
+            Serial.println(Serial1.available());
+            break;             
+          case 2:
+            Serial.println(F("fansOn();"));
+            fansOn();
+            break;
+          case 3:
+            Serial.println(F("fansOff();"));
+            fansOff();
+            break;           
+          default:
+            Serial.println("Kein Kommando mit dieser Nummer gefunden");
+        }
+        
       } else if(cmd.startsWith(F("test wifi"))) { 
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
@@ -416,6 +465,11 @@ void commandLine() {
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
+        Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
+        Serial.println(F(" -      0 :: Serial2.flush();"));
+        Serial.println(F(" -      1 :: Serial.println(Serial1.available());"));
+        Serial.println(F(" -      2 :: fansOn();"));
+        Serial.println(F(" -      3 :: fansOff();"));
         Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
         Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
         Serial.println(F(" - tesla status :: Check tesla charge state"));
@@ -436,10 +490,24 @@ void commandLine() {
     }  
 } 
 
+bool fansRunning() {
+  return !digitalRead(RELAY_4);
+}
+
+void fansOn() {
+  digitalWrite(RELAY_4, LOW);
+}
+
+void fansOff() {
+  digitalWrite(RELAY_4, HIGH);
+}
+
 void print() {
   Serial.println(F("--------------------------------"));
   Serial.print(F("Running since: "));
   Serial.println(runningSince);
+  Serial.print(F("Lüfter aktiv: "));
+  Serial.println(fansRunning());
   Serial.print(F("Temperatur: "));
   Serial.println(temp);  
   Serial.print(F("Ladezustand: "));
@@ -455,4 +523,6 @@ void print() {
   Serial.print(F("Last status message: "));
   Serial.println(lastStatusMsg );
   Serial.println(F(""));
+  Serial.print(F("Loopanalyzer steht auf: "));
+  Serial.println(loopAnalyzer);
 }
