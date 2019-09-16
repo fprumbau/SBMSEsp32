@@ -201,12 +201,18 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.94  (7) Die Standard-SBMS-Aktualisierung ist 61Byte, weicht der Wert ab, wird er in SBMS.cpp verworfen und der Buffer geleert.
 <li>0.9.9.94  (8) Das SBMS-Interval wird von 3 auf 2s heruntergesetzt (das SBMS sendet alle 3s)
 <li>0.9.9.94  (9) SBMS: readString wieder ersetzt, verzicht auf globales sbmsData, stattdessen sbms.data
+<li>0.9.9.95  (1) Aus Serial1 wird serialSBMS. Die L&auml;nge der empfangenden Daten wurde nicht korrekt vermessen, darum gabe es immer Falschmeldungen bez. Zellunterspannungen; 
+<li>0.9.9.95  (2) Wird nach 10Min fehlenden SBMS-Aktualisierungen der Batteriemodus abgeschaltet, wird jetzt auch der L&uuml;fter abgeschaltet (da der Task0 meist steht)
+<li>0.9.9.95  (3) Ein 'reset flags' erlaubt das R&uuml;cksetzen aller Debugflags (Kommandozeile) 
+<li>0.9.9.95  (4) Bisher wurde bei Fehler mehrere Male pro Sekunde ein SBMS-Readversuch gemacht. Dies wird nun auf 1/Sekunde begrenzt.
+<li>0.9.9.95  (5) Beim Browserconnect wurde bisher immer ein @Connected, danach eine UI-Aktualisierung gesendet. Nun wird auf die erste Nachricht verzichtet.
+<li>0.9.9.96  (6) Da in SBMS.cpp nun immer nach sbms.data gelesen wird, muss dessen Inhalt aktiv VOR dem &uuml;bermitteln in die GUI gepr&uuml;ft werden, sonst: WebSocket connection to '...' failed: Could not decode a text frame as UTF-8.
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.94"
+#define VERSION "0.9.9.95"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
@@ -587,7 +593,7 @@ connection.onmessage = function (e) {
             }
           break;
       default:
-            if(data.indexOf('408') !== -1) {
+            if(null != data && data.length >= 3 && data.indexOf('408') !== -1) {
                 setOff(document.getElementById('state'));
                 setOff(document.getElementById('wakeup'));
                 setOff(document.getElementById('lim50'));

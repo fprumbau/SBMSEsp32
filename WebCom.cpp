@@ -80,7 +80,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["s2"]=charger.isChargerOn(2);
         doc["b"]=battery.isOn();
         doc["n"]=netto;
-        if(sbms.data.length() > 10) {
+        if(sbms.data != NULL && sbms.data.length() > 30 && sbms.data.charAt(0) != 'P') {
            doc["d"]=sbms.data;
         }
         if(perry.hasUpdate()) {
@@ -117,10 +117,11 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
   switch (type) {
     case WS_EVT_CONNECT: {       
        
-          client->text(F("@ Connected"));
+          //0.9.9.95 Verzicht auf: client->text(F("@ Connected"));
          
           //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
-          wc.updateUi(client, false);             
+          wc.updateUi(client, false);      
+                 
           break;
       }    
       case WS_EVT_DATA: 

@@ -91,7 +91,7 @@ extern float temp; //SBMS Temperatur
 extern int TEMP_THRESHOLD_HIGH; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 extern int TEMP_THRESHOLD_LOW; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
 
-//nicht auf Serial1 warten, Feste Werte annehmen
+//nicht auf serialSBMS warten, Feste Werte annehmen
 extern bool testFixed;
 extern String testData;
 extern const char* hostName;
@@ -125,4 +125,5 @@ extern int highIncomeCount; //0.9.9.80
 extern String lastStatusMsg; //0.9.9.93
 extern String runningSince; //0.9.9.93
 extern int loopAnalyzer; //0.9.9.94
+extern HardwareSerial serialSBMS; //0.9.9.95
 #endif

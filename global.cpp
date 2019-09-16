@@ -85,7 +85,7 @@ float temp = 0.0; //aktuelle Temperatur des SBMS120
 int TEMP_THRESHOLD_HIGH = 37; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
 
-//nicht auf Serial1 warten, Feste Werte annehmen
+//nicht auf serialSBMS warten, Feste Werte annehmen
 bool testFixed = false;
 String testData = F("#$$(I?#\\GOGSGSGQGQGPGPGR+<##+#_:%[6#.4%(@###6Of6O_######%N(");
 const char* hostName = "esp32a";
@@ -119,3 +119,4 @@ CFG config;
 String lastStatusMsg = "";
 String runningSince = "";
 int loopAnalyzer = -1; //0.9.9.94
+HardwareSerial serialSBMS(1); //0.9.9.95, uart 1

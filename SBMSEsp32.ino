@@ -54,14 +54,14 @@ void setup() {
 
   esp_task_wdt_init(999,false); //0.9.9.88
 
-  Serial.begin(115200);  //USB Serial1 Pins 4,2, 
+  Serial.begin(115200);  //USB Serial Pins 4,2, 
   
   //WROOM hat 16/17 auf RX2/TX2 verbunden
-  Serial1.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
-  Serial1.setTimeout(100); //Default 1000ms; 0.9.9.94; ( 9600 baud ist ca. 800 Byte/s, da nur ca 100 Byte benoetigt werden, kann es schneller gehen)
+  serialSBMS.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
+  serialSBMS.setTimeout(100); //Default 1000ms; 0.9.9.94; ( 9600 baud ist ca. 800 Byte/s, da nur ca 100 Byte benoetigt werden, kann es schneller gehen)
 
   //WROVER-B hier sind die Pins 16+17 disabled, 
-  //Serial1.begin(9600, SERIAL_8N1, 15, 17); //TX2 wird nicht gebraucht (Kommunikation -> SBMS), RX2 auf GPIO15, hierfür muss dann in der Schaltung GPIO16 auf GPIO15 gebrückt werden!
+  //serialSBMS.begin(9600, SERIAL_8N1, 15, 17); //TX2 wird nicht gebraucht (Kommunikation -> SBMS), RX2 auf GPIO15, hierfür muss dann in der Schaltung GPIO16 auf GPIO15 gebrückt werden!
   
   Serial2.begin(115200); //wegen Restart
 
@@ -243,6 +243,7 @@ void loop0(void * parameter) {
         inverter.stopBattery = true; //verhindert wiederanlaufen und die Wiederholung der Stopaufforderung ( loop geht vielfach pro Sekunde!!! )
         inverter.starteNetzvorrang(lastStatusMsg);
         inverter.setRed();
+        digitalWrite(RELAY_4, HIGH); //Lüfter abschalten, da meist der Task1 hängt und darum keine Steuerung mehr erfolgt.
       }      
       //xSemaphoreGive(semaphore);
   }
@@ -280,11 +281,6 @@ void loop() {
       }
 
       loopAnalyzer = 5;
-    }
-
-    if(debug) {
-      Serial.print(F("Loopanalyzer steht auf: "));
-      Serial.println(loopAnalyzer);
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -430,12 +426,12 @@ void commandLine() {
         int nr = nrStr.toInt();
         switch(nr) {
           case 0:
-            Serial.println(F("Serial1.flush();"));
-            Serial1.flush();
+            Serial.println(F("serialSBMS.flush();"));
+            serialSBMS.flush();
             break;
           case 1:
-            Serial.println(F("Serial.println(Serial1.available());"));
-            Serial.println(Serial1.available());
+            Serial.println(F("Serial.println(serialSBMS.available());"));
+            Serial.println(serialSBMS.available());
             break;             
           case 2:
             Serial.println(F("fansOn();"));
@@ -444,7 +440,13 @@ void commandLine() {
           case 3:
             Serial.println(F("fansOff();"));
             fansOff();
-            break;           
+            break;      
+          case 4:
+            Serial.println(F("Clear serialSBMS"));
+            while(serialSBMS.available()) {
+              serialSBMS.read();
+            }
+            break;
           default:
             Serial.println("Kein Kommando mit dieser Nummer gefunden");
         }
@@ -453,6 +455,10 @@ void commandLine() {
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
         Serial.println(ok);
+      } else if(cmd.startsWith(F("reset flags"))) { 
+        Serial.println("Reset all debugging flags");
+        bitset = "0000000000";
+        wc.updateUi();
       } else if(cmd.startsWith(F("verbose"))) { 
         esp_log_level_set("*", ESP_LOG_VERBOSE);
       } else {
@@ -460,16 +466,18 @@ void commandLine() {
         Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
         Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
         Serial.println(F(" - restart esp   :: restarting whole ESP32"));
+        Serial.println(F(" - reset flags   :: reset all debug flags"));        
         Serial.println(F(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W"));
         Serial.println(F(" - stop  RELAY_S1|_S2|_3|_4|_W :: stop relays S1,S2,3,4 und W"));
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
         Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
-        Serial.println(F(" -      0 :: Serial2.flush();"));
-        Serial.println(F(" -      1 :: Serial.println(Serial1.available());"));
+        Serial.println(F(" -      0 :: serialSBMS.flush();"));
+        Serial.println(F(" -      1 :: Serial.println(serialSBMS.available());"));
         Serial.println(F(" -      2 :: fansOn();"));
         Serial.println(F(" -      3 :: fansOff();"));
+        Serial.println(F(" -      4 :: clear serialSBMS"));        
         Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
         Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
         Serial.println(F(" - tesla status :: Check tesla charge state"));
@@ -522,7 +530,8 @@ void print() {
   Serial.println(wifiReconnects);
   Serial.print(F("Last status message: "));
   Serial.println(lastStatusMsg );
-  Serial.println(F(""));
-  Serial.print(F("Loopanalyzer steht auf: "));
+  Serial.print(F("Free Heap: "));
+  Serial.println(ESP.getFreeHeap());
+  Serial.print(F("\nLoopanalyzer steht auf: "));
   Serial.println(loopAnalyzer);
 }

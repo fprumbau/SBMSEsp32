@@ -7,6 +7,7 @@ class SBMS {
 
   private:
     unsigned int char_off(char c);    
+    unsigned long lastChecked;
 
   public:
     String data = String((char*)0);

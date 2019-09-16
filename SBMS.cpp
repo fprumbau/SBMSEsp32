@@ -45,7 +45,11 @@ unsigned int SBMS::char_off(char c) {
 bool SBMS::read() {
 
   /**
-     Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
+
+
+
+
+    Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
      Werte, dazu, soc und cv[] zurueckzusetzen, woraufhin der naechste Lauf der
      Interruptmethode isrHandler(..) dazu, dass die Status-LED auf rot schaltet.
@@ -54,7 +58,9 @@ bool SBMS::read() {
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
   long now = millis();
-  if (( now - lastReceivedMillis ) > 2000) { //Verarbeitung hoechstens alle 2 Sekunden
+  if (( now - lastReceivedMillis ) > 2000 && ( now -lastChecked ) > 1000) { //Verarbeitung hoechstens alle 2 Sekunden, Versuch nur jede Sekunde
+
+      lastChecked = now;
     
       int len;
       if (testFixed) {
@@ -67,19 +73,18 @@ bool SBMS::read() {
         len = data.length(); 
       } else {
 
-        
-        static int index;
+        int index;
         const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
         char stringBuffer[STRING_BUFFER_SIZE];
-        if(Serial1.available()>61) {
-          while(Serial1.available()>0) {
+        if(serialSBMS.available()>61) {
+          while(serialSBMS.available()>0) {
             //bis zum nächsten String-Start ( \0 ) vorlesen
-            char c = Serial1.read();
-            if(c == '\0' || c == '\r' || c == '\n') break;
+            char c = serialSBMS.read();
+            if(c == '\0') break;
           }        
         }
-        while (Serial1.available() > 0) {            
-            char c = Serial1.read();
+        while (serialSBMS.available() > 0) {            
+            char c = serialSBMS.read();
             if(c >= 32 && index < STRING_BUFFER_SIZE - 1) {
               stringBuffer[index++] = c;
             } else {
@@ -97,19 +102,19 @@ bool SBMS::read() {
             }       
         }
         data = String(stringBuffer);
-        
+        len = data.length(); 
         /*
-        int ct = Serial1.available();
+        int ct = serialSBMS.available();
         if(ct > 80) {
           ct+=61; //max. obere Grenze, um Lockup zu verhindern
-          while(Serial1.available() && ct>0) {
-            Serial1.read();
+          while(serialSBMS.available() && ct>0) {
+            serialSBMS.read();
             ct--;
           }
           return false;
         }
-        if (Serial1.available()) {
-          data = Serial1.readString();      
+        if (serialSBMS.available()) {
+          data = serialSBMS.readString();      
         }
         data.trim();
         len = data.length();
@@ -131,9 +136,9 @@ bool SBMS::read() {
       yield();
     
       if (debugSbms && len > 0) {
-        Serial.print(".____");
+        Serial.print(">");
         Serial.print(data);
-        Serial.println("____.");
+        Serial.println("<");
         Serial.print("Length 'data': ");
         Serial.println(len);
       };
