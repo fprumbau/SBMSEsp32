@@ -45,11 +45,7 @@ unsigned int SBMS::char_off(char c) {
 bool SBMS::read() {
 
   /**
-
-
-
-
-    Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
+     Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
      Werte, dazu, soc und cv[] zurueckzusetzen, woraufhin der naechste Lauf der
      Interruptmethode isrHandler(..) dazu, dass die Status-LED auf rot schaltet.
@@ -58,7 +54,7 @@ bool SBMS::read() {
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
   long now = millis();
-  if (( now - lastReceivedMillis ) > 2000 && ( now -lastChecked ) > 1000) { //Verarbeitung hoechstens alle 2 Sekunden, Versuch nur jede Sekunde
+  if (( now - lastReceivedMillis ) > 4000 && ( now -lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )
 
       lastChecked = now;
     
@@ -152,51 +148,63 @@ bool SBMS::read() {
           errData+="); Inhalt: ";
           errData+=data;        
           wc.sendClients(errData.c_str());
-          return false;
         }
+        return false;
       }
 
       //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount
       // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
       soc = 0;
 
-      //Werte nun lesen
+      //Werte nun ans Webfrontend schicken
       wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
 
       const char* txt = data.c_str();
 
-      String outString = "\nSOC: ";
-      if (len >= 8) {
-        soc = sbms.dcmp(6, 2, txt, len);
-        outString += soc;
-        outString += " ( Limit: ";
-        outString += socLimit;
-        outString += " ) \n";
+      if(debugSbms) {
+          String outString = String((char*)0);
+          outString.reserve(100);
+          outString += "\nSOC: ";
+          if (len >= 8) {
+            soc = sbms.dcmp(6, 2, txt, len);
+            outString += soc;
+            outString += "(Limit:";
+            outString += socLimit;
+            outString += "); ";
+          }
+          if (len >= 24) {
+            for (int k = 0; k < 8; k++) {
+              int loc = k * 2 + 8;
+              cv[k] = sbms.dcmp(loc, 2, txt, len);
+              outString += "cv";
+              outString += ( k + 1 );
+              outString += "[";
+              outString += cv[k];
+              outString += "], ";
+            }
+          }
+          if (len >=26) {
+            //((dcmp(24,2,data)/10)-45)
+            temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
+          }
+          Serial.print(outString);
+          Serial.print(F("; StopBattery: "));
+          Serial.println(inverter.stopBattery);   
+      } else {
+          if (len >= 8) {
+            soc = sbms.dcmp(6, 2, txt, len);
+          }
+          if (len >= 24) {
+            for (int k = 0; k < 8; k++) {
+              int loc = k * 2 + 8;
+              cv[k] = sbms.dcmp(loc, 2, txt, len);
+            }
+          }
+          if (len >=26) {
+            temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
+          }               
       }
-      if (len >= 24) {
-        for (int k = 0; k < 8; k++) {
-          int loc = k * 2 + 8;
-          cv[k] = sbms.dcmp(loc, 2, txt, len);
-
-          outString += "\ncv";
-          outString += ( k + 1 );
-          outString += ": ";
-          outString += cv[k];
-        }
-      }
-      if (len >=26) {
-        //((dcmp(24,2,data)/10)-45)
-        temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
-      }
-      
       yield();
-
-      if (debugSbms) {
-        Serial.println(outString);
-        Serial.print(F("StopBattery: "));
-        Serial.println(inverter.stopBattery);
-        Serial.println(F("_______________________________________"));
-      }
 
       //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
       lastReceivedMillis = millis();

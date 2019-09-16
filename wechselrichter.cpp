@@ -125,7 +125,7 @@ void Inverter::check()  {
       limit += CV_HYST; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um CV_HYST mV hoeher
     }
     for (int k = 0; k < 8; k++) {
-      if (cv[k] < limit) {
+      if (cv[k] > 0 && cv[k] < limit) {
         message = F("Undervoltage cell: ");
         message += k;
         stop = true;

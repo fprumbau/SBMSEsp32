@@ -206,7 +206,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.95  (3) Ein 'reset flags' erlaubt das R&uuml;cksetzen aller Debugflags (Kommandozeile) 
 <li>0.9.9.95  (4) Bisher wurde bei Fehler mehrere Male pro Sekunde ein SBMS-Readversuch gemacht. Dies wird nun auf 1/Sekunde begrenzt.
 <li>0.9.9.95  (5) Beim Browserconnect wurde bisher immer ein @Connected, danach eine UI-Aktualisierung gesendet. Nun wird auf die erste Nachricht verzichtet.
-<li>0.9.9.96  (6) Da in SBMS.cpp nun immer nach sbms.data gelesen wird, muss dessen Inhalt aktiv VOR dem &uuml;bermitteln in die GUI gepr&uuml;ft werden, sonst: WebSocket connection to '...' failed: Could not decode a text frame as UTF-8.
+<li>0.9.9.95  (6) Da in SBMS.cpp nun immer nach sbms.data gelesen wird, muss dessen Inhalt aktiv VOR dem &uuml;bermitteln in die GUI gepr&uuml;ft werden, sonst: WebSocket connection to '...' failed: Could not decode a text frame as UTF-8.
+<li>0.9.9.95  (7) Es werden nun nur noch SBMS-Pakete ans UI geschickt, deren L&aauml;nge genau 60(61) Zeichen sind.
+<li>0.9.9.95  (8) Die SBMS-Aktualisierung wurde auf 5s, die max. Verarbeitungsrate in SBMS.cpp auf 4s und die max. Versuchsrate auf 2s eingestellt. (die beiden letzten Werte wurden damit verdoppelt, das SBMS120 von 3s auf 5s erh&ouml;ht.
+<li>0.9.9.95  (9) In der Inverter.check()-Methode werden bei der Pr&uuml;fung von Zellspannungen nun nur noch Spannung > 0 verglichen, bei einer Zellspannung von 0 muss ein Auswertungsfehler der SBMS-Daten vorliegen. Das verhindert das kurzfristige Abschalten wegen Datenfehlern.
+<li>0.9.9.95  (10) In SBMS.cpp wird nun die Verarbeitung einmal in einem debugSbms-Abschnitt und einmal in einem einfachen Abschnitt gemacht, um das andauernde Erzeugen von unn&ouml;gen Strings zu vermeiden. Fix: ist data<50, wird keine Ui-Aktualisierung mehr getriggert.
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 

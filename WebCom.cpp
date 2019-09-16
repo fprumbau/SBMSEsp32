@@ -80,7 +80,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["s2"]=charger.isChargerOn(2);
         doc["b"]=battery.isOn();
         doc["n"]=netto;
-        if(sbms.data != NULL && sbms.data.length() > 30 && sbms.data.charAt(0) != 'P') {
+        if(sbms.data != NULL && sbms.data.length() == 60 && sbms.data.charAt(0) != 'P') {
            doc["d"]=sbms.data;
         }
         if(perry.hasUpdate()) {
