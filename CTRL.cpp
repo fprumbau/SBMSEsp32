@@ -1,9 +1,5 @@
 #include "global.h" 
 
-CTRL::CTRL(long millis) {
-  uptime = millis;
-}
-
 bool CTRL::fansRunning() {
   return !digitalRead(RELAY_4);
 }
@@ -17,7 +13,9 @@ void CTRL::fansOff() {
 }
 
 bool CTRL::isUpForSeconds(int seconds) {
-  return (uptime - (seconds * 1000)) > 0;
+  long sinceMillis = seconds * 1000;
+  long diff = millis() - sinceMillis;
+  return  diff > 0;
 }
 
 void CTRL::print() {

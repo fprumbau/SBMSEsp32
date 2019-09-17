@@ -220,7 +220,12 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.96  (7) Die Extrameldung 'UDP reinitialized' wurde nun mit der Folgemeldung (inkl. reconnectCount) zusammengelegt.
 <li>0.9.9.96  (8) Die im Webclient (html.h) generierte Meldung 'End trying to open webclient socket' wird nun nur noch auf der Konsole, nicht im Weboutput ausgegeben
 <li>0.9.9.96  (9) Die Position und der Vorgabewert des Timestamps in der Webseite wurde nun ge&auml;ndert und erg&auml;nzt.
-<li>0.9.9.97  (1) 
+<li>0.9.9.97  (1) Nachricht 'Trying to open Webclient socket' wird nun nur noch auf die Konsole gelogged; Kommen non-Jsondaten an, werden sie nur noch ins UI gelogged, wenn der Debugschalter gesetzt ist (Webclient)
+<li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
+
+<li>0.9.9.97  (3) Das Datum vehicleId wurde nicht richtig abgespeichert
+<li>0.9.9.97  (4) Die mit 96/4 eingeführte Karenzzeit von 60s triggert nun dauert, obwohl der Controller schon mehr als 60s läuft. 
+
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
@@ -568,8 +573,6 @@ a.prototype.onerror=function(){},a.debugAll=!1,a.CONNECTING=WebSocket.CONNECTING
 var ip = location.host;
 var connection = new ReconnectingWebSocket('ws://' + ip + '/ws', null, { debug:true, reconnectInterval: 6000, reconnectDecay: 1.1, maxReconnectInterval: 10000 });
 console.log('Trying to open Webclient socket');
-log('Trying to open Webclient socket');
-//var timerID=0;
 connection.onopen = function () { 
   log('Connect: ' + new Date()); 
 };
@@ -608,7 +611,7 @@ connection.onmessage = function (e) {
               setOff(document.getElementById('lim90'));
           }
           console.log('Nachricht: ', data);
-          log(data);      
+          if(debug) log(data);      
         break;          
   }
 };
