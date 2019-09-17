@@ -12,7 +12,7 @@ class Inverter {
     void check(); //Pruefe Werte fuer SOC und cell voltages
     bool stopBattery; //Stopflag, verhindert ein manuelles Anschalten der Batterie
     void starteNetzvorrang(String reason); //Netzbetrieb aktivieren
-    void starteBatterie(String reason); //Batteriebetrieb aktivieren   
+    bool starteBatterie(String reason); //Batteriebetrieb aktivieren   
     void handleButtonPressed(); //Tastersteuerung, um Inverterstatus zu toggeln 
 };
 

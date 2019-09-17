@@ -1,0 +1,49 @@
+#include "global.h" 
+
+CTRL::CTRL(long millis) {
+  uptime = millis;
+}
+
+bool CTRL::fansRunning() {
+  return !digitalRead(RELAY_4);
+}
+
+void CTRL::fansOn() {
+  digitalWrite(RELAY_4, LOW);
+}
+
+void CTRL::fansOff() {
+  digitalWrite(RELAY_4, HIGH);
+}
+
+bool CTRL::isUpForSeconds(int seconds) {
+  return (uptime - (seconds * 1000)) > 0;
+}
+
+void CTRL::print() {
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("Running since: "));
+  Serial.println(runningSince);
+  Serial.print(F("Lüfter aktiv: "));
+  Serial.println(fansRunning());
+  Serial.print(F("Temperatur: "));
+  Serial.println(temp);  
+  Serial.print(F("Ladezustand: "));
+  Serial.println(soc); 
+  Serial.print(F("SOC-Limit: "));
+  Serial.println(socLimit);  
+  Serial.print(F("Now (millis): "));
+  Serial.println(millis());        
+  Serial.print(F("Udp resets: "));
+  Serial.println(udpResets);  
+  Serial.print(F("Wifi reconnects: "));
+  Serial.println(wifiReconnects);
+  Serial.print(F("Last status message: "));
+  Serial.println(lastStatusMsg );
+  Serial.print(F("Free Heap: "));
+  Serial.println(ESP.getFreeHeap());
+  Serial.print(F("\nLoopanalyzer steht auf: "));
+  Serial.println(loopAnalyzer);
+  Serial.print(F("SbmsAnalyzer steht auf: "));
+  Serial.println(sbms.sbmsAnalyzer);  
+}

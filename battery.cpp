@@ -24,7 +24,7 @@ void Battery::checkCellVoltages() {
         d+=LOW_MINIMAL_CV_MILLIS;
         wc.sendClients(d.c_str());
       }      
-      if (cv[k] < LOW_MINIMAL_CV_MILLIS) {            
+      if (cv[k] > 0 && cv[k] < LOW_MINIMAL_CV_MILLIS) {            
             String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
             m+=k;
             Serial.println(m);

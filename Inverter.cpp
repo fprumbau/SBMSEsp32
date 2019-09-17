@@ -14,10 +14,10 @@ void Inverter::starteNetzvorrang(String reason) {
     msg += reason;
     msg += '\n';
   } else {
-    if (debug)  msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
+    if (debugInverter)  msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
   }
   if (msg.length() > 0) {
-    if (debug) {
+    if (debugInverter) {
       Serial.println(msg);
     }
     wc.sendClients(msg.c_str());
@@ -25,30 +25,41 @@ void Inverter::starteNetzvorrang(String reason) {
 }
 
 /**
-   Batteriebetrieb starten
+   Batteriebetrieb starten;
+   gibt true zurück, wenn start erfolgreich ODER
+   wenn Batteriemodus schon aktiv.
 */
-void Inverter::starteBatterie(String reason) {
+bool Inverter::starteBatterie(String reason) {
   String msg((char *)0);
   msg.reserve(60);
   if (!stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
+      //0.9.9.6 Batteriemodus erst 'erlauben', wenn ESP32>1Min laeuft (um SW-Updates zu erlauben)
+      if(!controller.isUpForSeconds(60)) {
+        msg = F("Bevor der Batteriemodus aktiviert werden kann, muss der Controller mindestends 60s laufen");
+        Serial.println(msg);
+        if(debugInverter) {
+          wc.sendClients(msg.c_str());
+        }
+        return false;
+      }
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
       wc.sendClients("Batterie -> An, Netz -> Aus");
-      msg += F("Starte Netzvorrang :: ");
+      msg += F("Starte Batterie :: ");
       msg += reason;
       msg += '\n';
-    } else {
-      return;
     }
+    return true; //lief schon oder wurde aktiviert
   } else {
-    msg = F("Kann Netzvorrang nicht stoppen, da Stopflag aktiv\n");
+    msg = F("Kann Batterie nicht starten, da Stopflag aktiv\n");
   }
   if (msg.length() > 0) {
-    if (debug) {
-      Serial.println(msg);
+    if (debugInverter) {      
+       wc.sendClients(msg.c_str());
     }
-    wc.sendClients(msg.c_str());
+    Serial.println(msg);
   }
+  return false;
 }
 
 void Inverter::setBlue() {
@@ -91,7 +102,7 @@ void Inverter::check()  {
   battery.controlFans();
   yield();
   
-  if(debug) {
+  if(debugInverter) {
     Serial.print(F("Check...  ; failureCount: "));
     Serial.println(failureCount);
   }
@@ -136,7 +147,7 @@ void Inverter::check()  {
   if (stop) {
     failureCount++;
     if (failureCount < errLimit) { //einen 'Fehlversuch' ignorieren.
-      if (debug) {
+      if (debugInverter) {
         Serial.print(F("Error found, waiting until failureCount reaches "));
         Serial.print(errLimit);
         Serial.print("; now: ");
@@ -144,7 +155,7 @@ void Inverter::check()  {
       }
     } else {
       if (!stopBattery) {
-        if (debug) {
+        if (debugInverter) {
           Serial.println(F("Error limit reached, stopping inverter..."));
         }
       }
@@ -170,7 +181,7 @@ void Inverter::check()  {
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
   datetime = timeClient.getFormattedDate();
-  if (debug) {
+  if (debugInverter) {
       Serial.print(hours);
       Serial.print(":");
       Serial.print(mins);
@@ -184,9 +195,8 @@ void Inverter::check()  {
       if(!nacht) {
         if(!isBatOn) { 
             wc.sendClients(datetime.c_str());
-            starteBatterie(F("Batteriezeit"));    
-        }
-        nacht = true;    
+            nacht = starteBatterie(F("Batteriezeit"));    
+        }  
       } 
     } else {
       if(nacht) {
@@ -225,7 +235,7 @@ void Inverter::handleButtonPressed() {
       if (!stopBattery) {
         starteBatterie(BUTTONACTION);
       } else {
-        if (debug) {
+        if (debugInverter) {
           Serial.println(F("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)"));
         }
       }

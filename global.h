@@ -12,7 +12,7 @@
 
 #include "MyWifi.h"
 #include "WebCom.h"
-#include "wechselrichter.h"
+#include "Inverter.h"
 #include "OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
@@ -22,6 +22,7 @@
 
 #include "Tesla.h"
 #include "CFG.h"
+#include "CTRL.h"
 
 //findet die Checkmethode falsche Werte vor, so wird noch einmal
 //(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
@@ -126,4 +127,5 @@ extern String lastStatusMsg; //0.9.9.93
 extern String runningSince; //0.9.9.93
 extern int loopAnalyzer; //0.9.9.94
 extern HardwareSerial serialSBMS; //0.9.9.95
+extern CTRL controller; //0.9.9.96
 #endif

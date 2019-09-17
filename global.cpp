@@ -2,7 +2,7 @@
 
 #include "MyWifi.h"
 #include "WebCom.h"
-#include "wechselrichter.h"
+#include "Inverter.h"
 #include "OTA.h"
 #include "Tesla.h"
 
@@ -120,3 +120,4 @@ String lastStatusMsg = "";
 String runningSince = "";
 int loopAnalyzer = -1; //0.9.9.94
 HardwareSerial serialSBMS(1); //0.9.9.95, uart 1
+CTRL controller(millis()); //0.9.9.96

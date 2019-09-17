@@ -21,7 +21,6 @@ void SMA::reset() {
     
     IPAddress ipMulti(239,12,255,254);   
     udp.beginMulticast(ipMulti, portMulti);
-    wc.sendClients("UDP reinitialized");
     initialized = true;
 }
 
@@ -95,7 +94,7 @@ bool SMA::read() {
           yield();
           String msg((char *)0);
           msg.reserve(42);
-          msg += F("Last WiFi UPD-Packet read ");
+          msg += F("UDP reinitialized: Last packet read ");
           msg += lastUdp;
           msg += F("ms ago; ReconnectCount: ");
           msg += udpResets;

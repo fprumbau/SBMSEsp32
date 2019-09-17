@@ -44,6 +44,8 @@ unsigned int SBMS::char_off(char c) {
 
 bool SBMS::read() {
 
+   sbmsAnalyzer=0;
+
   /**
      Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
@@ -56,6 +58,8 @@ bool SBMS::read() {
   long now = millis();
   if (( now - lastReceivedMillis ) > 4000 && ( now -lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )
 
+      sbmsAnalyzer=1;
+      
       lastChecked = now;
     
       int len;
@@ -67,18 +71,25 @@ bool SBMS::read() {
         //data = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
         data = testData;   
         len = data.length(); 
+
+        sbmsAnalyzer=2;
+        
       } else {
+
+        sbmsAnalyzer=3;
 
         int index;
         const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
         char stringBuffer[STRING_BUFFER_SIZE];
         if(serialSBMS.available()>61) {
+          sbmsAnalyzer=4;
           while(serialSBMS.available()>0) {
             //bis zum nächsten String-Start ( \0 ) vorlesen
             char c = serialSBMS.read();
             if(c == '\0') break;
-          }        
+          }                 
         }
+        sbmsAnalyzer=5; 
         while (serialSBMS.available() > 0) {            
             char c = serialSBMS.read();
             if(c >= 32 && index < STRING_BUFFER_SIZE - 1) {
@@ -97,6 +108,7 @@ bool SBMS::read() {
               break;
             }       
         }
+        sbmsAnalyzer=6;
         data = String(stringBuffer);
         len = data.length(); 
         /*
@@ -124,7 +136,7 @@ bool SBMS::read() {
         */
         
       }
-
+      sbmsAnalyzer=7;
       if(len == 0) {
         return false;
       }
@@ -149,6 +161,7 @@ bool SBMS::read() {
           errData+=data;        
           wc.sendClients(errData.c_str());
         }
+        sbmsAnalyzer=8;
         return false;
       }
 
@@ -160,6 +173,8 @@ bool SBMS::read() {
       wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
 
       const char* txt = data.c_str();
+
+      sbmsAnalyzer=10;
 
       if(debugSbms) {
           String outString = String((char*)0);
@@ -191,19 +206,23 @@ bool SBMS::read() {
           Serial.print(F("; StopBattery: "));
           Serial.println(inverter.stopBattery);   
       } else {
+          sbmsAnalyzer=11;
           if (len >= 8) {
             soc = sbms.dcmp(6, 2, txt, len);
           }
+          sbmsAnalyzer=12;
           if (len >= 24) {
             for (int k = 0; k < 8; k++) {
               int loc = k * 2 + 8;
               cv[k] = sbms.dcmp(loc, 2, txt, len);
             }
           }
+          sbmsAnalyzer=13;
           if (len >=26) {
             temp = (sbms.dcmp(24, 2, txt, len)/10)-45;
           }               
       }
+      sbmsAnalyzer=14;
       yield();
 
       //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde

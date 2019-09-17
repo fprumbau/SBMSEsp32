@@ -26,19 +26,6 @@ void handleButton(AceButton*, uint8_t eventType, uint8_t);
 void commandLine();
 
 /**
- * Ausgabe von einigen Variablen (SOC, Temperatur)
- * aus global.cpp
- */
-void print();
-
-/**
- * Solange es fuer die Lüfter keine eigene Klasse hat...
- */
-bool fansRunning();
-void fansOn();
-void fansOff(); 
-
-/**
  * Registriere Eventhandler für WebSocketEvents in WebCom
  */
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
@@ -387,7 +374,7 @@ void commandLine() {
         sbms.print();
         wc.print();
         battery.print();
-        print();
+        controller.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -434,12 +421,12 @@ void commandLine() {
             Serial.println(serialSBMS.available());
             break;             
           case 2:
-            Serial.println(F("fansOn();"));
-            fansOn();
+            Serial.println(F("controller.fansOn();"));
+            controller.fansOn();
             break;
           case 3:
-            Serial.println(F("fansOff();"));
-            fansOff();
+            Serial.println(F("controller.fansOff();"));
+            controller.fansOff();
             break;      
           case 4:
             Serial.println(F("Clear serialSBMS"));
@@ -497,41 +484,3 @@ void commandLine() {
       wc.sendClients(msg.c_str());
     }  
 } 
-
-bool fansRunning() {
-  return !digitalRead(RELAY_4);
-}
-
-void fansOn() {
-  digitalWrite(RELAY_4, LOW);
-}
-
-void fansOff() {
-  digitalWrite(RELAY_4, HIGH);
-}
-
-void print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Running since: "));
-  Serial.println(runningSince);
-  Serial.print(F("Lüfter aktiv: "));
-  Serial.println(fansRunning());
-  Serial.print(F("Temperatur: "));
-  Serial.println(temp);  
-  Serial.print(F("Ladezustand: "));
-  Serial.println(soc); 
-  Serial.print(F("SOC-Limit: "));
-  Serial.println(socLimit);  
-  Serial.print(F("Now (millis): "));
-  Serial.println(millis());        
-  Serial.print(F("Udp resets: "));
-  Serial.println(udpResets);  
-  Serial.print(F("Wifi reconnects: "));
-  Serial.println(wifiReconnects);
-  Serial.print(F("Last status message: "));
-  Serial.println(lastStatusMsg );
-  Serial.print(F("Free Heap: "));
-  Serial.println(ESP.getFreeHeap());
-  Serial.print(F("\nLoopanalyzer steht auf: "));
-  Serial.println(loopAnalyzer);
-}

@@ -211,12 +211,21 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.95  (8) Die SBMS-Aktualisierung wurde auf 5s, die max. Verarbeitungsrate in SBMS.cpp auf 4s und die max. Versuchsrate auf 2s eingestellt. (die beiden letzten Werte wurden damit verdoppelt, das SBMS120 von 3s auf 5s erh&ouml;ht.
 <li>0.9.9.95  (9) In der Inverter.check()-Methode werden bei der Pr&uuml;fung von Zellspannungen nun nur noch Spannung > 0 verglichen, bei einer Zellspannung von 0 muss ein Auswertungsfehler der SBMS-Daten vorliegen. Das verhindert das kurzfristige Abschalten wegen Datenfehlern.
 <li>0.9.9.95  (10) In SBMS.cpp wird nun die Verarbeitung einmal in einem debugSbms-Abschnitt und einmal in einem einfachen Abschnitt gemacht, um das andauernde Erzeugen von unn&ouml;gen Strings zu vermeiden. Fix: ist data<50, wird keine Ui-Aktualisierung mehr getriggert.
+<li>0.9.9.96  (1) In battery.checkCellVoltages(..) wurde noch nicht ber&uuml;cksichtigt, das eine gemessene Zellspannung > 0 sein muss (0.9.9.95/9)
+<li>0.9.9.96  (2) Eine Controllerklasse ( CTRL.h ) wurde angelegt für die nicht zur Startklasse SBMSEsp32.ino geh&ouml;renden Methoden
+<li>0.9.9.96  (3) Die Klasse Dateien Wechselrichter.h und .cpp wurde umbenannt: Inverter.h/.cpp, zudem wurden fehlerhafte Meldungen korrigiert und das 'debug'-Flag durch 'debugInverter' ersetzt.
+<li>0.9.9.96  (4) Die Aktiviert des Batteriemodus durch inverter.starteBatterie(..) wird nun abgelehnt, wenn der Controller weniger als 60s online ist.
+<li>0.9.9.96  (5) Eine sbms.sbmsAnalyzer-Variable soll nun dabei helfen, den H&auml;nger in sbms.read() zu identifizieren.
+<li>0.9.9.96  (6) Eine initial in der Webseite gef&uuml;llte Variable 'server' wurde nur einmal hinterlegt, ohne weiter darauf zuzugreifen. Ab jetzt werden die Daten auch beim ersten Zugriff schon normal verarbeitet.
+<li>0.9.9.96  (7) Die Extrameldung 'UDP reinitialized' wurde nun mit der Folgemeldung (inkl. reconnectCount) zusammengelegt.
+<li>0.9.9.96  (8) Die im Webclient (html.h) generierte Meldung 'End trying to open webclient socket' wird nun nur noch auf der Konsole, nicht im Weboutput ausgegeben
+<li>0.9.9.96  (9) Die Position und der Vorgabewert des Timestamps in der Webseite wurde nun ge&auml;ndert und erg&auml;nzt.
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.95"
+#define VERSION "0.9.9.96"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
@@ -397,7 +406,7 @@ div::-webkit-scrollbar-track {
 <div2 style="top:0px;left:205px;top:-6px;width:138px;font-family:'Arial';font-size:28px;color:lightgreen;background-color:#505050;border:1px solid white;padding:5px;text-align:right;white-space:pre;border-radius:5px;" title="If solar production is positive (green), the power that goes to the grid is shown, else (if red) the power taken from the grid is shown" id="lieferung">0.0 W</div2>
 </div2>
 <div2 style='width:350px; top:82px; left:90px; color:#be5;float:none;'>
-<div2 style='margin-top:-20px' id="datetime">2018-12-27</div2>
+<span style='margin-top:-20px;color:beige;' id="datetime">2019-09-17T13:29:37Z</span>
 <div >www.ElectroDacus.com</div>
 <div style='color:transparent; -webkit-transform: rotateX(180deg);transform: rotateX(180deg);-ms-transform:rotateX(180deg); text-shadow: 0px 0px 1px #371;' onClick="updatePage();">www.ElectroDacus.com</div></div2>
 <div2 style='width:350px; top:45px; left:520px;'>
@@ -568,49 +577,41 @@ connection.onerror = function (error) {
   log('wsServer Error ' + error);
 };
 //vom Server empfangen
-var server = '';
 var json = null;
 connection.onmessage = function (e) { 
-  if(server == '') {
-    server = e.data;
-    console.log('Server: ', server);
-    log('Server: ' + server);
-  } else {
-    data = e.data;
-    switch(data[0]) {
-       case '{':
-            try {
-              if(debugJson) {
-                log(data);
-              }
-              json = JSON.parse(data); 
-              updateUi();      
-              if(json.hasOwnProperty('d')) {       
-                updateSbmsData();    
-              }
-            } catch(error) {
-              console.log( "Fehler in connection.onmessage: ", error.message );
-              console.log( error.stack );
-              console.log( data );
-              log( error.stack );
-              log( data );
+  data = e.data;
+  switch(data[0]) {
+     case '{':
+          try {
+            if(debugJson) {
+              log(data);
             }
-          break;
-      default:
-            if(null != data && data.length >= 3 && data.indexOf('408') !== -1) {
-                setOff(document.getElementById('state'));
-                setOff(document.getElementById('wakeup'));
-                setOff(document.getElementById('lim50'));
-                setOff(document.getElementById('lim90'));
+            json = JSON.parse(data); 
+            updateUi();      
+            if(json.hasOwnProperty('d')) {       
+              updateSbmsData();    
             }
-            console.log('Nachricht: ', data);
-            log(data);      
-          break;          
-    }
+          } catch(error) {
+            console.log( "Fehler in connection.onmessage: ", error.message );
+            console.log( error.stack );
+            console.log( data );
+            log( error.stack );
+            log( data );
+          }
+        break;
+    default:
+          if(null != data && data.length >= 3 && data.indexOf('408') !== -1) {
+              setOff(document.getElementById('state'));
+              setOff(document.getElementById('wakeup'));
+              setOff(document.getElementById('lim50'));
+              setOff(document.getElementById('lim90'));
+          }
+          console.log('Nachricht: ', data);
+          log(data);      
+        break;          
   }
 };
 console.log('End trying to open Webclient socket');
-log('End trying to open webclient socket');
 var rts_reset = false;
 /**
  * Akualisierung nach Empfang von Serverdaten
