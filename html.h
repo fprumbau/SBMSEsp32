@@ -220,12 +220,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.96  (7) Die Extrameldung 'UDP reinitialized' wurde nun mit der Folgemeldung (inkl. reconnectCount) zusammengelegt.
 <li>0.9.9.96  (8) Die im Webclient (html.h) generierte Meldung 'End trying to open webclient socket' wird nun nur noch auf der Konsole, nicht im Weboutput ausgegeben
 <li>0.9.9.96  (9) Die Position und der Vorgabewert des Timestamps in der Webseite wurde nun ge&auml;ndert und erg&auml;nzt.
+<li>0.9.9.97  (1) 
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.96"
+#define VERSION "0.9.9.97"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
@@ -570,7 +571,7 @@ console.log('Trying to open Webclient socket');
 log('Trying to open Webclient socket');
 //var timerID=0;
 connection.onopen = function () { 
-  log('Serververbindung aufgebaut: ' + new Date()); 
+  log('Connect: ' + new Date()); 
 };
 connection.onerror = function (error) { 
   console.log('wsServer Error ', error);
