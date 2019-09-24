@@ -16,7 +16,9 @@ void Battery::checkCellVoltages() {
     for (int k = 0; k < 8; k++) {
 
       if(debug) {
-        String d = "Cell: ";
+        String d = String((char*)0);
+        d.reserve(64);
+        d+="Cell: ";
         d+=k;
         d+="; Voltage: ";
         d+=cv[k];

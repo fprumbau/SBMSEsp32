@@ -227,9 +227,12 @@ bool SBMS::read() {
 
       //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
       lastReceivedMillis = millis();
+
+      sbmsAnalyzer=15;
       return true;
   
   }
+   sbmsAnalyzer=16;
   return false;
 }
 

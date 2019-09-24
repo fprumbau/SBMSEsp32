@@ -171,17 +171,24 @@ void Inverter::check()  {
     stopBattery = false;
     setGreen();
   }
-  //ab v.0.9.9.28 NTPClient mit Zeit
-  while(!timeClient.update()) {
+  //ab v.0.9.9.28 NTPClient mit Zeit; 0.9.9.97 nicht EWIG warten (10 Versuche)
+  int ct = 0;
+  bool timeUpdate = false;
+  while(!(timeUpdate = timeClient.update())) {
     yield();
+    if(ct++>10) { 
+      lastStatusMsg = F("Loese timeUpdate-Loop (break)");
+      break;
+    }
     timeClient.forceUpdate();
   }
+  
   int day = timeClient.getDay();
   int hours = timeClient.getHours();
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
   datetime = timeClient.getFormattedDate();
-  if (debugInverter) {
+  if (debugInverter && timeUpdate) {
       Serial.print(hours);
       Serial.print(":");
       Serial.print(mins);
@@ -194,7 +201,7 @@ void Inverter::check()  {
     if(hours>=18 || hours < 9) {
       if(!nacht) {
         if(!isBatOn) { 
-            wc.sendClients(datetime.c_str());
+            if(timeUpdate) wc.sendClients(datetime.c_str());
             nacht = starteBatterie(F("Batteriezeit"));    
         }  
       } 
@@ -204,7 +211,7 @@ void Inverter::check()  {
         if(isBatOn) {
             starteNetzvorrang(F("Schalte wieder auf Netz zurück"));    
         } else { 
-            wc.sendClients(datetime.c_str());
+            if(timeUpdate) wc.sendClients(datetime.c_str());
         }
       }
     }

@@ -257,17 +257,19 @@ void loop() {
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
         yield();
+        loopAnalyzer = 4;
         inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       }
 
-      loopAnalyzer = 4;
+      loopAnalyzer = 5;
       
       if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
+        loopAnalyzer = 6;
         charger.checkOnIncome();     
       }
 
-      loopAnalyzer = 5;
+      loopAnalyzer = 7;
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
