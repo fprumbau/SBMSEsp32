@@ -229,13 +229,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.97  (7) failureCount und errLimit wurden in inverter.h/cpp integriert, das errLimit von 5 auf 10 angehoben 
 <li>0.9.9.97  (8) Der Solarcharger sollte nicht 5, sondern 10Minuten laufen
 <li>0.9.9.97  (9) Zur Meldung "Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle 7" sollte die gemessene Spannung angegeben werden 
-
+<li>0.9.9.98  (1) 
 <h2>TODO</h2>
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.97"
+#define VERSION "0.9.9.98"
 
 const char login[] PROGMEM = R"=====(
 <!DOCTYPE html><html>
