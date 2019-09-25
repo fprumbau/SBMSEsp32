@@ -15,7 +15,7 @@ void Battery::checkCellVoltages() {
     
     for (int k = 0; k < 8; k++) {
 
-      if(debug) {
+      if(debugBattery) {
         String d = String((char*)0);
         d.reserve(64);
         d+="Cell: ";
@@ -29,6 +29,8 @@ void Battery::checkCellVoltages() {
       if (cv[k] > 0 && cv[k] < LOW_MINIMAL_CV_MILLIS) {            
             String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
             m+=k;
+            m+=F("; gemessene Spannung (in mv): ");
+            m+=cv[k];
             Serial.println(m);
             wc.sendClients(m.c_str());
             charger.toggleCharger(S2,true,true,true);
@@ -37,8 +39,8 @@ void Battery::checkCellVoltages() {
       }
     }
   } else {
-      if(s2ActForLowCV && charger.getRunningMillis(2) > 300000) { //nachdem S2 5 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
-          String m = F("Deaktiviere Solarcharger 2 nach 5 Minuten Ladezeit jetzt...");
+      if(s2ActForLowCV && charger.getRunningMillis(2) > 600000) { //nachdem S2 10 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
+          String m = F("Deaktiviere Solarcharger 2 nach 10 Minuten Ladezeit jetzt...");
           Serial.println(m);
           wc.sendClients(m.c_str());
           charger.toggleCharger(S2,false,true, true);
@@ -54,7 +56,7 @@ bool Battery::isOn() {
 //v. 0.9.9.40 laeuft weder die Batterie noch ein Charger, schalte die Luefter ueber Relais 4 ab
 void Battery::controlFans() {
   bool fansRunning = !digitalRead(RELAY_4);
-  if(debug) {
+  if(debugBattery) {
     String m((char *)0);
     m.reserve(128);
     m += F("Lueft.: ");

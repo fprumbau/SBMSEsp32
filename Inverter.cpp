@@ -138,7 +138,10 @@ void Inverter::check()  {
     for (int k = 0; k < 8; k++) {
       if (cv[k] > 0 && cv[k] < limit) {
         message = F("Undervoltage cell: ");
-        message += k;
+        message += (k+1);
+        message += F("; kleiner als: ");
+        message += limit;
+        message += F("mv");
         stop = true;
         break;
       }    
@@ -146,7 +149,7 @@ void Inverter::check()  {
   }
   if (stop) {
     failureCount++;
-    if (failureCount < errLimit) { //einen 'Fehlversuch' ignorieren.
+    if (failureCount < errLimit) { //'Fehlversuche' bis zum errLimit ignorieren.
       if (debugInverter) {
         Serial.print(F("Error found, waiting until failureCount reaches "));
         Serial.print(errLimit);

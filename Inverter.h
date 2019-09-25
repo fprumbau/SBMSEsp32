@@ -5,6 +5,8 @@ class Inverter {
   private: 
     bool nacht = false;
     unsigned long lastCheckedMillis = -1; 
+    int failureCount = 0;
+    const int errLimit = 10;  
   public:
     void setBlue();
     void setGreen();

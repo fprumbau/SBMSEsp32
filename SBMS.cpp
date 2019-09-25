@@ -165,8 +165,7 @@ bool SBMS::read() {
         return false;
       }
 
-      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount
-      // hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
+      //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
       soc = 0;
 
       //Werte nun ans Webfrontend schicken

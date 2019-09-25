@@ -224,9 +224,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
 <li>0.9.9.97  (3) Die mit 96/4 eingef&uuml;hrte Karenzzeit von 60s triggert nun dauert, obwohl der Controller schon mehr als 60s l&auml;uft. 
 <li>0.9.9.97  (4) Es SCHEINT, der H&auml;nger kommt aus invert.checkIncome() im Bereich timeClient.update() ( while-Schleife OHNE Exit ). Ein break beendet den Loop nun nach 10 Fehlversuchen. 
+<li>0.9.9.97  (5) Eine Zellunterspannung sollte auf jeden Fall auf Kommandozeile UND GUI gelogged werden (inverter.cpp, wenn debugInverter == true)
+<li>0.9.9.97  (6) LOW_VOLTAGE_MILLIS wird von 3100 auf 2800mv heruntergenommen. Damit ist im Netzmodus eine Umschaltung auf Batterie bei 2850mV (durch Hysterese) m&ouml;glich.
+<li>0.9.9.97  (7) failureCount und errLimit wurden in inverter.h/cpp integriert, das errLimit von 5 auf 10 angehoben 
+<li>0.9.9.97  (8) Der Solarcharger sollte nicht 5, sondern 10Minuten laufen
+<li>0.9.9.97  (9) Zur Meldung "Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle 7" sollte die gemessene Spannung angegeben werden 
 
 <h2>TODO</h2>
-<li> 21:26:11.520 -> Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle 7 ( Hier sollte die gemessene Spannung angegeben werden )
 <li>  Fixme: Serial1.readString() in SBMS.cpp read() ersetzen.
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";

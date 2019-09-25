@@ -30,9 +30,7 @@ extern int socLimit;
 extern int SOC_HYST;
 extern int LOW_VOLTAGE_MILLIS; 
 extern int CV_HYST;
-extern int LOW_MINIMAL_CV_MILLIS;
-extern int failureCount;
-extern const int errLimit;   
+extern int LOW_MINIMAL_CV_MILLIS;   
 extern const int smaMeasurementsBeforSwitchoff;
 extern const int checkMillis;
  
