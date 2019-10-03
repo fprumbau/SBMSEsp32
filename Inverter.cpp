@@ -14,12 +14,10 @@ void Inverter::starteNetzvorrang(String reason) {
     msg += reason;
     msg += '\n';
   } else {
-    if (debugInverter)  msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
+    msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
   }
-  if (msg.length() > 0) {
-    if (debugInverter) {
-      Serial.println(msg);
-    }
+  Serial.println(msg);
+  if (msg.length() > 0) {    
     wc.sendClients(msg.c_str());
   }
 }
@@ -33,11 +31,9 @@ bool Inverter::starteBatterie(String reason) {
   String msg((char *)0);
   msg.reserve(60);
   if(!batteryEnabled) {
-    if(debugInverter) {
-      msg = F("Kann Batterie nicht starten, da inverter.batteryEnabled==false");
-      Serial.println(msg);
-      wc.sendClients(msg.c_str());
-    }
+    msg = F("Kann Batterie nicht starten, da inverter.batteryEnabled==false");
+    Serial.println(msg);
+    wc.sendClients(msg.c_str());
     return false;
   }
   if (!stopBattery) {
@@ -46,9 +42,7 @@ bool Inverter::starteBatterie(String reason) {
       if(!controller.isUpForSeconds(60)) {
         msg = F("Bevor der Batteriemodus aktiviert werden kann, muss der Controller mindestends 60s laufen");
         Serial.println(msg);
-        if(debugInverter) {
-          wc.sendClients(msg.c_str());
-        }
+        wc.sendClients(msg.c_str());        
         return false;
       }
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
@@ -61,11 +55,9 @@ bool Inverter::starteBatterie(String reason) {
   } else {
     msg = F("Kann Batterie nicht starten, da Stopflag aktiv\n");
   }
-  if (msg.length() > 0) {
-    if (debugInverter) {      
-       wc.sendClients(msg.c_str());
-    }
-    Serial.println(msg);
+  Serial.println(msg);
+  if (msg.length() > 0) {  
+     wc.sendClients(msg.c_str());
   }
   return false;
 }

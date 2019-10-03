@@ -65,6 +65,9 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.98  (8) Wird der Charger s2 in charger.cpp wg. Zellunterspannungen an oder der Inverter abgeschaltet, dann erfolgt dies nun aufgrund von Fehlercountern in battery.h ab count>3.
 <li>0.9.9.98  (9) Kommandozeile: Ein "reset sma" und ein sma.reset() nach myWifi.reconnect() wurden verdrahtet.
 <li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. läuft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
+<li>0.9.9.99  (2) Kommt in SMA.cpp ein neues UDP-Paket an, wird ein Flag gesetzt, welches steuert, dass charger.checkOnIncome() aufgerufen wird. Nach Verarbeitung setzt die Chargermethode das Flag zur&uuml;ck (Schnellere Justierung der Charger)
+<li>0.9.9.99  (3) Das Flag debugInverter in Inverter.cpp sollte beim Start- und Stop des Netzmodus keine Nachrichten unterdr&uuml;cken
+<li>0.9.9.99  (4) Konfigoption, alle einkommenden Ertragswerte (netto) direkt an alle verbundenen Clients schicken zu können (fastResponse)
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
@@ -208,6 +211,7 @@ div::-webkit-scrollbar-track {
       <option name="9">Debug Konfig</option>
       <option name="10">Debug Tesla</option>
       <option name="11">Batterie Aktiv</option>
+      <option name="12">Fast Response</option>
     </select>
 </input>
 </div2>
@@ -250,7 +254,7 @@ div::-webkit-scrollbar-track {
 var debug = false;
 var debugJson = false;
 var queryTeslaStateAfter = false;
-var bitset = "000000000000";
+var bitset = "0000000000000";
 String.prototype.replaceAt=function(index, char) {
     var a = this.split("");
     a[index] = char;

@@ -69,10 +69,25 @@ void SMA::eval(AsyncUDPPacket* packet) {
         Serial.println(netto);
       }
 
+      //0.9.9.99 alle verfuegbaren Werte DIREKT an den/die Clients senden
+      if(fastResponse) {
+        StaticJsonDocument<32> doc; 
+        doc["n"]=netto;
+        char jsonChar[32];
+        serializeJson(doc, jsonChar);
+        String str(jsonChar);
+        wc.sendClients(str.c_str());
+      }
+
       //0.9.9.99 die Auswertung sollte nicht mehr Timergesteuert laufen, sondern immer dann, wenn ein neues UDP-Paket vorliegt
       hasNewPckt = true;
   
   } else {
+
+     if(debugSma) {
+        Serial.print(F("Received packet of size (sma.udp): "));
+        Serial.println(packetSize);
+      }
 
       long now = millis();
       long lastUdp = now - lastUdpRead;

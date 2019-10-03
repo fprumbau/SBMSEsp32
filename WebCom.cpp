@@ -85,6 +85,11 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(11,48);
         } 
+        if(fastResponse) {
+          bitset.setCharAt(12,49);
+        } else {
+          bitset.setCharAt(12,48);
+        } 
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -282,7 +287,16 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "batteryEnabled", String(inverter.batteryEnabled).c_str());      
                   config.save();
                 }
-                break;                             
+                break;        
+              case 12:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  fastResponse = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "fastResponse", String(fastResponse).c_str());      
+                  config.save();
+                }
+                break;                                        
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  

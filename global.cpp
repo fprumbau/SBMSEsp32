@@ -32,8 +32,9 @@ bool debugBattery = false;
 bool debugInverter = false;
 bool debugConfig = false;
 bool debugTesla = false;
+bool fastResponse = false; //0.9.9.98 alle Ertragsnachrichten sofort an die Clients senden
 
-extern String bitset = "000000000000";
+extern String bitset = "0000000000000";
 
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
@@ -96,8 +97,6 @@ long s1MinRestMillis = 60000; //0.9.9.53
 long s2MinRestMillis = 30000; //0.9.9.53
 
 int dutyCycle = 0; //0.9.9.60, 0...1023
-long checkOnIncomeMinIntervalMillis = 0;
-long CHECK_INCOME_MIN_INTERVAL_MILLIS = 10000; //0.9.9.62
 bool enableCountBeforeOff = false; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
 String TESLA_CLIENT_ID = F("81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384");

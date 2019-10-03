@@ -177,26 +177,6 @@ void Charger::checkOnIncome() {
     }
     yield();
     
-
-
-    /*
-    //TODO CHECK_INCOME_MIN_INTERVAL_MILLIS, checkOnIncomeMinIntervalMillis koennen entfeallen
-    nowOff = now + CHECK_INCOME_MIN_INTERVAL_MILLIS; //s.o.
-
-    //Bis 0.9.9.61 wurde z.T. jede Sekunde ein Check gemacht, dies sollte gedehnt werden
-    if((nowOff - checkOnIncomeMinIntervalMillis) > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
-      checkOnIncomeMinIntervalMillis = nowOff; 
-    } else {
-      return;
-    }
-    
-    //0.9.9.72 VOR dem Schalten der Charger, schauen, ob die Battery läuft.
-    //if(battery.isOn()) {
-    //  return;
-    //}
-    */
-    
-
     /**
      * Ist Charger2 aus UND ist der letzte Schaltvorgang
      * mehr als 30s her UND gibt es einen Energieüberschuss von 

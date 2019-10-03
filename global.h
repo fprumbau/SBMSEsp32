@@ -50,6 +50,7 @@ extern bool debugInverter;
 extern bool debugConfig;
 extern bool debugTesla;
 extern String bitset;
+extern bool fastResponse; //0.9.9.98 alle Ertragsnachrichten sofort an die Clients senden
 
 extern int RELAY_S1;
 extern int RELAY_S2; 
@@ -105,8 +106,6 @@ extern long s1MinRestMillis; //0.9.9.53
 extern long s2MinRestMillis; //0.9.9.53
 
 extern int dutyCycle; //0.9.9.60
-extern long checkOnIncomeMinIntervalMillis; //0.9.9.62
-extern long CHECK_INCOME_MIN_INTERVAL_MILLIS; //0.9.9.62
 extern bool enableCountBeforeOff; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
 extern String TESLA_CLIENT_ID;
