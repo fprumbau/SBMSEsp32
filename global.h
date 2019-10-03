@@ -48,6 +48,7 @@ extern bool debugCharger;
 extern bool debugBattery;
 extern bool debugInverter;
 extern bool debugConfig;
+extern bool debugTesla;
 extern String bitset;
 
 extern int RELAY_S1;
@@ -74,7 +75,7 @@ extern WebCom wc;
 extern AsyncWebServer server;   
 extern AsyncWebSocket ws;
 extern OTA updater; //Over-the-air updater
-extern WiFiUDP udp;
+extern AsyncUDP udp;
 extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
@@ -85,7 +86,6 @@ extern int udpResets; //0.9.9.92 Zaehlen von Resets
 extern int wifiReconnects; //0.9.9.92 Zaehlen von Wifi Reconnects
 
 extern long soc; //aktueller Wert State Of Charge
-extern int cv[]; //aktuelle Zellspannungen
 extern float temp; //SBMS Temperatur
 extern int TEMP_THRESHOLD_HIGH; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 extern int TEMP_THRESHOLD_LOW; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet

@@ -31,8 +31,9 @@ bool debugCharger = false;
 bool debugBattery = false;
 bool debugInverter = false;
 bool debugConfig = false;
+bool debugTesla = false;
 
-extern String bitset = "0000000000";
+extern String bitset = "000000000000";
 
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
@@ -65,7 +66,7 @@ AsyncWebServer server(80);
 OTA updater;
 SBMS sbms;
 Utils utils;
-WiFiUDP udp;
+AsyncUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 long lastUdpRead = -1;
@@ -76,7 +77,6 @@ int wifiReconnects = 0; //0.9.9.92 Zaehlen von Wifi Reconnects
 AsyncWebSocket ws("/ws");
 
 long soc = -1; //aktueller Wert State Of Charge
-int cv[8]; //aktuelle Zellspannungen
 float temp = 0.0; //aktuelle Temperatur des SBMS120
 int TEMP_THRESHOLD_HIGH = 37; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet

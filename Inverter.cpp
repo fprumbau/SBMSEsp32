@@ -32,6 +32,14 @@ void Inverter::starteNetzvorrang(String reason) {
 bool Inverter::starteBatterie(String reason) {
   String msg((char *)0);
   msg.reserve(60);
+  if(!batteryEnabled) {
+    if(debugInverter) {
+      msg = F("Kann Batterie nicht starten, da inverter.batteryEnabled==false");
+      Serial.println(msg);
+      wc.sendClients(msg.c_str());
+    }
+    return false;
+  }
   if (!stopBattery) {
     if (digitalRead(RELAY_PIN) == LOW) {
       //0.9.9.6 Batteriemodus erst 'erlauben', wenn ESP32>1Min laeuft (um SW-Updates zu erlauben)
@@ -136,15 +144,20 @@ void Inverter::check()  {
       limit += CV_HYST; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um CV_HYST mV hoeher
     }
     for (int k = 0; k < 8; k++) {
-      if (cv[k] > 0 && cv[k] < limit) {
+      if (battery.cv[k] < limit) {
+        battery.cvErrInv[k]++;
+      } else {
+        battery.cvErrInv[k]=0;
+      }
+      if(battery.cvErrInv[k]>3) {
         message = F("Undervoltage cell: ");
         message += (k+1);
         message += F("; kleiner als: ");
         message += limit;
         message += F("mv");
         stop = true;
-        break;
-      }    
+        break;        
+      }
     }
   }
   if (stop) {
@@ -205,7 +218,9 @@ void Inverter::check()  {
       if(!nacht) {
         if(!isBatOn) { 
             if(timeUpdate) wc.sendClients(datetime.c_str());
-            nacht = starteBatterie(F("Batteriezeit"));    
+            if(batteryEnabled) {
+              nacht = starteBatterie(F("Batteriezeit"));   
+            } 
         }  
       } 
     } else {
@@ -250,4 +265,12 @@ void Inverter::handleButtonPressed() {
         }
       }
     }  
+}
+
+/**
+ * Moeglichkeit, den Batteriebetrieb zentral 
+ * abschaltbar zu machen
+ */
+void Inverter::enableBattery(bool flag) {
+  batteryEnabled = flag;
 }

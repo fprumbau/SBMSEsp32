@@ -2,7 +2,6 @@
 #define MYWIFI_H
 
 #include <WiFi.h>
-#include <WiFiClient.h>
 
 class MyWifi {
     private:
@@ -17,6 +16,7 @@ class MyWifi {
       String getIpAddress();
       IPAddress localIP();
       void reconnect();
+      bool connected();
 };
 
 #endif

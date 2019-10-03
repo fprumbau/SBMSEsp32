@@ -35,8 +35,15 @@ void MyWifi::connect() {
   sma.init();
 
   //Running since
-  while(!timeClient.update()) {
+  //ab v.0.9.9.28 NTPClient mit Zeit; 0.9.9.98 nicht EWIG warten (10 Versuche)
+  int ct = 0;
+  bool timeUpdate = false;
+  while(!(timeUpdate = timeClient.update())) {
     yield();
+    if(ct++>10) { 
+      lastStatusMsg = F("Loese timeUpdate-Loop (break)");
+      break;
+    }
     timeClient.forceUpdate();
   }
   runningSince = timeClient.getFormattedDate();
@@ -63,5 +70,11 @@ void MyWifi::reconnect() {
       Serial.println(F("Restarting WiFi..."));
       connect();
     }
+    Serial.println(F("And reinitializing sma: reset()"));
+    sma.reset();
   }
+}
+
+bool MyWifi::connected() {
+  return WiFi.status() == WL_CONNECTED;
 }

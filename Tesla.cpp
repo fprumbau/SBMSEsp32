@@ -18,7 +18,7 @@ int Tesla::wakeup() {
     yield();
  
     if(rc>0) {
-        if(debug) {
+        if(debugTesla) {
           Serial.println(_wakeup_url);
           String response = http.getString();    
           Serial.println(response);  
@@ -29,6 +29,7 @@ int Tesla::wakeup() {
 
     } else {
         Serial.println(F("Error sending wakeup POST"));
+        Serial.println(http.errorToString(rc));
     }
     yield();
     http.end();
@@ -98,6 +99,7 @@ int Tesla::authorize(const char* password) {
 
     } else {
         Serial.println(F("Error sending wakeup POST"));
+        Serial.println(http.errorToString(rc));
     }
     yield();
     http.end();
@@ -158,6 +160,7 @@ int Tesla::readChargeState() {
   } else {
       Serial.print(F("Error sending GET charge state; rc="));
       Serial.println(rc);
+      Serial.println(http.errorToString(rc));
   }
   
   yield();
@@ -178,7 +181,7 @@ int Tesla::startCharge() {
     Serial.println(rc);
     
     if(rc>0) {  
-        if(debug) {
+        if(debugTesla) {
           Serial.println(_charge_start_url);
           String response = http.getString();                        
           Serial.println(response);  
@@ -186,6 +189,7 @@ int Tesla::startCharge() {
         }
     } else {
         Serial.println(F("Error sending POST charge start"));
+        Serial.println(http.errorToString(rc));
     }
     yield();
     http.end();
@@ -213,6 +217,7 @@ int Tesla::stopCharge() {
         wc.sendClients(response.c_str());
     } else {
         Serial.println(F("Error sending POST charge stop"));
+        Serial.println(http.errorToString(rc));
     }
     yield();
     http.end();
@@ -242,7 +247,7 @@ int Tesla::setChargeLimit(int percent) {
   Serial.println(rc);
   
   if(rc>0) {  
-      if(debug) {
+      if(debugTesla) {
         Serial.println(_set_charge_limit_url);
         String response = http.getString();                        
         Serial.println(response);  
@@ -250,6 +255,7 @@ int Tesla::setChargeLimit(int percent) {
       }
   } else {
       Serial.println(F("Error sending POST charge limit"));
+      Serial.println(http.errorToString(rc));
   }  
   yield();
   http.end();
@@ -377,6 +383,22 @@ const char* Tesla::status() {
 
 void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->begin(url);
+    if(debugTesla) {
+      Serial.print(F("Is connected: "));
+      Serial.println(client->connected());      
+      Serial.print(F("Setting Header: "));
+      Serial.print(_hd_user_agent);
+      Serial.print(F(" to "));
+      Serial.println(_user_agent);
+      Serial.print(F("Setting Header: "));
+      Serial.print(_hd_app_agent);
+      Serial.print(F(" to "));
+      Serial.println(_tesla_user_agent);      
+      Serial.print(F("Setting Header: "));
+      Serial.print(_hd_content_type);
+      Serial.print(F(" to "));
+      Serial.println(_json_header);            
+    }
     client->addHeader(_hd_user_agent, _user_agent);
     client->addHeader(_hd_app_agent, _tesla_user_agent);
     client->addHeader(_hd_content_type, _json_header);

@@ -44,4 +44,6 @@ void CTRL::print() {
   Serial.println(loopAnalyzer);
   Serial.print(F("SbmsAnalyzer steht auf: "));
   Serial.println(sbms.sbmsAnalyzer);  
+  Serial.print(F("MyWifi.connected() :: "));
+  Serial.println(myWifi.connected());  
 }

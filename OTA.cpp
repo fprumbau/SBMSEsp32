@@ -87,7 +87,7 @@ void OTA::setup(const char *path, String username, String password) {
         stopForOTA = true; //stoppt alle Aktionen im loop()
 
         delay(2000); //geht das hier?? unsicher!!!; 0.9.9.89: -1s
-        udp.stop(); //koennte helfen
+        udp.close(); //0.9.9.98 statt stop()
         
         Serial.printf("UploadStart: %s\n", filename.c_str());
         Serial.setDebugOutput(true);

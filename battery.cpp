@@ -26,16 +26,21 @@ void Battery::checkCellVoltages() {
         d+=LOW_MINIMAL_CV_MILLIS;
         wc.sendClients(d.c_str());
       }      
-      if (cv[k] > 0 && cv[k] < LOW_MINIMAL_CV_MILLIS) {            
-            String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
-            m+=k;
-            m+=F("; gemessene Spannung (in mv): ");
-            m+=cv[k];
-            Serial.println(m);
-            wc.sendClients(m.c_str());
-            charger.toggleCharger(S2,true,true,true);
-            s2ActForLowCV = true;
-            break;            
+      if (cv[k] < LOW_MINIMAL_CV_MILLIS) {    
+        cvErrChg[k]++;                        
+      } else {
+        cvErrChg[k]=0;
+      }
+      if(cvErrChg[k]>3) {
+          String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
+          m+=k;
+          m+=F("; gemessene Spannung (in mv): ");
+          m+=cv[k];
+          Serial.println(m);
+          wc.sendClients(m.c_str());
+          charger.toggleCharger(S2,true,true,true);
+          s2ActForLowCV = true;
+          break;            
       }
     }
   } else {

@@ -11,10 +11,14 @@
   <component name="ChangeListManager">
     <list default="true" id="688fe3da-a399-414e-913f-e5ae167bec02" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SBMS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/SBMS.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SBMS.h" beforeDir="false" afterPath="$PROJECT_DIR$/SBMS.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CFG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CFG.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inverter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Inverter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inverter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Inverter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MyWifi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MyWifi.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SBMSEsp32.ino" beforeDir="false" afterPath="$PROJECT_DIR$/SBMSEsp32.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tesla.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Tesla.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WebCom.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/WebCom.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/battery.h" beforeDir="false" afterPath="$PROJECT_DIR$/battery.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/global.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/global.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/global.h" beforeDir="false" afterPath="$PROJECT_DIR$/global.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/html.h" beforeDir="false" afterPath="$PROJECT_DIR$/html.h" afterDir="false" />

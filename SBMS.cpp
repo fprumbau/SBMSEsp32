@@ -49,7 +49,7 @@ bool SBMS::read() {
   /**
      Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
-     Werte, dazu, soc und cv[] zurueckzusetzen, woraufhin der naechste Lauf der
+     Werte, dazu, soc und battery.cv[] zurueckzusetzen, woraufhin der naechste Lauf der
      Interruptmethode isrHandler(..) dazu, dass die Status-LED auf rot schaltet.
      Gleichzeitig ist es nicht mehr möglich, auf Batterie zu wechseln.
 
@@ -189,11 +189,11 @@ bool SBMS::read() {
           if (len >= 24) {
             for (int k = 0; k < 8; k++) {
               int loc = k * 2 + 8;
-              cv[k] = sbms.dcmp(loc, 2, txt, len);
+              battery.cv[k] = sbms.dcmp(loc, 2, txt, len);
               outString += "cv";
               outString += ( k + 1 );
               outString += "[";
-              outString += cv[k];
+              outString += battery.cv[k];
               outString += "], ";
             }
           }
@@ -213,7 +213,7 @@ bool SBMS::read() {
           if (len >= 24) {
             for (int k = 0; k < 8; k++) {
               int loc = k * 2 + 8;
-              cv[k] = sbms.dcmp(loc, 2, txt, len);
+              battery.cv[k] = sbms.dcmp(loc, 2, txt, len);
             }
           }
           sbmsAnalyzer=13;

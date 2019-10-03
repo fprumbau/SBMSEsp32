@@ -7,6 +7,7 @@
 #define AUTHORIZATION "authorization"
 #define TESLAACTIVE "teslaCtrlActive"
 #define SOCLIMIT "socLimit"
+#define BATTERYENABLED "batteryEnabled"
 
 void CFG::load() {
 
@@ -80,18 +81,25 @@ void CFG::load() {
     //Lese andere Konfigwerte fuer global.h    
     if(doc.containsKey(TESLAACTIVE)) {
       teslaCtrlActive = doc[TESLAACTIVE];
-      if(debug) {
+      if(debugConfig) {
         Serial.print(TESLAACTIVE);
         Serial.println(teslaCtrlActive);  
       }
     }
     if(doc.containsKey(SOCLIMIT)) {
       socLimit = doc[SOCLIMIT];
-      if(debug) {
+      if(debugConfig) {
         Serial.print(SOCLIMIT);
         Serial.println(socLimit);  
       }
-    }    
+    }  
+    if(doc.containsKey(BATTERYENABLED)) {
+      inverter.batteryEnabled = doc[BATTERYENABLED];  
+      if(debugConfig) {
+        Serial.print(BATTERYENABLED);
+        Serial.println(inverter.batteryEnabled);  
+      }      
+    }
   }
 }
 
@@ -109,6 +117,7 @@ bool CFG::save() {
   doc[WEBUSER] = _webUser;
   doc[WEBPASS] = _webPass;
   doc[SOCLIMIT] = socLimit;
+  doc[BATTERYENABLED] = inverter.batteryEnabled;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -215,4 +224,6 @@ void CFG::print() {
   Serial.println(debugBattery); 
   Serial.print(F("debugInverter: "));
   Serial.println(debugInverter);  
+  Serial.print(F("batteryEnabled: "));
+  Serial.println(inverter.batteryEnabled);   
 }

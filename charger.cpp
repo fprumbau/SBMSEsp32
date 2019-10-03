@@ -186,15 +186,6 @@ void Charger::checkOnIncome() {
     if((now - checkOnIncomeMinIntervalMillis) > CHECK_INCOME_MIN_INTERVAL_MILLIS) {
       checkOnIncomeMinIntervalMillis = now; 
     } else {
-      if(debugCharger) {
-        String msg = String((char*)0);
-        msg.reserve(100);
-        msg+=F("Skipping checkonIncome for now... ( CHECK_INCOME_MIN_INTERVAL_MILLIS ); checkOnIncomeMinIntervalMillis / now: ");
-        msg+=checkOnIncomeMinIntervalMillis;
-        msg+=F(" / ");
-        msg+=now;            
-        Serial.println(msg);
-      }
       return;
     }
 

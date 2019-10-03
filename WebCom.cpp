@@ -74,7 +74,17 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           bitset.setCharAt(9,49);
         } else {
           bitset.setCharAt(9,48);
-        }        
+        }      
+        if(debugTesla) {
+          bitset.setCharAt(10,49);
+        } else {
+          bitset.setCharAt(10,48);
+        } 
+        if(inverter.batteryEnabled) {
+          bitset.setCharAt(11,49);
+        } else {
+          bitset.setCharAt(11,48);
+        } 
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -256,6 +266,23 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "debugConfig", String(debugConfig).c_str());      
                 }
                 break;    
+              case 10:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  debugTesla = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "debugTesla", String(debugTesla).c_str());      
+                }
+                break;    
+              case 11:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  inverter.batteryEnabled = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "batteryEnabled", String(inverter.batteryEnabled).c_str());      
+                  config.save();
+                }
+                break;                             
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  
@@ -377,6 +404,7 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(name);
     msg->concat(F(" to "));
     msg->concat(value);
+    msg->concat(F("; "));
 }
 
 void WebCom::print() {

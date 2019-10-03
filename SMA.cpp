@@ -3,9 +3,13 @@
 #define PACKETSIZE 600
 
 void SMA::init() {
-
-  IPAddress ipMulti(239,12,255,254);     
-  udp.beginMulticast(ipMulti, portMulti);
+   
+  if(udp.listenMulticast(IPAddress(239,12,255,254), portMulti)) {
+      Serial.println("UDP connected");
+      udp.onPacket([&](AsyncUDPPacket packet) {
+          eval(&packet);
+      });
+  }  
   
   Serial.println(F("\nUDP init fertig!\n"));
 
@@ -17,41 +21,33 @@ void SMA::init() {
 void SMA::reset() {
 
     initialized = false;
-    udp.stop();
+    udp.close();
     
-    IPAddress ipMulti(239,12,255,254);   
-    udp.beginMulticast(ipMulti, portMulti);
+    if(udp.listenMulticast(IPAddress(239,12,255,254), portMulti)) {
+        Serial.println(F("UDP connected"));
+        udp.onPacket([&](AsyncUDPPacket packet) {
+            eval(&packet);
+        });
+    }    
     initialized = true;
 }
 
-bool SMA::read() {
-
-  if(!initialized) {
-    return false;
-  }
-
-  unsigned long now = millis();
-  if ((now - lastUdpRead) < 3000) { 
-    return false;
-  }
+void SMA::eval(AsyncUDPPacket* packet) {
   
-  yield();
-  int packetSize = udp.parsePacket();
-  yield();
+  int packetSize = packet->length();
   if(packetSize == PACKETSIZE) {
-    
+
+      long now = millis();
       if(debugSma) {
         Serial.print(F("Received 600Byte UDP packet successfully after "));
         Serial.print(now - lastUdpRead);
         Serial.println(F("ms"));
       }    
       
-      lastUdpRead = millis();
+      lastUdpRead = now;
    
-      // read the packet into buf and get the senders IP addr and port number
-      udp.read(buf,PACKETSIZE);
-      yield();
-  
+      uint8_t* buf = packet->data();
+      
       for (std::size_t i = 0; i != packetSize; ++i) {
         hex[2*i  ] = lookup[ buf[i] >> 4  ];
         hex[2*i+1] = lookup[ buf[i] & 0xF ];
@@ -73,8 +69,6 @@ bool SMA::read() {
         Serial.println(netto);
       }
   
-      return true;
-      
   } else {
 
       long now = millis();
@@ -84,7 +78,7 @@ bool SMA::read() {
       if(lastUdp > 600000) {
         Serial.println(F("Das letzte UDP-Paket wurde vor mehr als 10Min empfangen, restarte Wifi jetzt..."));
         myWifi.reconnect();
-        return false;
+        return;
       }
 
       if(lastUdp > 120000 && (now - lastUdpReset) > 10000) {         
@@ -103,5 +97,4 @@ bool SMA::read() {
           udpResets++;
       }
   }
-  return false;
 }

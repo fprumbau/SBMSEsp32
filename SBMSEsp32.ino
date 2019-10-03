@@ -42,6 +42,7 @@ void setup() {
   esp_task_wdt_init(999,false); //0.9.9.88
 
   Serial.begin(115200);  //USB Serial Pins 4,2, 
+  Serial.setDebugOutput(true); //0.9.9.98
   
   //WROOM hat 16/17 auf RX2/TX2 verbunden
   serialSBMS.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
@@ -263,11 +264,11 @@ void loop() {
 
       loopAnalyzer = 5;
       
-      if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
+      //if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
         loopAnalyzer = 6;
         charger.checkOnIncome();     
-      }
+      //}
 
       loopAnalyzer = 7;
     }
@@ -370,6 +371,10 @@ void commandLine() {
         inverter.stopBattery = false;
         inverter.starteBatterie(F("Schalte Batterie ueber Kommandozeile an"));
         inverter.setGreen();
+      } else if(cmd.startsWith(F("battery mode on"))) {        
+        inverter.enableBattery(true);     
+      } else if(cmd.startsWith(F("battery mode off"))) {         
+        inverter.enableBattery(false);        
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
         config.print();
@@ -388,6 +393,8 @@ void commandLine() {
         config.load();
       } else if(cmd.startsWith(F("config save"))) {
         config.save();
+      } else if(cmd.startsWith(F("reset sma"))) {
+        sma.reset();
       } else if(cmd.startsWith(F("config set"))) {
         String keyVal = cmd.substring(10); //alles hinter 'set'
         keyVal.trim();
@@ -455,7 +462,9 @@ void commandLine() {
         Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
         Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
         Serial.println(F(" - restart esp   :: restarting whole ESP32"));
-        Serial.println(F(" - reset flags   :: reset all debug flags"));        
+        Serial.println(F(" - reset flags   :: reset all debug flags"));  
+        Serial.println(F(" - reset sma   :: reset sma wg. udp.close()"));  
+        Serial.println(F(" - batterymode on|off   :: Batteriebetrieb blockieren (nur laden)"));  
         Serial.println(F(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W"));
         Serial.println(F(" - stop  RELAY_S1|_S2|_3|_4|_W :: stop relays S1,S2,3,4 und W"));
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
