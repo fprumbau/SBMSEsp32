@@ -13,10 +13,13 @@ class SMA {
     char wlb[9]; //Wirkleistung Bezug
     char wll[9]; //Wirkleistung Lieferung
     void eval(AsyncUDPPacket* packet);
+    bool hasNewPckt = false; //0.9.9.99
       
   public:
     void init();
     void reset(); 
+    bool hasNewPacket();
+    void resetNewPacket();
 };
 
 #endif

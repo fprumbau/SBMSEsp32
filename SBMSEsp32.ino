@@ -271,11 +271,11 @@ void loop() {
 
       loopAnalyzer = 5;
       
-      //if(sma.read()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
+      if(sma.hasNewPacket()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
         loopAnalyzer = 6;
         charger.checkOnIncome();     
-      //}
+      }
 
       loopAnalyzer = 7;
     }

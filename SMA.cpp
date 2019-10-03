@@ -68,6 +68,9 @@ void SMA::eval(AsyncUDPPacket* packet) {
         Serial.print(F("Neuer Wert fuer Nettoertrag (sma.udp): "));
         Serial.println(netto);
       }
+
+      //0.9.9.99 die Auswertung sollte nicht mehr Timergesteuert laufen, sondern immer dann, wenn ein neues UDP-Paket vorliegt
+      hasNewPckt = true;
   
   } else {
 
@@ -97,4 +100,12 @@ void SMA::eval(AsyncUDPPacket* packet) {
           udpResets++;
       }
   }
+}
+
+bool SMA::hasNewPacket() {
+  return hasNewPckt;
+}
+
+void SMA::resetNewPacket() {
+  hasNewPckt = false;
 }
