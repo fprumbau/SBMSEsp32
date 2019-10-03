@@ -232,7 +232,14 @@ void loop0(void * parameter) {
         inverter.starteNetzvorrang(lastStatusMsg);
         inverter.setRed();
         digitalWrite(RELAY_4, HIGH); //Lüfter abschalten, da meist der Task1 hängt und darum keine Steuerung mehr erfolgt.
-      }      
+      } 
+      //0.9.9.99 myWifi connection check
+      if((now - lastConnectCheck) > 300000) {
+        if(!myWifi.connected()) {
+          Serial.println(F("myWifi ist nicht verbunden, versuche einen Reconnect"));    
+          myWifi.reconnect();
+        }
+      }
       //xSemaphoreGive(semaphore);
   }
 }

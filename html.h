@@ -64,11 +64,12 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.98  (7) Statt WifiUdp in sma.read() wird nun AsyncUDP verwendet ( damit wird fast jede Sekunde automatisch ein UDP-Paket empfangen )
 <li>0.9.9.98  (8) Wird der Charger s2 in charger.cpp wg. Zellunterspannungen an oder der Inverter abgeschaltet, dann erfolgt dies nun aufgrund von Fehlercountern in battery.h ab count>3.
 <li>0.9.9.98  (9) Kommandozeile: Ein "reset sma" und ein sma.reset() nach myWifi.reconnect() wurden verdrahtet.
+<li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. läuft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";
 
-#define VERSION "0.9.9.98"
+#define VERSION "0.9.9.99"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
