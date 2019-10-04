@@ -205,7 +205,7 @@ void Inverter::check()  {
       wc.sendClients(datetime.c_str());
   }
   //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
-  if(!stop) {
+  if(!stop && (soc > (socLimit + SOC_HYST))) { //0.9.9.99 den geregelten Batteriebetrieb nur aufnehmen wenn soc > socLimit (z.B.70) + SOC_HYST (z.B. 5) ist, also ab 75% StateOfCharge
     if(hours>=18 || hours < 9) {
       if(!nacht) {
         if(!isBatOn) { 

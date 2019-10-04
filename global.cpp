@@ -9,8 +9,8 @@
 #include <WiFiUdp.h>
  
 const int smaMeasurementsBeforSwitchoff = 10;
-int socLimit = 30; //wird aus Config ueberschrieben
-int SOC_HYST = 2; //2% Hysterese
+int socLimit = 70; //wird aus Config ueberschrieben (in %)
+int SOC_HYST = 5; //5% Hysterese
 int LOW_MINIMAL_CV_MILLIS = 2700; //darunter wird Charger S2 für 5Min aktiviert
 int LOW_VOLTAGE_MILLIS = 2800; //darunter wird die Batterie abgeschaltet  
 int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_VOLTAGE_MILLIS + CV_HYST ist
