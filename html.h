@@ -68,7 +68,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.99  (2) Kommt in SMA.cpp ein neues UDP-Paket an, wird ein Flag gesetzt, welches steuert, dass charger.checkOnIncome() aufgerufen wird. Nach Verarbeitung setzt die Chargermethode das Flag zur&uuml;ck (Schnellere Justierung der Charger)
 <li>0.9.9.99  (3) Das Flag debugInverter in Inverter.cpp sollte beim Start- und Stop des Netzmodus keine Nachrichten unterdr&uuml;cken
 <li>0.9.9.99  (4) Konfigoption, alle einkommenden Ertragswerte (netto) direkt an alle verbundenen Clients schicken zu k&ouml;nnen (fastResponse)
-<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Brücksichtigung von socLimit wird für den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
+<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Ber&uuml;cksichtigung von socLimit wird für den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";

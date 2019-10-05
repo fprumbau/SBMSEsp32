@@ -49,7 +49,7 @@ void CFG::load() {
 
       if(debugConfig) {
         serializeJson(doc, Serial);
-        Serial.print(F("Initialisiere Teslakonfig: authorization:|"));
+        Serial.print(F("\nInitialisiere Teslakonfig: authorization:|"));
         Serial.print(auth);
         Serial.print(F("|; vehicleId:|"));
         Serial.print(vehicleId);

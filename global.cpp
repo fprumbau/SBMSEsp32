@@ -70,8 +70,6 @@ Utils utils;
 AsyncUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
-long lastUdpRead = -1;
-long lastUdpReset = -1;
 int udpResets = 0;
 int wifiReconnects = 0; //0.9.9.92 Zaehlen von Wifi Reconnects
 

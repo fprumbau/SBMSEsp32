@@ -14,6 +14,8 @@ class SMA {
     char wll[9]; //Wirkleistung Lieferung
     void eval(AsyncUDPPacket* packet);
     bool hasNewPckt = false; //0.9.9.99
+    long lastUdpRead = -1;
+    long lastUdpReset = -1;
       
   public:
     void init();

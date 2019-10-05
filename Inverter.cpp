@@ -14,7 +14,9 @@ void Inverter::starteNetzvorrang(String reason) {
     msg += reason;
     msg += '\n';
   } else {
-    msg = F("Kann Netzvorrang nicht starten, da schon aktiv\n");
+    msg = F("Kann Netzvorrang nicht starten, da schon aktiv :: ");
+    msg += reason;
+    msg += '\n';
   }
   Serial.println(msg);
   if (msg.length() > 0) {    
@@ -53,7 +55,9 @@ bool Inverter::starteBatterie(String reason) {
     }
     return true; //lief schon oder wurde aktiviert
   } else {
-    msg = F("Kann Batterie nicht starten, da Stopflag aktiv\n");
+    msg = F("Kann Batterie nicht starten, da Stopflag aktiv :: ");
+    msg += reason;
+    msg += '\n';
   }
   Serial.println(msg);
   if (msg.length() > 0) {  
@@ -167,7 +171,7 @@ void Inverter::check()  {
           Serial.println(F("Error limit reached, stopping inverter..."));
         }
       }
-      stopBattery = true; //
+      stopBattery = true; 
       starteNetzvorrang("Interrupt(NZV); " + message);
       setRed();
     }
