@@ -190,7 +190,7 @@ void Charger::checkOnIncome() {
      * s2MinRestMillis==60s
      * 
      */     
-    unsigned long s1Last = nowOff - s1_switched;
+    unsigned long s1Last = now - s1_switched;
     if(s1_switched == -1 || s1Last > s1MinRestMillis) {     
       if(!s1on) {
         //Läuft S2 noch nicht, dann wird S1 gestartet, wenn netto > 600, also der Max-Wert von S1
@@ -236,7 +236,7 @@ void Charger::checkOnIncome() {
      * Er sollte erst per Relais abgeschaltet werden (0A), wenn länger als
      * 5 Minuten kein Stromüberschuss vorhanden ist, um Schaltzyklen zu verhindern.
      */
-    unsigned long s2Last = nowOff - s2_switched;
+    unsigned long s2Last = now - s2_switched;
     if(s2_switched == -1 || s2Last > s2MinRestMillis) {
       if(!s2on) {
         if (netto > 30) {
@@ -258,10 +258,10 @@ void Charger::checkOnIncome() {
 
             //0.9.9.88, der Status netto sollte laenger als 5 Min kleiner 0 sein, sonst NICHT ausschalten
             if(-1 == s2_millisBeforeOff) {
-              s2_millisBeforeOff = nowOff; //Start des LowNetto-Timers
+              s2_millisBeforeOff = now; //Start des LowNetto-Timers
             }
         
-            if(nowOff - s2_millisBeforeOff > 300000) {       
+            if(now - s2_millisBeforeOff > 300000) {       
               if(debugRelais) {
                  wc.sendClients("Deaktiviere Solarcharger 2");
               }
@@ -297,7 +297,7 @@ void Charger::checkOnIncome() {
      m1+=F("; Netto: ");
      m1+=netto;
      m1+=F("; now: ");
-     m1+=nowOff;
+     m1+=now;
      m1+=F("; s1Last: ");
      m1+=s1Last;
      m1+=F("; s1_switched: ");

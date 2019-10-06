@@ -20,6 +20,7 @@ void Inverter::starteNetzvorrang(String reason) {
   }
   Serial.println(msg);
   if (msg.length() > 0) {    
+    logs.append(msg);
     wc.sendClients(msg.c_str());
   }
 }
@@ -61,6 +62,7 @@ bool Inverter::starteBatterie(String reason) {
   }
   Serial.println(msg);
   if (msg.length() > 0) {  
+     logs.append(msg);
      wc.sendClients(msg.c_str());
   }
   return false;
@@ -215,7 +217,15 @@ void Inverter::check()  {
         if(!isBatOn) { 
             if(timeUpdate) wc.sendClients(datetime.c_str());
             if(batteryEnabled) {
-              nacht = starteBatterie(F("Batteriezeit"));   
+              String msg = String((char*)0);
+              msg.reserve(60);
+              msg+=F("Batteriezeit: socLimit(");
+              msg+=socLimit;
+              msg+=F(");SOC_HYST(");
+              msg+=SOC_HYST;
+              msg+=F("); Time: ");
+              msg+=datetime;
+              nacht = starteBatterie(msg);   
             } 
         }  
       } 

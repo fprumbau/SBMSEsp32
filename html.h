@@ -38,7 +38,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.95  (9) In der Inverter.check()-Methode werden bei der Pr&uuml;fung von Zellspannungen nun nur noch Spannung > 0 verglichen, bei einer Zellspannung von 0 muss ein Auswertungsfehler der SBMS-Daten vorliegen. Das verhindert das kurzfristige Abschalten wegen Datenfehlern.
 <li>0.9.9.95  (10) In SBMS.cpp wird nun die Verarbeitung einmal in einem debugSbms-Abschnitt und einmal in einem einfachen Abschnitt gemacht, um das andauernde Erzeugen von unn&ouml;gen Strings zu vermeiden. Fix: ist data<50, wird keine Ui-Aktualisierung mehr getriggert.
 <li>0.9.9.96  (1) In battery.checkCellVoltages(..) wurde noch nicht ber&uuml;cksichtigt, das eine gemessene Zellspannung > 0 sein muss (0.9.9.95/9)
-<li>0.9.9.96  (2) Eine Controllerklasse ( CTRL.h ) wurde angelegt für die nicht zur Startklasse SBMSEsp32.ino geh&ouml;renden Methoden
+<li>0.9.9.96  (2) Eine Controllerklasse ( CTRL.h ) wurde angelegt f&uuml;r die nicht zur Startklasse SBMSEsp32.ino geh&ouml;renden Methoden
 <li>0.9.9.96  (3) Die Klasse Dateien Wechselrichter.h und .cpp wurde umbenannt: Inverter.h/.cpp, zudem wurden fehlerhafte Meldungen korrigiert und das 'debug'-Flag durch 'debugInverter' ersetzt.
 <li>0.9.9.96  (4) Die Aktiviert des Batteriemodus durch inverter.starteBatterie(..) wird nun abgelehnt, wenn der Controller weniger als 60s online ist.
 <li>0.9.9.96  (5) Eine sbms.sbmsAnalyzer-Variable soll nun dabei helfen, den H&auml;nger in sbms.read() zu identifizieren.
@@ -64,11 +64,14 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.98  (7) Statt WifiUdp in sma.read() wird nun AsyncUDP verwendet ( damit wird fast jede Sekunde automatisch ein UDP-Paket empfangen )
 <li>0.9.9.98  (8) Wird der Charger s2 in charger.cpp wg. Zellunterspannungen an oder der Inverter abgeschaltet, dann erfolgt dies nun aufgrund von Fehlercountern in battery.h ab count>3.
 <li>0.9.9.98  (9) Kommandozeile: Ein "reset sma" und ein sma.reset() nach myWifi.reconnect() wurden verdrahtet.
-<li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. läuft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
+<li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. l&auml;uft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
 <li>0.9.9.99  (2) Kommt in SMA.cpp ein neues UDP-Paket an, wird ein Flag gesetzt, welches steuert, dass charger.checkOnIncome() aufgerufen wird. Nach Verarbeitung setzt die Chargermethode das Flag zur&uuml;ck (Schnellere Justierung der Charger)
 <li>0.9.9.99  (3) Das Flag debugInverter in Inverter.cpp sollte beim Start- und Stop des Netzmodus keine Nachrichten unterdr&uuml;cken
 <li>0.9.9.99  (4) Konfigoption, alle einkommenden Ertragswerte (netto) direkt an alle verbundenen Clients schicken zu k&ouml;nnen (fastResponse)
-<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Ber&uuml;cksichtigung von socLimit wird für den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
+<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Ber&uuml;cksichtigung von socLimit wird f&uuml;r den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
+<li>0.9.9.99  (6) Logs.h/Logs.cpp aus PegelControl &uuml;bernommen, wird zwischen Netz- und Batteriemodus geschaltet, wird dies hier gelogged.
+<li>0.9.9.99  (7) Fix Tesla UserAgent Header 
+<li>0.9.9.99  (8) M&ouml;glichkeit einen Logeintrag zu schreiben (Test, Kommandozeile)
 <h2>TODO</h2>
 <li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
 )=====";

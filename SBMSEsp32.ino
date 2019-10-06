@@ -154,7 +154,7 @@ void setup() {
         }
     }
     String header = request->header("User-Agent");
-    if(header.indexOf("Tesla QtCarBrowser")>1) {
+    if(header.indexOf("Tesla")>1) {
       request->send(200, "text/html", html);
     } else {
       if(!request->authenticate(config.webUser(), config.webPass())) {
@@ -389,6 +389,7 @@ void commandLine() {
         wc.print();
         battery.print();
         controller.print();
+        logs.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -458,6 +459,13 @@ void commandLine() {
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
         Serial.println(ok);
+      } else if(cmd.startsWith(F("logs save"))) { 
+        logs.save();
+      } else if(cmd.startsWith(F("logs load"))) { 
+        logs.load();
+      } else if(cmd.startsWith(F("logs add"))) { 
+        String entry = cmd.substring(8); 
+        logs.append(entry);
       } else if(cmd.startsWith(F("reset flags"))) { 
         Serial.println("Reset all debugging flags");
         bitset = "0000000000";
@@ -477,6 +485,9 @@ void commandLine() {
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
+        Serial.println(F(" - logs save :: Logeintraege im SPIFFS ablegen"));
+        Serial.println(F(" - logs load :: Logeintraege aus SPIFFS einlesen"));
+        Serial.println(F(" - logs add 'some log entry' :: Logeintraeg schreiben"));
         Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
         Serial.println(F(" -      0 :: serialSBMS.flush();"));
         Serial.println(F(" -      1 :: Serial.println(serialSBMS.available());"));
