@@ -72,11 +72,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.99  (6) Logs.h/Logs.cpp aus PegelControl &uuml;bernommen, wird zwischen Netz- und Batteriemodus geschaltet, wird dies hier gelogged.
 <li>0.9.9.99  (7) Fix Tesla UserAgent Header 
 <li>0.9.9.99  (8) M&ouml;glichkeit einen Logeintrag zu schreiben (Test, Kommandozeile)
-<h2>TODO</h2>
-<li>  https://owner-api.teslamotors.com/api/1/vehicles/YOUR_VEHICLE_ID_HERE/data_request/vehicle_state  /  https://medium.com/@jhuang5132/a-beginners-guide-to-the-unofficial-tesla-api-a5b3edfe1467 
+<li>1.0.0     (1)
 )=====";
 
-#define VERSION "0.9.9.99"
+#define VERSION "1.0.0"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
