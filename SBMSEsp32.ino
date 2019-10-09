@@ -132,7 +132,7 @@ void setup() {
         Serial.println(request->header(i));
     }
     String header = request->header("User-Agent");
-    if(header.indexOf("Tesla QtCarBrowser")>1) {
+    if(header.indexOf("Tesla")>1) {
       request->send(200, "text/html", html);
     } else {
       if(!request->authenticate(config.webUser(), config.webPass())) {
