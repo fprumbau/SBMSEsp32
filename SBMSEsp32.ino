@@ -252,33 +252,22 @@ void loop0(void * parameter) {
 /**********************************************************************/
 void loop() {
 
-    loopAnalyzer = 1;
-
     if(!updater.stopForOTA) {
 
-      loopAnalyzer = 2;
-      
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();      
 
-      loopAnalyzer = 3;
-      
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
         yield();
-        loopAnalyzer = 4;
         inverter.check(); //oben ausgelesene Werte pruefen und ggfls. den Inverter umschalten
       }
 
-      loopAnalyzer = 5;
-      
       if(sma.hasNewPacket()) {       //energymeter lesen, wenn upd-Paket vorhanden, dann auswerten und beide Charger steuern
         yield();
-        loopAnalyzer = 6;
         charger.checkOnIncome();     
       }
 
-      loopAnalyzer = 7;
     }
 
     //xSemaphoreTake(semaphore, portMAX_DELAY); geht erst weiter, wenn erster Task das semaphore gegeben hat  
@@ -391,6 +380,7 @@ void commandLine() {
         battery.print();
         controller.print();
         logs.print();
+        myWifi.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 

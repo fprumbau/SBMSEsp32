@@ -81,13 +81,15 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
 <li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
 <li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
-<li>1.0.2     (2) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen auslöst ) 
-<li>1.0.2     (2) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
-<li>1.0.2     (2) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese überschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
-<li>1.0.2     (2) 5 globale Variablen wurden nach battery.h verlegt
+<li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen auslöst ) 
+<li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
+<li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese überschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
+<li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
+<li>1.0.3     (1) MyWifi.print() gibt eigenen Status aus    
+<li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
 )=====";
 
-#define VERSION "1.0.2"
+#define VERSION "1.0.3"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -12,6 +12,8 @@ void Battery::print() {
   Serial.println(socLimit);    
   Serial.print(F("battery.enabled: "));
   Serial.println(enabled);     
+  Serial.print(F("SOC_HYST: "));
+  Serial.println(SOC_HYST);       
 }
 
 /**

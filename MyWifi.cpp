@@ -83,3 +83,13 @@ void MyWifi::reconnect() {
 bool MyWifi::connected() {
   return WiFi.status() == WL_CONNECTED;
 }
+
+void MyWifi::print() {
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("Wifi reconnects: "));
+  Serial.println(wifiReconnects);
+  Serial.print(F("Wifi IP: "));
+  Serial.println(localIP());  
+  Serial.print(F("MyWifi.connected() :: "));
+  Serial.println(connected());   
+}

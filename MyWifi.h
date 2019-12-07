@@ -19,6 +19,7 @@ class MyWifi {
       IPAddress localIP();
       void reconnect();
       bool connected();
+      void print();
 };
 
 #endif

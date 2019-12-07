@@ -10,7 +10,6 @@ class SBMS {
     unsigned long lastChecked;
 
   public:
-    unsigned int sbmsAnalyzer;
     String data = String((char*)0);
     /**
      * SBMS über serielle Schnittstelle auslesen.

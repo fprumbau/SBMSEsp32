@@ -104,7 +104,6 @@ int highIncomeCount = 0;
 CFG config;
 String lastStatusMsg = String((char*)0);
 String runningSince = String((char*)0);
-int loopAnalyzer = -1; //0.9.9.94
 HardwareSerial serialSBMS(1); //0.9.9.95, uart 1
 CTRL controller; //0.9.9.96
 unsigned long lastConnectCheck = 0; //0.9.9.99

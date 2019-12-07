@@ -114,7 +114,6 @@ extern int lowIncomeCount; //0.9.9.80
 extern int highIncomeCount; //0.9.9.80
 extern String lastStatusMsg; //0.9.9.93
 extern String runningSince; //0.9.9.93
-extern int loopAnalyzer; //0.9.9.94
 extern HardwareSerial serialSBMS; //0.9.9.95
 extern CTRL controller; //0.9.9.96
 extern unsigned long lastConnectCheck; //0.9.9.99

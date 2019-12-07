@@ -30,18 +30,8 @@ void CTRL::print() {
   Serial.println(millis());        
   Serial.print(F("Udp resets: "));
   Serial.println(udpResets);  
-  Serial.print(F("Wifi reconnects: "));
-  Serial.println(myWifi.wifiReconnects);
-  Serial.print(F("Wifi IP: "));
-  Serial.println(myWifi.localIP());
   Serial.print(F("Last status message: "));
   Serial.println(lastStatusMsg );
   Serial.print(F("Free Heap: "));
-  Serial.println(ESP.getFreeHeap());
-  Serial.print(F("\nLoopanalyzer steht auf: "));
-  Serial.println(loopAnalyzer);
-  Serial.print(F("SbmsAnalyzer steht auf: "));
-  Serial.println(sbms.sbmsAnalyzer);  
-  Serial.print(F("MyWifi.connected() :: "));
-  Serial.println(myWifi.connected());  
+  Serial.println(ESP.getFreeHeap());  
 }
