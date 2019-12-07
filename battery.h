@@ -5,15 +5,24 @@
 class Battery {
 
   private:
-    
-  public:
-    int cv[8]; //aktuelle Zellspannungen    
+  
+    int LOW_MINIMAL_CV_MILLIS = 2700; //untere Zellspannung in mv
+    int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_MINIMAL_CV_MILLIS + CV_HYST ist    
+    int SOC_HYST = 5; //5% Hysterese  
     int cvErrChg[8]; //Zellspannungsfehlercounter Charger
     int cvErrInv[8];  //Zellspannungsfehlercounter Inverter
+
+  public:
+
+    bool enabled = false; //wegen Belgienurlaub, Batterie SOLL aus bleiben
+    int cv[8]; //aktuelle Zellspannungen    
+    int soc = -1; //aktueller Wert State Of Charge
+    int socLimit = 70; //wird aus Config ueberschrieben (in %)
     void print();
     bool isOn();
-    void controlFans();
-    void checkCellVoltages();    
+    bool checkCellVoltages();    
+    bool isReady2Activate(); //Alle Regeln OK zur Nutzung (SoC + Aktivflag)
+    
 };
 
 #endif

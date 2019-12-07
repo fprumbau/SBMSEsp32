@@ -87,17 +87,17 @@ void CFG::load() {
       }
     }
     if(doc.containsKey(SOCLIMIT)) {
-      socLimit = doc[SOCLIMIT];
+      battery.socLimit = doc[SOCLIMIT];
       if(debugConfig) {
         Serial.print(SOCLIMIT);
-        Serial.println(socLimit);  
+        Serial.println(battery.socLimit);  
       }
     }  
     if(doc.containsKey(BATTERYENABLED)) {
-      inverter.batteryEnabled = doc[BATTERYENABLED];  
+      battery.enabled = doc[BATTERYENABLED];  
       if(debugConfig) {
         Serial.print(BATTERYENABLED);
-        Serial.println(inverter.batteryEnabled);  
+        Serial.println(battery.enabled);  
       }      
     }
   }
@@ -116,8 +116,8 @@ bool CFG::save() {
   doc[TESLAACTIVE] = teslaCtrlActive;
   doc[WEBUSER] = _webUser;
   doc[WEBPASS] = _webPass;
-  doc[SOCLIMIT] = socLimit;
-  doc[BATTERYENABLED] = inverter.batteryEnabled;
+  doc[SOCLIMIT] = battery.socLimit;
+  doc[BATTERYENABLED] = battery.enabled;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -171,7 +171,7 @@ void CFG::set(const char* key, const char* val) {
       teslaCtrlActive=false;
     }
   } else if(keyStr == SOCLIMIT) {
-      socLimit = String(val).toInt();
+      battery.socLimit = String(val).toInt();
   } else {
       Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
       Serial.println(key);
@@ -224,6 +224,4 @@ void CFG::print() {
   Serial.println(debugBattery); 
   Serial.print(F("debugInverter: "));
   Serial.println(debugInverter);  
-  Serial.print(F("batteryEnabled: "));
-  Serial.println(inverter.batteryEnabled);   
 }

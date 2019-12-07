@@ -9,13 +9,7 @@
 #include <WiFiUdp.h>
  
 const int smaMeasurementsBeforSwitchoff = 10;
-int socLimit = 70; //wird aus Config ueberschrieben (in %)
-int SOC_HYST = 5; //5% Hysterese
-int LOW_MINIMAL_CV_MILLIS = 2700; //darunter wird Charger S2 für 5Min aktiviert
-int LOW_VOLTAGE_MILLIS = 2800; //darunter wird die Batterie abgeschaltet  
-int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_VOLTAGE_MILLIS + CV_HYST ist
-
-const int checkMillis = 10000; //Pruefung der Kennwerte (SOC, Zellspannungen), minimales Interval in Millisekunden
+const int tenSeconds = 10000; //Pruefung der Kennwerte (SOC, Zellspannungen), minimales Interval in Millisekunden
 
 int LED_RED = 12;
 int LED_GREEN = 14;
@@ -57,6 +51,7 @@ int GPIO25 = 0;
 int GPIO26 = 1;
 int GPIO05 = 2;
 
+Luefter luefter;
 Battery battery;
 Charger charger;
 MyWifi myWifi; 
@@ -71,11 +66,9 @@ AsyncUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);
 int udpResets = 0;
-int wifiReconnects = 0; //0.9.9.92 Zaehlen von Wifi Reconnects
 
 AsyncWebSocket ws("/ws");
 
-long soc = -1; //aktueller Wert State Of Charge
 float temp = 0.0; //aktuelle Temperatur des SBMS120
 int TEMP_THRESHOLD_HIGH = 37; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet

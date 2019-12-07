@@ -53,7 +53,7 @@ void setup() {
   
   Serial2.begin(115200); //wegen Restart
 
-  Serial.println("Starting...");
+  Serial.println(F("Starting..."));
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(RELAY_PIN, OUTPUT);
@@ -234,10 +234,11 @@ void loop0(void * parameter) {
         digitalWrite(RELAY_4, HIGH); //Lüfter abschalten, da meist der Task1 hängt und darum keine Steuerung mehr erfolgt.
       } 
       //0.9.9.99 myWifi connection check
-      if((now - lastConnectCheck) > 300000) {
+      if((now - lastConnectCheck) > 10000) {
         if(!myWifi.connected()) {
           Serial.println(F("myWifi ist nicht verbunden, versuche einen Reconnect"));    
           myWifi.reconnect();
+          lastConnectCheck = now;
         }
       }
       //xSemaphoreGive(semaphore);
@@ -379,9 +380,9 @@ void commandLine() {
         inverter.starteBatterie(F("Schalte Batterie ueber Kommandozeile an"));
         inverter.setGreen();
       } else if(cmd.startsWith(F("battery mode on"))) {        
-        inverter.enableBattery(true);     
+        battery.enabled = true;      
       } else if(cmd.startsWith(F("battery mode off"))) {         
-        inverter.enableBattery(false);        
+        battery.enabled = false;        
       } else if(cmd.startsWith(F("print"))) {         
         perry.print();
         config.print();

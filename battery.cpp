@@ -6,123 +6,100 @@ void Battery::print() {
   Serial.println(F("--------------------------------"));
   Serial.print(F("Batterie: "));
   Serial.println(isOn()); 
+  Serial.print(F("Ladezustand: "));
+  Serial.println(soc); 
+  Serial.print(F("SOC-Limit: "));
+  Serial.println(socLimit);    
+  Serial.print(F("battery.enabled: "));
+  Serial.println(enabled);     
 }
 
-void Battery::checkCellVoltages() {
+/**
+ * Aufruf aus Inverter
+ */
+boolean Battery::checkCellVoltages() {
 
-  //c) 0.9.9.37: Egal, ob stop aktiv oder nicht, Teste Zellspannungen und aktiviere ggfls. S2(175W) für 5Min
-  if(!charger.isChargerOn(2)) {
-    
-    for (int k = 0; k < 8; k++) {
+  boolean stopBattery = false;
+  int cellNumber;
+
+  //Test: Wenn eine Zelle einen Fehlerzahl > 3 hat, beenden
+  for (int k = 0; k < 8; k++) {
 
       if(debugBattery) {
-        String d = String((char*)0);
-        d.reserve(64);
-        d+="Cell: ";
-        d+=k;
-        d+="; Voltage: ";
-        d+=cv[k];
-        d+="; Limit: ";
-        d+=LOW_MINIMAL_CV_MILLIS;
-        wc.sendClients(d.c_str());
+          String d = String((char*)0);
+          d.reserve(64);
+          d+="Cell: ";
+          d+=k;
+          d+="; Voltage: ";
+          d+=cv[k];
+          d+="; Limit: ";
+          d+=LOW_MINIMAL_CV_MILLIS;
+          wc.sendClients(d.c_str());
       }      
       if (cv[k] < LOW_MINIMAL_CV_MILLIS) {    
-        cvErrChg[k]++;                        
+          cvErrChg[k]++;                        
       } else {
-        cvErrChg[k]=0;
+          cvErrChg[k]=0;
       }
+      //Errorcount der Zelle groesser als 3 -> Fehler, Ende der Auswertung
       if(cvErrChg[k]>3) {
+          cellNumber=k;
+          stopBattery = true;
+          break;          
+      }
+      
+  }
+
+  //Massnahmen treffen
+  if(stopBattery) {
+
+      //Zur Zellunterstuetzung den Charger2 aktivieren
+      if(!charger.isChargerOn(2)) {
+        
           String m = F("Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle ");
-          m+=k;
+          m+=cellNumber;
           m+=F("; gemessene Spannung (in mv): ");
-          m+=cv[k];
+          m+=cv[cellNumber];
           Serial.println(m);
           wc.sendClients(m.c_str());
           charger.toggleCharger(S2,true,true,true);
           s2ActForLowCV = true;
-          break;            
-      }
-    }
-  } else {
-      if(s2ActForLowCV && charger.getRunningMillis(2) > 600000) { //nachdem S2 10 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
-          String m = F("Deaktiviere Solarcharger 2 nach 10 Minuten Ladezeit jetzt...");
-          Serial.println(m);
-          wc.sendClients(m.c_str());
-          charger.toggleCharger(S2,false,true, true);
-          s2ActForLowCV = false;
-      }
-  }  
+          
+      } else {
+        
+          //nachdem S2 10 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
+          if(s2ActForLowCV && charger.getRunningMillis(2) > 600000) { 
+              String m = F("Deaktiviere Solarcharger 2 nach 10 Minuten Ladezeit jetzt...");
+              Serial.println(m);
+              wc.sendClients(m.c_str());
+              charger.toggleCharger(S2,false,true, true);
+              s2ActForLowCV = false;
+          }
+          
+      }   
+  }
+  
+  return stopBattery;
 }
+
+bool Battery::isReady2Activate() {
+  int limit = socLimit + SOC_HYST;
+  if(enabled && soc > limit) {
+    if(debugBattery) {
+      Serial.println(F("Battery::isReady2Activate enabled==true"));
+      Serial.print(F("Battery::isReady2Activate soc: "));
+      Serial.println(soc);
+      Serial.print(F("Battery::isReady2Activate socLimit: "));
+      Serial.println(socLimit);
+      Serial.print(F("Battery::isReady2Activate limit: "));
+      Serial.println(limit);
+    }
+    return true;
+  }
+  return false;
+}
+
 
 bool Battery::isOn() {
     return digitalRead(RELAY_PIN);
-}
-
-//v. 0.9.9.40 laeuft weder die Batterie noch ein Charger, schalte die Luefter ueber Relais 4 ab
-void Battery::controlFans() {
-  bool fansRunning = !digitalRead(RELAY_4);
-  if(debugBattery) {
-    String m((char *)0);
-    m.reserve(128);
-    m += F("Lueft.: ");
-    m += fansRunning;
-    m += F("; Batt: ");
-    m += isOn();
-    m += F("; Chrg: ");
-    m += charger.isOn();
-    m += F("; RS1: ");
-    m +=digitalRead(RELAY_S1);
-    m += F("; RS2: ");
-    m +=digitalRead(RELAY_S2);
-    m += F("; R3: ");
-    m +=digitalRead(RELAY_3);
-    m += F("; isOnS1: ");
-    m += charger.isChargerOn(1);
-    m += F("; isOnS2: ");
-    m += charger.isChargerOn(2);
-    m += F("\nBez/Lief: ");
-    m += netto;
-    wc.sendClients(m.c_str());
-  }
-  String msg;
-  if(isOn()) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
-    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
-      msg = F("Schalte Luefter an, da der Batteriebetrieb aktiv ist");
-      Serial.println(msg);
-      wc.sendClients(msg.c_str());
-      digitalWrite(RELAY_4, LOW);
-    }
- } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
-    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen, aber nur wenn der Ladestand<99% UND die Temperatur>35°C ist, beim Balancing werden die Luefter nicht benutzt
-      if(temp>TEMP_THRESHOLD_HIGH) {
-        msg = F("Schalte Luefter an, da gerade geladen wird; Temperatur: ");
-        msg+=temp;
-        msg+="°C";
-        Serial.println(msg);
-        wc.sendClients(msg.c_str());
-        digitalWrite(RELAY_4, LOW);
-      }
-    } else {
-      if(soc>=99 && temp<TEMP_THRESHOLD_LOW) {
-        msg = F("Schalte Luefter ab, da fertig geladen wurde");
-        Serial.println(msg);
-        wc.sendClients(msg.c_str());
-        digitalWrite(RELAY_4, HIGH);
-      }      
-    }
- } else {
-    if(fansRunning) { //Versuche, die Luefter auszuschalten nur dann, wenn sie schon laufen
-      if(temp<TEMP_THRESHOLD_LOW) {
-        if(fansRunning) {
-          msg = F("Schalte Luefter ab, da weder Batterie noch Charger laufen");
-          Serial.println(msg);
-          wc.sendClients(msg.c_str());
-          digitalWrite(RELAY_4, HIGH);
-        }
-      } else {
-        Serial.println(F("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): "));
-        Serial.println(temp);
-      }
-    }
-  }
 }

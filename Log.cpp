@@ -5,21 +5,21 @@
 #define len(x) sizeof(x)/sizeof(x[0])
 
 String LOG::load() {
-  String msg = "Mounting FS...";
+  String msg = F("Mounting FS...");
   if(!SPIFFS.begin()) {
-    msg+="Failed to mount file system (read)\n";
+    msg+=F("Failed to mount file system (read)\n");
     return msg;
   }
   File logFile = SPIFFS.open("/log.json", "r");
   if(!logFile){
-    msg+="Failed to open config file\n";
+    msg+=F("Failed to open config file\n");
     return msg;
   }
   size_t size = logFile.size();
-  Serial.print("size ");
+  Serial.print(F("size "));
   Serial.println(size);
   if(size > BUFFSIZE) {
-     msg+="Config file is to large";
+     msg+=F("Config file is to large");
      return msg;
   }
   //allocate a buffer to store contetns of the file.
@@ -43,7 +43,7 @@ String LOG::load() {
   JsonArray array = doc.to<JsonArray>();
 
   if(error) {
-    msg+="Failed to parse config file\n";
+    msg+=F("Failed to parse config file\n");
     return msg;
   }
 
@@ -66,9 +66,10 @@ String LOG::load() {
 }
 
 String LOG::save() {
-  String msg = "";
+  String msg = String((char*)0);
+  msg.reserve(48);
   if(!SPIFFS.begin()) {
-    msg="Failed to mount file system (save)\n";
+    msg+=F("Failed to mount file system (save)\n");
     return msg;
   }
   //80 Strings a 100 Zeichen sind 8kB
@@ -92,7 +93,7 @@ String LOG::save() {
 
   File logFile = SPIFFS.open("/log.json", "w");
   if (!logFile) {
-    msg+="Failed to open config file for writing\n";
+    msg+=F("Failed to open config file for writing\n");
     return msg;
   }
 
@@ -104,34 +105,36 @@ String LOG::save() {
 }
 
 void LOG::print(){
-  Serial.print("\nEs traten bisher ");
+  Serial.print(F("\nEs traten bisher "));
   Serial.print(eventCount);
-  Serial.println(" Logevents auf ");
+  Serial.println(F(" Logevents auf "));
 
-  Serial.print("Oldest: ");
+  Serial.print(F("Oldest: "));
   Serial.println(oldest);
 
-  Serial.print("Eventindex: ");
+  Serial.print(F("Eventindex: "));
   Serial.println(eventIndex);
   
   int actualEventCount = length();
 
-  Serial.print("actualEventCount: ");
+  Serial.print(F("actualEventCount: "));
   Serial.println(actualEventCount);
   
   for(int i = oldest; i < actualEventCount; i++) {
-    Serial.println(logEvents[i]);
+    Serial.print(logEvents[i]);
   }
   if(oldest > 0) {
       for(int j = 0; j < oldest; j++) {
-        Serial.println(logEvents[j]);
+        Serial.print(logEvents[j]);
       }
   }
-
-  Serial.println("Natural order:");
-  for(int k = 0; k < actualEventCount; k++) {
-    Serial.println(logEvents[k]);
-  }
+  /*
+  if(debugLog) {
+    Serial.println("Natural order:");
+    for(int k = 0; k < actualEventCount; k++) {
+      Serial.print(logEvents[k]);
+    }
+  }*/
 }
 
 bool LOG::append(String logEntry) {

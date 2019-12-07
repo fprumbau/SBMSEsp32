@@ -80,7 +80,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(10,48);
         } 
-        if(inverter.batteryEnabled) {
+        if(battery.enabled) {
           bitset.setCharAt(11,49);
         } else {
           bitset.setCharAt(11,48);
@@ -282,9 +282,9 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
               case 11:
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);
-                  inverter.batteryEnabled = (c == 49);   
+                  battery.enabled = (c == 49);   
                   update = true;      
-                  buildMessage(&msg, "batteryEnabled", String(inverter.batteryEnabled).c_str());      
+                  buildMessage(&msg, "battery.enabled", String(battery.enabled).c_str());      
                   config.save();
                 }
                 break;        

@@ -72,7 +72,7 @@ int Tesla::authorize(const char* password) {
         wc.sendClients(response.c_str());
         DynamicJsonDocument doc(256); 
         deserializeJson(doc, response);
-        String rt = doc["refresh_token"];
+        String rt = doc["access_token"];
         _authorization = new char[rt.length()+1];
         rt.toCharArray(_authorization, rt.length()+1); 
                

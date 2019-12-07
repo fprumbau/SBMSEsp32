@@ -14,7 +14,7 @@ void MyWifi::connect() {
  
   WiFi.begin(_ssid, _password); 
 
-  while(WiFi.status() != WL_CONNECTED && wifiReconnects < myWifiRestartLimit) {
+  while(WiFi.status() != WL_CONNECTED) {
         wifiReconnects++;
         lastReconnectMillis = millis();
         WiFi.disconnect(true);
@@ -23,30 +23,35 @@ void MyWifi::connect() {
         Serial.print(F("."));
         delay(3000); 
   }
-  Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
-  Serial.print(F("Ip Address: "));
 
-  IPAddress ip = WiFi.localIP();
-  Serial.println(ip);
-  _localIP = ip;
-  _ip=ip.toString();
-
-  Serial.println(F("Initializing sma.init"));
-  sma.init();
-
-  //Running since
-  //ab v.0.9.9.28 NTPClient mit Zeit; 0.9.9.98 nicht EWIG warten (10 Versuche)
-  int ct = 0;
-  bool timeUpdate = false;
-  while(!(timeUpdate = timeClient.update())) {
-    yield();
-    if(ct++>10) { 
-      lastStatusMsg = F("Loese timeUpdate-Loop (break)");
-      break;
-    }
-    timeClient.forceUpdate();
+  if(connected()) {
+        Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
+        Serial.print(F("Ip Address: "));
+      
+        IPAddress ip = WiFi.localIP();
+        Serial.println(ip);
+        _localIP = ip;
+        _ip=ip.toString();
+      
+        Serial.println(F("Initializing sma.init"));
+        sma.init();
+      
+        //Running since
+        //ab v.0.9.9.28 NTPClient mit Zeit; 0.9.9.98 nicht EWIG warten (10 Versuche)
+        int ct = 0;
+        bool timeUpdate = false;
+        while(!(timeUpdate = timeClient.update())) {
+          yield();
+          if(ct++>10) { 
+            lastStatusMsg = F("Loese timeUpdate-Loop (break)");
+            break;
+          }
+          timeClient.forceUpdate();
+        }
+        if(isBooting) {
+          runningSince = timeClient.getFormattedDate();
+        }
   }
-  runningSince = timeClient.getFormattedDate();
 }
 
 String MyWifi::getIpAddress() {
@@ -59,7 +64,7 @@ IPAddress MyWifi::localIP() {
 
 void MyWifi::reconnect() {
   long now = millis();
-  if((now - lastReconnectMillis) > 300000) { //Ein Reconnect max. alle 5 Minuten
+  if((now - lastReconnectMillis) > 60000) { //Ein Reconnect max. jede Minute
     if(wifiReconnects >= myWifiRestartLimit) {
       String msg = F("Nach {myWifiRestartLimit} Wifi Reconnects: Esp.restart()");
       wc.sendClients(msg.c_str());

@@ -4,11 +4,8 @@
 class Inverter {
   private: 
     bool nacht = false;
-    unsigned long lastCheckedMillis = -1; 
-    int failureCount = 0;
-    const int errLimit = 10;    
+    unsigned long lastCheckedMillis = -1;    
   public:
-    bool batteryEnabled = false; //wegen Belgienurlaub, Batterie SOLL aus bleiben
     void setBlue();
     void setGreen();
     void setRed();   
@@ -17,7 +14,6 @@ class Inverter {
     void starteNetzvorrang(String reason); //Netzbetrieb aktivieren
     bool starteBatterie(String reason); //Batteriebetrieb aktivieren   
     void handleButtonPressed(); //Tastersteuerung, um Inverterstatus zu toggeln 
-    void enableBattery(bool flag);
 };
 
 #endif 

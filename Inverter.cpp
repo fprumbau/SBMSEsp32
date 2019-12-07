@@ -33,8 +33,8 @@ void Inverter::starteNetzvorrang(String reason) {
 bool Inverter::starteBatterie(String reason) {
   String msg((char *)0);
   msg.reserve(60);
-  if(!batteryEnabled) {
-    msg = F("Kann Batterie nicht starten, da inverter.batteryEnabled==false");
+  if(!battery.enabled) {
+    msg = F("Kann Batterie nicht starten, da battery.enabled==false");
     Serial.println(msg);
     wc.sendClients(msg.c_str());
     return false;
@@ -54,6 +54,11 @@ bool Inverter::starteBatterie(String reason) {
       msg += reason;
       msg += '\n';
     }
+    Serial.println(msg);
+    if (msg.length() > 0) {  
+       logs.append(msg);
+       wc.sendClients(msg.c_str());
+    }    
     return true; //lief schon oder wurde aktiviert
   } else {
     msg = F("Kann Batterie nicht starten, da Stopflag aktiv :: ");
@@ -93,116 +98,50 @@ void Inverter::setRed() {
 void Inverter::check()  {
 
   //Zur weiteren Pruefung sollte die soc vorliegen
-  if (soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
+  if (battery.soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
-  if (( millis() - lastCheckedMillis ) < checkMillis) { //Pruefung hoechstens alle 10 Sekunden
+  long now = millis();
+  if (( now - lastCheckedMillis ) < tenSeconds) { //Pruefung hoechstens alle 10 Sekunden
     return;
   }
-  lastCheckedMillis = millis();
+  lastCheckedMillis = now;
     
-  //v. 0.9.9.38 faellt die CV zu sehr, sollte S1 (Charger 1) aktiviert werden
-  battery.checkCellVoltages();
-  yield();
-
   //v. 0.9.9.40 ggfls. Luefer abschalten (es laeuft weder ein Charger noch der Inverter)
-  battery.controlFans();
+  luefter.check();
   yield();
-  
-  if(debugInverter) {
-    Serial.print(F("Check...  ; failureCount: "));
-    Serial.println(failureCount);
-  }
 
   if (testFixed) {
     return; //keine Auswertung, wenn Testwerte
   }
+
+  boolean badBattery = battery.checkCellVoltages();
+  yield();
   
-  boolean isBatOn = battery.isOn();
-  /*int limit;
-  if(isBatOn) {
-    limit = socLimit;
-  } else {
-    //v.0.9.9.36 ist die Batterie aus, dann muss um SOC_HYST (z.B. 5%) hoehere Ladung zur Verfuegung stehen
-    limit = socLimit + SOC_HYST;
-  }*/
-  //a) Teste State-Of-Charge
-  boolean stop = false;
-  String message((char *)0);
-  message.reserve(128);
-  /*if (soc < limit) {
-    message = F("State of charge below ");
-    message += limit;
-    message += "%";
-    stop = true;
-  }*/
-  //b) Ist jetzt noch kein Stopflag aktiv, teste die einzelnen Zellspannungen
-  if (!stop) {
-    int limit = LOW_VOLTAGE_MILLIS;   
-    if(!isBatOn) {
-      limit += CV_HYST; //Hysterese beachten: Bei Netzbetrieb (Batterie im Leerlauf, also mit hoeherer Zellspannung) ist Grenze um CV_HYST mV hoeher
-    }
-    for (int k = 0; k < 8; k++) {
-      if (battery.cv[k] < limit) {
-        battery.cvErrInv[k]++;
-      } else {
-        battery.cvErrInv[k]=0;
-      }
-      if(battery.cvErrInv[k]>3) {
-        message = F("Undervoltage cell: ");
-        message += (k+1);
-        message += F("; kleiner als: ");
-        message += limit;
-        message += F("mv");
-        stop = true;
-        break;        
-      }
-    }
-  }
-  if (stop) {
-    failureCount++;
-    if (failureCount < errLimit) { //'Fehlversuche' bis zum errLimit ignorieren.
-      if (debugInverter) {
-        Serial.print(F("Error found, waiting until failureCount reaches "));
-        Serial.print(errLimit);
-        Serial.print("; now: ");
-        Serial.println(failureCount);
-      }
-    } else {
+  if (badBattery) {
+
       if (!stopBattery) {
         if (debugInverter) {
-          Serial.println(F("Error limit reached, stopping inverter..."));
+          Serial.println(F("Stopflag was set, stopping inverter..."));
         }
       }
       stopBattery = true; 
-      starteNetzvorrang("Interrupt(NZV); " + message);
+      starteNetzvorrang("Interrupt(NZV); (CellVoltages)");
       setRed();
-    }
+    
   } else {
-    if (failureCount >= errLimit) {
-      failureCount = 0;
-    }
+
     //Hier sollte nicht die Batterie gestartet, sondern nur freigeschaltet werden!!!
     stopBattery = false;
     setGreen();
+
   }
-  //ab v.0.9.9.28 NTPClient mit Zeit; 0.9.9.97 nicht EWIG warten (10 Versuche)
-  int ct = 0;
-  bool timeUpdate = false;
-  while(!(timeUpdate = timeClient.update())) {
-    yield();
-    if(ct++>10) { 
-      lastStatusMsg = F("Loese timeUpdate-Loop (break)");
-      break;
-    }
-    timeClient.forceUpdate();
-  }
-  
+  //1.0.1 Timeclient muss nicht wieder aktualisiert werden (kann HTTPClient stoeren)  
   int day = timeClient.getDay();
   int hours = timeClient.getHours();
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
   datetime = timeClient.getFormattedDate();
-  if (debugInverter && timeUpdate) {
+  if (debugInverter) {
       Serial.print(hours);
       Serial.print(":");
       Serial.print(mins);
@@ -210,45 +149,24 @@ void Inverter::check()  {
       Serial.println(secs);    
       wc.sendClients(datetime.c_str());
   }
-  //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
-  if(!stop && (soc > (socLimit + SOC_HYST))) { //0.9.9.99 den geregelten Batteriebetrieb nur aufnehmen wenn soc > socLimit (z.B.70) + SOC_HYST (z.B. 5) ist, also ab 75% StateOfCharge
-    if(hours>=18 || hours < 9) {
-      if(!nacht) {
-        if(!isBatOn) { 
-            if(timeUpdate) wc.sendClients(datetime.c_str());
-            if(batteryEnabled) {
-              String msg = String((char*)0);
-              msg.reserve(60);
-              msg+=F("Batteriezeit: socLimit(");
-              msg+=socLimit;
-              msg+=F(");SOC_HYST(");
-              msg+=SOC_HYST;
-              msg+=F("); Time: ");
-              msg+=datetime;
-              nacht = starteBatterie(msg);   
-            } 
-        }  
-      } 
-    } else {
-      if(nacht) {
-        nacht = false;
-        if(isBatOn) {
-            starteNetzvorrang(F("Schalte wieder auf Netz zurück"));    
-        } else { 
-            if(timeUpdate) wc.sendClients(datetime.c_str());
-        }
+
+  if(!badBattery) { 
+
+      //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
+      if(hours>=18 || hours < 9) {
+          if(!nacht && !battery.isOn() && battery.isReady2Activate()) { //das 'nacht'-Flag verhindert, dass mehrfach versucht wird, auf Batterie umzuschalten; war die Umschaltung erfolgreich, ist nacht==true
+              nacht = starteBatterie("Batteriezeit ab 18 Uhr");            
+          } 
+      } else {
+          if(nacht) {
+              nacht = false;
+              if(battery.isOn()) {
+                  starteNetzvorrang(F("Schalte ab 9 Uhr wieder aufs Netz zurück"));    
+              } 
+          }
       }
-    }
+
   }
-  /*
-  //v. 0.9.9.58 jeden Morgen um 6Uhr neu starten (nur volle Minute)
-  if(hours == 6 && mins == 0 && dayOfMonthLastRestart != day)  {
-     dayOfMonthLastRestart = day; //nur EINEN Restart am Tag 
-     wc.sendClients(F("Restarte ESP um 6:00 Uhr").c_str());
-     delay(200); //Warte, bis Nachricht verschickt ist
-     ESP.restart();
-  }*/
-  //0.9.9.90 Steigt die Erzeugung (PV2) über 10A, dann ist der Tag sicher nicht fern :-); siehe SBMS.cpp
 }
 
 /**
@@ -271,12 +189,4 @@ void Inverter::handleButtonPressed() {
         }
       }
     }  
-}
-
-/**
- * Moeglichkeit, den Batteriebetrieb zentral 
- * abschaltbar zu machen
- */
-void Inverter::enableBattery(bool flag) {
-  batteryEnabled = flag;
 }

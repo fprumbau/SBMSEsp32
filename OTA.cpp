@@ -86,7 +86,8 @@ void OTA::setup(const char *path, String username, String password) {
       if(!index){ // if index == 0 then this is the first frame of data
         stopForOTA = true; //stoppt alle Aktionen im loop()
 
-        delay(2000); //geht das hier?? unsicher!!!; 0.9.9.89: -1s
+        yield();
+        delay(1500); //geht das hier?? unsicher!!!; 0.9.9.89: -1s
         udp.close(); //0.9.9.98 statt stop()
         
         Serial.printf("UploadStart: %s\n", filename.c_str());
@@ -131,21 +132,21 @@ void OTA::setup(const char *path, String username, String password) {
   server.onNotFound([](AsyncWebServerRequest *request){
       Serial.print(F("NOT_FOUND: "));
       if(request->method() == HTTP_GET)
-        Serial.printf("GET");
+        Serial.print(F("GET"));
       else if(request->method() == HTTP_POST)
-        Serial.printf("POST");
+        Serial.print(F("POST"));
       else if(request->method() == HTTP_DELETE)
-        Serial.printf("DELETE");
+        Serial.print(F("DELETE"));
       else if(request->method() == HTTP_PUT)
-        Serial.printf("PUT");
+        Serial.print(F("PUT"));
       else if(request->method() == HTTP_PATCH)
-        Serial.printf("PATCH");
+        Serial.print(F("PATCH"));
       else if(request->method() == HTTP_HEAD)
-        Serial.printf("HEAD");
+        Serial.print(F("HEAD"));
       else if(request->method() == HTTP_OPTIONS)
-        Serial.printf("OPTIONS");
+        Serial.println(F("OPTIONS"));
       else
-        Serial.printf("UNKNOWN");
+        Serial.println(F("UNKNOWN"));
       Serial.printf(" http://%s%s\n", request->host().c_str(), request->url().c_str());
   
       if(request->contentLength()){

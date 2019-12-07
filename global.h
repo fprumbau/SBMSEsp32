@@ -13,6 +13,7 @@
 #include "MyWifi.h"
 #include "WebCom.h"
 #include "Inverter.h"
+#include "Luefter.h"
 #include "OTA.h"
 #include "SBMS.h"
 #include "SMA.h"
@@ -24,16 +25,9 @@
 #include "Tesla.h"
 #include "CFG.h"
 #include "CTRL.h"
-
-//findet die Checkmethode falsche Werte vor, so wird noch einmal
-//(4s) gewartet, bevor diese tatsächlich zu einem Fehler führen.
-extern int socLimit; 
-extern int SOC_HYST;
-extern int LOW_VOLTAGE_MILLIS; 
-extern int CV_HYST;
-extern int LOW_MINIMAL_CV_MILLIS;   
+ 
 extern const int smaMeasurementsBeforSwitchoff;
-extern const int checkMillis;
+extern const int tenSeconds;
  
 extern int LED_RED;
 extern int LED_GREEN;
@@ -68,6 +62,7 @@ extern int GPIO25; //Channel Lueft. Charger
 extern int GPIO26; //Channel Lueferter Inverter
 extern int GPIO05; //Channel HLG600-30B
 
+extern Luefter luefter;
 extern Battery battery;
 extern Charger charger;
 extern Inverter inverter;
@@ -83,9 +78,7 @@ extern NTPClient timeClient;
 extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern Utils utils; 
 extern int udpResets; //0.9.9.92 Zaehlen von Resets
-extern int wifiReconnects; //0.9.9.92 Zaehlen von Wifi Reconnects
 
-extern long soc; //aktueller Wert State Of Charge
 extern float temp; //SBMS Temperatur
 extern int TEMP_THRESHOLD_HIGH; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
 extern int TEMP_THRESHOLD_LOW; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet

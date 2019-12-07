@@ -166,7 +166,7 @@ bool SBMS::read() {
       }
 
       //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
-      soc = 0;
+      battery.soc = 0;
 
       //Werte nun ans Webfrontend schicken
       wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
@@ -180,10 +180,10 @@ bool SBMS::read() {
           outString.reserve(100);
           outString += "\nSOC: ";
           if (len >= 8) {
-            soc = sbms.dcmp(6, 2, txt, len);
-            outString += soc;
+            battery.soc = sbms.dcmp(6, 2, txt, len);
+            outString += battery.soc;
             outString += "(Limit:";
-            outString += socLimit;
+            outString += battery.socLimit;
             outString += "); ";
           }
           if (len >= 24) {
@@ -207,7 +207,7 @@ bool SBMS::read() {
       } else {
           sbmsAnalyzer=11;
           if (len >= 8) {
-            soc = sbms.dcmp(6, 2, txt, len);
+            battery.soc = sbms.dcmp(6, 2, txt, len);
           }
           sbmsAnalyzer=12;
           if (len >= 24) {

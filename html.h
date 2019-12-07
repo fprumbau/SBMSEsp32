@@ -72,10 +72,22 @@ const char changelog[] PROGMEM = R"=====(
 <li>0.9.9.99  (6) Logs.h/Logs.cpp aus PegelControl &uuml;bernommen, wird zwischen Netz- und Batteriemodus geschaltet, wird dies hier gelogged.
 <li>0.9.9.99  (7) Fix Tesla UserAgent Header 
 <li>0.9.9.99  (8) M&ouml;glichkeit einen Logeintrag zu schreiben (Test, Kommandozeile)
-<li>1.0.0     (1)
+<li>1.0.0     (0) Release
+<li>1.0.1     (1) Wird die inverter.starteBatterie(..) gerufen, wurde meist keine Lognachricht geschrieben (vorzeitiges return)
+<li>1.0.1     (2) Logging beim Einschalten der Batterie um den 'soc'-Wert erweitert
+<li>1.0.1     (3) Fehler in der loop0-Methode behoben, hier wurde der myWifi.connected()-Check IMMER durchgef&uuml;hrt, da 'lastConnectCheck' nie gesetzt wurde.
+<li>1.0.1     (4) Logs.cpp optimiert und Ausgabe verschlankt
+<li>1.0.1     (5) Es braucht das access_token, nicht das refresh_token zur Authentifizierung des Tesla-Accounts 
+<li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
+<li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
+<li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
+<li>1.0.2     (2) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen auslöst ) 
+<li>1.0.2     (2) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
+<li>1.0.2     (2) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese überschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
+<li>1.0.2     (2) 5 globale Variablen wurden nach battery.h verlegt
 )=====";
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.2"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -7,16 +7,16 @@
 class OTA
 {
   private:
-    String _username = "";
-    String _password = "";
+    String _username;
+    String _password;
     bool _authenticated;
 
-    String _title = "OTA updater";
-    String _banner = "OTA updater";
-    String _build = "Build : ";
-    String _branch = "Branch : ";
+    String _title = F("OTA updater");
+    String _banner = F("OTA updater");
+    String _build = F("Build : ");
+    String _branch = F("Branch : ");
     String _deviceInfo = "ChipId : " + String(ESP.getChipRevision());
-    String _footer = "ESP32 OTA Updater";
+    String _footer = F("ESP32 OTA Updater");
     void setup(const char *path, String username, String password);
     
   public:
