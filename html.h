@@ -87,6 +87,8 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
 <li>1.0.3     (1) MyWifi.print() gibt eigenen Status aus    
 <li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
+<li>1.0.3     (3) Wird im Inverter beim Check die Nachtzeit geprueft, so erfolgt dies alle paar Sekunden. Ein falscher SoC-Wert (einmal: 4858) kann die Batterie einschalten. Es werden nun alle Werte > 100 ignoriert. 
+<li>1.0.3     (4) SBMS.readSoc beruecksichtigt nun nur noch neu SoC-Werte, wenn sie vom alten weniger als 10% abweichen (Und der alte > 0 war)
 )=====";
 
 #define VERSION "1.0.3"

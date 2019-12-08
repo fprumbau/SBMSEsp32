@@ -8,6 +8,8 @@ class SBMS {
   private:
     unsigned int char_off(char c);    
     unsigned long lastChecked;
+    unsigned int oldSoc;
+    void readSoc(const char* txt, int len);
 
   public:
     String data = String((char*)0);

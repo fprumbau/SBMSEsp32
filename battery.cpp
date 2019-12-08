@@ -86,7 +86,7 @@ boolean Battery::checkCellVoltages() {
 
 bool Battery::isReady2Activate() {
   int limit = socLimit + SOC_HYST;
-  if(enabled && soc > limit) {
+  if(enabled && soc > limit && soc <= 100) {
     if(debugBattery) {
       Serial.println(F("Battery::isReady2Activate enabled==true"));
       Serial.print(F("Battery::isReady2Activate soc: "));
