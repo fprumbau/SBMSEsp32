@@ -24,7 +24,7 @@ boolean Battery::checkCellVoltages() {
   boolean stopBattery = false;
   int cellNumber;
 
-  //Test: Wenn eine Zelle einen Fehlerzahl > 3 hat, beenden
+  //Ueber die 8 Zellen iterieren
   for (int k = 0; k < 8; k++) {
 
       if(debugBattery) {
@@ -39,12 +39,17 @@ boolean Battery::checkCellVoltages() {
           wc.sendClients(d.c_str());
       }      
       if (cv[k] < LOW_MINIMAL_CV_MILLIS) {    
-          cvErrChg[k]++;                        
+          cvErrChg[k]++; 
+          Serial.print(cvErrChg[k]);       
+          Serial.print(F(": Batteriezelle "));         
+          Serial.print(k); 
+          Serial.print(F(" meldet Unterspannung: "));
+          Serial.println(cv[k]);                    
       } else {
           cvErrChg[k]=0;
       }
-      //Errorcount der Zelle groesser als 3 -> Fehler, Ende der Auswertung
-      if(cvErrChg[k]>3) {
+      //Errorcount der Zelle groesser als 10 Fehler -> Ende der Auswertung
+      if(cvErrChg[k]>10) {
           cellNumber=k;
           stopBattery = true;
           break;          
@@ -97,6 +102,15 @@ bool Battery::isReady2Activate() {
       Serial.println(limit);
     }
     return true;
+  }
+  if(enabled) {
+      Serial.println(F("Battery::isReady2Activate enabled==false (Batterie wird NICHT aktiviert)"));
+      Serial.print(F("Battery::isReady2Activate soc: "));
+      Serial.println(soc);
+      Serial.print(F("Battery::isReady2Activate socLimit: "));
+      Serial.println(socLimit);
+      Serial.print(F("Battery::isReady2Activate limit: "));
+      Serial.println(limit);
   }
   return false;
 }

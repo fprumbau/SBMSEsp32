@@ -1,51 +1,6 @@
 const char changelog[] PROGMEM = R"=====(
 <b>Device info</b>: Frank's Solar Charger Monitor
 
-<li>0.9.9.92: (1) Aus 0.9.9.69: Wenn S2 nicht l&auml;dt und Netto >100W, wird Batteriemodus abgeschaltet, das macht aber nun Probleme, wenn Abends der Batteriemodus fr&uuml;her online geht => wurde auskommentiert
-<li>0.9.9.92: (2) SMA.cpp: Wird mehr als 1h kein g&uuml;ltiges UDP-Paket (600Byte) mehr empfangen, leite einen Wifi-Reconnect ein! 
-<li>0.9.9.92: (3) L&auml;uft S2 und ist Netto + S2Power > 600W, dann sollte statt dessen S1 aktiviert werden und S2 eine Neubewertung erfahren.
-<li>0.9.9.92: (4) Es werden nun udp.resets und wifi.reconnects gez&auml;hlt. Nach 10 wifi.reconnects wird ein Esp.restart() getriggert.
-<li>0.9.9.92: (5) Wird auf eine Teslaanfrage ein 408 versendet, werden die Aktivstati aller Teslabuttons resettet werden. 
-<li>0.9.9.92: (6) Wird ein inkorrekter Json-String in der GUI empfangen, dann werden nun der Stacktrace UND die Daten ausgegeben.
-<li>0.9.9.92: (7) Die 1h aus (2) wurde in 10Min ge&auml;ndert, nach >10 Reconnects wird nun ein ESP.restart durchgef&uuml;hrt.
-<li>0.9.9.93: (1) Die Klasse WebCom bekommt eine print()-Methode (nachdem das System nun 5d stabil gelaufen ist, wenn alle Browser immer geschlossen werden).
-<li>0.9.9.93: (2) Die Beachtung von socLimit in wechselrichter.check() wurde herausgenommen, da a) der SOC nie genau war, b) ein Zugriff auf die Reserve auch bei Stromausfall nie m&oouml;glich war
-<li>0.9.9.93: (3) Ein ESP.restart() wird nur noch nach 50 Wifi.reconnects() durchgef&uuml;hrt (revert, wegen Instabilitaet!!!); fr&uuml;her wurde nach 1h kein UDP empfangen, ein Wifi-Reconnect gemacht, jetzt nach 10 Minuten. 
-<li>0.9.9.93: (4) Die Wartezeit in der while-Schleife beim MyWifi.begin() wurde von 100ms auf 3000ms angehoben
-<li>0.9.9.93: (5) Ein Wifi-Reconnect wurde immer dann getriggert, wenn UDP l&aauml;nger als 10 Minuten kein Paket empfangen hat. Da das alle 3 Sekunden gepr&uuml;ft wurde, also ggfls. alle 3 Sekunden einmal bis zum ESP.restart(), wird dies auf max. alle 5 Minuten begrenzt
-<li>0.9.9.93: (6) Der Count f&uuml;r maximale Wifi-Reconnects bis zum ESP-Restart wurde wieder erh&ouml;ht, nun von 10 auf 25 
-<li>0.9.9.93: (7) Im Main-Loop wird nun - wenn >1h keine SBMS-Aktualisierung gekommen ist, der Batteriemodus beendet, der Inverter in StopBatt-Modus geflagged, die rote LED geschaltet und eine lastStatusMsg global (fuer print) gelogged).
-<li>0.9.9.93: (8) Debugausgaben im Mainloop, um H&auml;nger feststellen zu k&ouml;nnen, Utils-Klasse hinzu, Ausgabe battery.isOn()
-<li>0.9.9.93: (9) Die Laufzeit&uuml;berwachung (Abschaltung Batterie, wenn >1h keine SBMS-Aktualisierung erfolgte), wird nun auf die andere CPU verlegt
-<li>0.9.9.93: (10) Die Batterie l&auml;sst sich nun &uuml;ber die Kommandozeile schalten (also auch &uuml;ber die andere CPU) 
-<li>0.9.9.94: (1) Fehler aus letztem Commit korrigiert: Batterie war nur abschaltbar &uuml;ber Kommandozeile
-<li>0.9.9.94: (2) Der Timeout des SBMS-Serial1-Streams wurde von 1000ms auf 100ms nach unten gestellt
-<li>0.9.9.94  (3) Die Zeit, nach der bei fehlender SBMS-Aktualisierung die laufende Batterie abgeschaltet wird, wurde ge&auml;ndert: 1h -> 10min; damit sollten weniger Lockups stattfinden
-<li>0.9.9.94  (4) LoopAnalyzer-int hinzugef&uuml;gt, der anzeigt, wo der letzte ausgef&uuml;hrte Schritt in der loop()-Ausf&uuml;hrung steht 
-<li>0.9.9.94  (5) Kommandozeile erweitert: cmd + NR, als erstes f&uuml;r Nummer 1 :: Serial2.flush(), 2 :: fansOn(), 3 :: fansOff(); 
-<li>0.9.9.94  (6) Wird 10 Minuten keine SBMS-Aktualisierung empfangen, wird der Batteriebetrieb jetzt mit erweitertem Debugging beendet
-<li>0.9.9.94  (7) Die Standard-SBMS-Aktualisierung ist 61Byte, weicht der Wert ab, wird er in SBMS.cpp verworfen und der Buffer geleert.
-<li>0.9.9.94  (8) Das SBMS-Interval wird von 3 auf 2s heruntergesetzt (das SBMS sendet alle 3s)
-<li>0.9.9.94  (9) SBMS: readString wieder ersetzt, verzicht auf globales sbmsData, stattdessen sbms.data
-<li>0.9.9.95  (1) Aus Serial1 wird serialSBMS. Die L&auml;nge der empfangenden Daten wurde nicht korrekt vermessen, darum gabe es immer Falschmeldungen bez. Zellunterspannungen; 
-<li>0.9.9.95  (2) Wird nach 10Min fehlenden SBMS-Aktualisierungen der Batteriemodus abgeschaltet, wird jetzt auch der L&uuml;fter abgeschaltet (da der Task0 meist steht)
-<li>0.9.9.95  (3) Ein 'reset flags' erlaubt das R&uuml;cksetzen aller Debugflags (Kommandozeile) 
-<li>0.9.9.95  (4) Bisher wurde bei Fehler mehrere Male pro Sekunde ein SBMS-Readversuch gemacht. Dies wird nun auf 1/Sekunde begrenzt.
-<li>0.9.9.95  (5) Beim Browserconnect wurde bisher immer ein @Connected, danach eine UI-Aktualisierung gesendet. Nun wird auf die erste Nachricht verzichtet.
-<li>0.9.9.95  (6) Da in SBMS.cpp nun immer nach sbms.data gelesen wird, muss dessen Inhalt aktiv VOR dem &uuml;bermitteln in die GUI gepr&uuml;ft werden, sonst: WebSocket connection to '...' failed: Could not decode a text frame as UTF-8.
-<li>0.9.9.95  (7) Es werden nun nur noch SBMS-Pakete ans UI geschickt, deren L&aauml;nge genau 60(61) Zeichen sind.
-<li>0.9.9.95  (8) Die SBMS-Aktualisierung wurde auf 5s, die max. Verarbeitungsrate in SBMS.cpp auf 4s und die max. Versuchsrate auf 2s eingestellt. (die beiden letzten Werte wurden damit verdoppelt, das SBMS120 von 3s auf 5s erh&ouml;ht.
-<li>0.9.9.95  (9) In der Inverter.check()-Methode werden bei der Pr&uuml;fung von Zellspannungen nun nur noch Spannung > 0 verglichen, bei einer Zellspannung von 0 muss ein Auswertungsfehler der SBMS-Daten vorliegen. Das verhindert das kurzfristige Abschalten wegen Datenfehlern.
-<li>0.9.9.95  (10) In SBMS.cpp wird nun die Verarbeitung einmal in einem debugSbms-Abschnitt und einmal in einem einfachen Abschnitt gemacht, um das andauernde Erzeugen von unn&ouml;gen Strings zu vermeiden. Fix: ist data<50, wird keine Ui-Aktualisierung mehr getriggert.
-<li>0.9.9.96  (1) In battery.checkCellVoltages(..) wurde noch nicht ber&uuml;cksichtigt, das eine gemessene Zellspannung > 0 sein muss (0.9.9.95/9)
-<li>0.9.9.96  (2) Eine Controllerklasse ( CTRL.h ) wurde angelegt f&uuml;r die nicht zur Startklasse SBMSEsp32.ino geh&ouml;renden Methoden
-<li>0.9.9.96  (3) Die Klasse Dateien Wechselrichter.h und .cpp wurde umbenannt: Inverter.h/.cpp, zudem wurden fehlerhafte Meldungen korrigiert und das 'debug'-Flag durch 'debugInverter' ersetzt.
-<li>0.9.9.96  (4) Die Aktiviert des Batteriemodus durch inverter.starteBatterie(..) wird nun abgelehnt, wenn der Controller weniger als 60s online ist.
-<li>0.9.9.96  (5) Eine sbms.sbmsAnalyzer-Variable soll nun dabei helfen, den H&auml;nger in sbms.read() zu identifizieren.
-<li>0.9.9.96  (6) Eine initial in der Webseite gef&uuml;llte Variable 'server' wurde nur einmal hinterlegt, ohne weiter darauf zuzugreifen. Ab jetzt werden die Daten auch beim ersten Zugriff schon normal verarbeitet.
-<li>0.9.9.96  (7) Die Extrameldung 'UDP reinitialized' wurde nun mit der Folgemeldung (inkl. reconnectCount) zusammengelegt.
-<li>0.9.9.96  (8) Die im Webclient (html.h) generierte Meldung 'End trying to open webclient socket' wird nun nur noch auf der Konsole, nicht im Weboutput ausgegeben
-<li>0.9.9.96  (9) Die Position und der Vorgabewert des Timestamps in der Webseite wurde nun ge&auml;ndert und erg&auml;nzt.
 <li>0.9.9.97  (1) Nachricht 'Trying to open Webclient socket' wird nun nur noch auf die Konsole gelogged; Kommen non-Jsondaten an, werden sie nur noch ins UI gelogged, wenn der Debugschalter gesetzt ist (Webclient)
 <li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
 <li>0.9.9.97  (3) Die mit 96/4 eingef&uuml;hrte Karenzzeit von 60s triggert nun dauert, obwohl der Controller schon mehr als 60s l&auml;uft. 
@@ -81,7 +36,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
 <li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
 <li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
-<li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen auslöst ) 
+<li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen ausl&ouml;st ) 
 <li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
 <li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese überschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
 <li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
@@ -89,6 +44,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
 <li>1.0.3     (3) Wird im Inverter beim Check die Nachtzeit geprueft, so erfolgt dies alle paar Sekunden. Ein falscher SoC-Wert (einmal: 4858) kann die Batterie einschalten. Es werden nun alle Werte > 100 ignoriert. 
 <li>1.0.3     (4) SBMS.readSoc beruecksichtigt nun nur noch neu SoC-Werte, wenn sie vom alten weniger als 10% abweichen (Und der alte > 0 war)
+<li>1.0.3     (5) Da die Batterie regelmässig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
 )=====";
 
 #define VERSION "1.0.3"
