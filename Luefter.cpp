@@ -38,7 +38,7 @@ void Luefter::check() {
     }
  } else if(charger.isOn()) { //Ladebetrieb, Lader brauchen Kuehlung
     if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen, und die Temperatur>35°C ist, beim Balancing werden die Luefter nicht benutzt
-      if(temp>TEMP_THRESHOLD_HIGH) {
+      if(temp>TEMP_THRESHOLD_HIGH &&  temp<80) { //1.0.4 falls Temperatur ueber 80 Grad, handelt es sich mit einiger Sicherheit um eine Fehlmessung, die wir hier ignorieren
         msg = F("Schalte Luefter an, da gerade geladen wird; Temperatur: ");
         msg+=temp;
         msg+=F("°C");

@@ -1,5 +1,5 @@
 const char changelog[] PROGMEM = R"=====(
-<b>Device info</b>: Frank's Solar Charger Monitor
+<b>Device info</b>: Frank's Solar Charge monitor
 
 <li>0.9.9.97  (1) Nachricht 'Trying to open Webclient socket' wird nun nur noch auf die Konsole gelogged; Kommen non-Jsondaten an, werden sie nur noch ins UI gelogged, wenn der Debugschalter gesetzt ist (Webclient)
 <li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
@@ -38,13 +38,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
 <li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen ausl&ouml;st ) 
 <li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
-<li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese überschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
+<li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese &uuml;berschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
 <li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
 <li>1.0.3     (1) MyWifi.print() gibt eigenen Status aus    
 <li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
 <li>1.0.3     (3) Wird im Inverter beim Check die Nachtzeit geprueft, so erfolgt dies alle paar Sekunden. Ein falscher SoC-Wert (einmal: 4858) kann die Batterie einschalten. Es werden nun alle Werte > 100 ignoriert. 
 <li>1.0.3     (4) SBMS.readSoc beruecksichtigt nun nur noch neu SoC-Werte, wenn sie vom alten weniger als 10% abweichen (Und der alte > 0 war)
-<li>1.0.3     (5) Da die Batterie regelmässig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
+<li>1.0.3     (5) Da die Batterie regelm&auml;ssig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
+<li>1.0.3     (6) Der Fehlerz&auml;hler wird nur hochgestellt, wenn die gemessene Zellspannung > 0 ist (sonst liegt eh eine Fehlmessung vor) 
+<li>1.0.3     (7) Die L&uuml;fter werden nur eingeschaltet, wenn die gemessene Temperatur UNTER 80Grad ist, alles andere wird als Fehlmessung verworfen (Luefter.cpp)
+
 )=====";
 
 #define VERSION "1.0.3"

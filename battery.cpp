@@ -39,7 +39,9 @@ boolean Battery::checkCellVoltages() {
           wc.sendClients(d.c_str());
       }      
       if (cv[k] < LOW_MINIMAL_CV_MILLIS) {    
-          cvErrChg[k]++; 
+          if(cv[k] > 0) {
+            cvErrChg[k]++; 
+          }
           Serial.print(cvErrChg[k]);       
           Serial.print(F(": Batteriezelle "));         
           Serial.print(k); 
@@ -104,7 +106,7 @@ bool Battery::isReady2Activate() {
     return true;
   }
   if(enabled) {
-      Serial.println(F("Battery::isReady2Activate enabled==false (Batterie wird NICHT aktiviert)"));
+      Serial.println(F("Battery::isReady2Activate enabled==true (Batterie wird NICHT aktiviert)"));
       Serial.print(F("Battery::isReady2Activate soc: "));
       Serial.println(soc);
       Serial.print(F("Battery::isReady2Activate socLimit: "));
