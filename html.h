@@ -47,10 +47,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.3     (5) Da die Batterie regelm&auml;ssig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
 <li>1.0.3     (6) Der Fehlerz&auml;hler wird nur hochgestellt, wenn die gemessene Zellspannung > 0 ist (sonst liegt eh eine Fehlmessung vor) 
 <li>1.0.3     (7) Die L&uuml;fter werden nur eingeschaltet, wenn die gemessene Temperatur UNTER 80Grad ist, alles andere wird als Fehlmessung verworfen (Luefter.cpp)
+<li>1.0.4     (1) 
 
 )=====";
 
-#define VERSION "1.0.3"
+#define VERSION "1.0.4"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

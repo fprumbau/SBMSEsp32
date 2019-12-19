@@ -33,6 +33,7 @@ class Charger {
     
   public:
     bool isOn();
+    void stop();
     void toggleCharger(uint8_t nr, bool onOff, bool override, bool notify);
     bool isChargerOn(uint8_t nr);
     void checkOnIncome(); //pruefe, ob Solarstrom konsumiert werden kann

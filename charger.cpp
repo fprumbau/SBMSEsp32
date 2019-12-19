@@ -44,6 +44,12 @@ bool Charger::isOn() {
   return !digitalRead(RELAY_3) || !digitalRead(RELAY_S2);
 }
 
+//stop mit override
+void Charger::stop() {
+  disableCharger(0,1,0);
+  disableCharger(1,1,0);
+}
+
 void Charger::enableCharger(byte nr, bool override, bool notify) {
   if(nr == 1) {
       if(override) {
