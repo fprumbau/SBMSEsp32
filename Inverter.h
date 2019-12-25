@@ -3,9 +3,9 @@
 
 class Inverter {
   private: 
-    bool nacht = false;
     unsigned long lastCheckedMillis = -1;    
   public:
+    bool nacht = false;
     void setBlue();
     void setGreen();
     void setRed();   

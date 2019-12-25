@@ -351,6 +351,16 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           yield();
         }
 
+        if(doc.containsKey("auth")) { //wt, request Tesla wakeup
+          update = true;
+          const char* pw = config.load("TESLAAUTH"); 
+          int rc = perry.authorize(pw);     
+          msg+=F("Requested Tesla reauthentication; Statuscode: ");    
+          msg+=rc;
+          msg+=F("; ");
+          yield();
+        }
+
         if(doc.containsKey("lm")) { //lm set charge limit
           update = true;
           int limit = doc["lm"];

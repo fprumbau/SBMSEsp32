@@ -6,7 +6,8 @@ class Battery {
 
   private:
   
-    int LOW_MINIMAL_CV_MILLIS = 2700; //untere Zellspannung in mv
+    int LOW_MINIMAL_CV_MILLIS = 2800; //untere Zellspannung in mv
+    int LOW_NIGHTLY_CV_MILLIS = 3050; //untere Zellspannung in mv im Nachtmodus
     int CV_HYST = 50; //Anschalten der Batterie erst moeglich, wenn CV jeder Zelle > LOW_MINIMAL_CV_MILLIS + CV_HYST ist    
     int SOC_HYST = 5; //5% Hysterese  
     int cvErrChg[8]; //Zellspannungsfehlercounter Charger

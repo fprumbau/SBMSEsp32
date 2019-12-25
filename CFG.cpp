@@ -124,7 +124,9 @@ bool CFG::save() {
     Serial.println(F("Failed to open config file for writing"));
     return false;
   }
-  serializeJson(doc, Serial);
+  if(debugConfig) {
+    serializeJson(doc, Serial);
+  }
   serializeJson(doc, configFile);
   Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
 
@@ -200,6 +202,89 @@ char* CFG::webUser() {
 char* CFG::webPass() {
   return _webPass;
 }
+const char* CFG::load(const String& key) {
+  if(!SPIFFS.begin()) {
+    return NULL;
+  }
+  File configFile = SPIFFS.open("/config.json", "r");
+  if(!configFile){
+    return NULL;
+  }
+  size_t size = configFile.size();
+  if(size>8192) {
+     Serial.println(F("Config file is to large"));
+     return NULL;
+  }
+  //allocate a buffer to store contents of the file.
+  std::unique_ptr<char[]> buf(new char[size]);
+
+  //We don't use String here because ArduinoJson lib req the intput buffer
+  // to be mutable. if you don't use ArduionJson, you may as well use
+  // configFile.readString instead
+  configFile.readBytes(buf.get(), size);
+  if(debugConfig) {
+    Serial.println(buf.get());
+  }
+
+  DynamicJsonDocument doc(1024);
+  
+  auto error = deserializeJson(doc, buf.get());
+
+  if(error) {
+    Serial.println(F("Failed to parse config file"));
+  }
+  
+  const char* val = doc[key];    
+  return val;        
+}       
+bool CFG::save(const String& key, const String& val) {
+
+  if(!SPIFFS.begin()) {
+    return NULL;
+  }
+  File configFile = SPIFFS.open("/config.json", "r");
+  if(!configFile){
+    return NULL;
+  }
+  size_t size = configFile.size();
+  if(size>8192) {
+     Serial.println(F("Config file is to large"));
+     return NULL;
+  }
+  //allocate a buffer to store contents of the file.
+  std::unique_ptr<char[]> buf(new char[size]);
+
+  //We don't use String here because ArduinoJson lib req the intput buffer
+  // to be mutable. if you don't use ArduionJson, you may as well use
+  // configFile.readString instead
+  configFile.readBytes(buf.get(), size);
+  if(debugConfig) {
+    Serial.println(buf.get());
+  }
+
+  DynamicJsonDocument doc(1024);
+  
+  auto error = deserializeJson(doc, buf.get());
+
+  if(error) {
+    Serial.println(F("Failed to parse config file"));
+  }  
+
+  doc[key]=val;  
+
+  Serial.print("Key: ");
+  Serial.print(key);
+  Serial.print("; Value: ");
+  Serial.println(val);
+  
+  serializeJson(doc, Serial);
+  serializeJson(doc, configFile);
+  Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
+
+  configFile.flush();
+  configFile.close();  
+}
+
 void CFG::print() {
   Serial.println(F("--------------------------------"));
   Serial.print(F("_webUser: "));

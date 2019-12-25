@@ -1,97 +1,4 @@
-const char changelog[] PROGMEM = R"=====(
-<b>Device info</b>: Frank's Solar Charge monitor
 
-<li>0.9.9.97  (1) Nachricht 'Trying to open Webclient socket' wird nun nur noch auf die Konsole gelogged; Kommen non-Jsondaten an, werden sie nur noch ins UI gelogged, wenn der Debugschalter gesetzt ist (Webclient)
-<li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
-<li>0.9.9.97  (3) Die mit 96/4 eingef&uuml;hrte Karenzzeit von 60s triggert nun dauert, obwohl der Controller schon mehr als 60s l&auml;uft. 
-<li>0.9.9.97  (4) Es SCHEINT, der H&auml;nger kommt aus invert.checkIncome() im Bereich timeClient.update() ( while-Schleife OHNE Exit ). Ein break beendet den Loop nun nach 10 Fehlversuchen. 
-<li>0.9.9.97  (5) Eine Zellunterspannung sollte auf jeden Fall auf Kommandozeile UND GUI gelogged werden (inverter.cpp, wenn debugInverter == true)
-<li>0.9.9.97  (6) LOW_VOLTAGE_MILLIS wird von 3100 auf 2800mv heruntergenommen. Damit ist im Netzmodus eine Umschaltung auf Batterie bei 2850mV (durch Hysterese) m&ouml;glich.
-<li>0.9.9.97  (7) failureCount und errLimit wurden in inverter.h/cpp integriert, das errLimit von 5 auf 10 angehoben 
-<li>0.9.9.97  (8) Der Solarcharger sollte nicht 5, sondern 10Minuten laufen
-<li>0.9.9.97  (9) Zur Meldung "Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle 7" sollte die gemessene Spannung angegeben werden 
-<li>0.9.9.98  (1) DebugTesla-Variable eingerichtet und in Tesla.cpp verarbeitet
-<li>0.9.9.98  (2) Loginabschnitt aus html.h entfernen (Formbased-Login, nicht verwendet), der Redirecting-Timeout im u.a. Updatetemplate wurde von 3 auf 6s erh&ouml;ht
-<li>0.9.9.98  (3) Tesla.cpp gibt nun eine Erkl&auml;rung f&uuml;r den gefunden rc<0 aus
-<li>0.9.9.98  (4) Das neue Flag (momentan nur per Kommandozeile setzbar) deaktiviert den Batteriemodus (nur laden m&ouml;glich); DEFAULT: false ( wegen Belgienurlaub )
-<li>0.9.9.98  (5) Batteriemodus in CFG speichern, beim starten wiederherstellen und in GUI &auml;nderbar machen, in CFG nur 'debugConfig' verwenden
-<li>0.9.9.98  (6) Ausgabe myWifi-Verbindungsstatus mit myWifi.connected &uuml;ber print() 
-<li>0.9.9.98  (7) Statt WifiUdp in sma.read() wird nun AsyncUDP verwendet ( damit wird fast jede Sekunde automatisch ein UDP-Paket empfangen )
-<li>0.9.9.98  (8) Wird der Charger s2 in charger.cpp wg. Zellunterspannungen an oder der Inverter abgeschaltet, dann erfolgt dies nun aufgrund von Fehlercountern in battery.h ab count>3.
-<li>0.9.9.98  (9) Kommandozeile: Ein "reset sma" und ein sma.reset() nach myWifi.reconnect() wurden verdrahtet.
-<li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. l&auml;uft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
-<li>0.9.9.99  (2) Kommt in SMA.cpp ein neues UDP-Paket an, wird ein Flag gesetzt, welches steuert, dass charger.checkOnIncome() aufgerufen wird. Nach Verarbeitung setzt die Chargermethode das Flag zur&uuml;ck (Schnellere Justierung der Charger)
-<li>0.9.9.99  (3) Das Flag debugInverter in Inverter.cpp sollte beim Start- und Stop des Netzmodus keine Nachrichten unterdr&uuml;cken
-<li>0.9.9.99  (4) Konfigoption, alle einkommenden Ertragswerte (netto) direkt an alle verbundenen Clients schicken zu k&ouml;nnen (fastResponse)
-<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Ber&uuml;cksichtigung von socLimit wird f&uuml;r den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
-<li>0.9.9.99  (6) Logs.h/Logs.cpp aus PegelControl &uuml;bernommen, wird zwischen Netz- und Batteriemodus geschaltet, wird dies hier gelogged.
-<li>0.9.9.99  (7) Fix Tesla UserAgent Header 
-<li>0.9.9.99  (8) M&ouml;glichkeit einen Logeintrag zu schreiben (Test, Kommandozeile)
-<li>1.0.0     (0) Release
-<li>1.0.1     (1) Wird die inverter.starteBatterie(..) gerufen, wurde meist keine Lognachricht geschrieben (vorzeitiges return)
-<li>1.0.1     (2) Logging beim Einschalten der Batterie um den 'soc'-Wert erweitert
-<li>1.0.1     (3) Fehler in der loop0-Methode behoben, hier wurde der myWifi.connected()-Check IMMER durchgef&uuml;hrt, da 'lastConnectCheck' nie gesetzt wurde.
-<li>1.0.1     (4) Logs.cpp optimiert und Ausgabe verschlankt
-<li>1.0.1     (5) Es braucht das access_token, nicht das refresh_token zur Authentifizierung des Tesla-Accounts 
-<li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
-<li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
-<li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
-<li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen ausl&ouml;st ) 
-<li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
-<li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese &uuml;berschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
-<li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
-<li>1.0.3     (1) MyWifi.print() gibt eigenen Status aus    
-<li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
-<li>1.0.3     (3) Wird im Inverter beim Check die Nachtzeit geprueft, so erfolgt dies alle paar Sekunden. Ein falscher SoC-Wert (einmal: 4858) kann die Batterie einschalten. Es werden nun alle Werte > 100 ignoriert. 
-<li>1.0.3     (4) SBMS.readSoc beruecksichtigt nun nur noch neu SoC-Werte, wenn sie vom alten weniger als 10% abweichen (Und der alte > 0 war)
-<li>1.0.3     (5) Da die Batterie regelm&auml;ssig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
-<li>1.0.3     (6) Der Fehlerz&auml;hler wird nur hochgestellt, wenn die gemessene Zellspannung > 0 ist (sonst liegt eh eine Fehlmessung vor) 
-<li>1.0.3     (7) Die L&uuml;fter werden nur eingeschaltet, wenn die gemessene Temperatur UNTER 80Grad ist, alles andere wird als Fehlmessung verworfen (Luefter.cpp)
-<li>1.0.4     (1) Die Limits der Teslasteuerung lassen sich nun mit einer Eingabe stufenlos setzen.
-<li>1.0.4     (2) Tritt beim Wakeup ein Fehler auf, so wird dieser im Client angezeigt
-<li>1.0.4     (3) Zur Re-Authentifizierung (alle 45d Pflicht) wurde ein Button eingef&uuml;hrt. ( geht noch nicht )
-<li>1.0.4     (4) Es wurde eine Load- und Save-Methode fuer die Konfigklasse vorbereitet
-<li>1.0.4     (5) Läuft der Inverter im Nachtmodus (wurde er also autom.bei >=75%SoC gestartet, dann ist die minimale Zellspg. 3050mV, sonst (Notmodus) 2800mV (vorher 2700mV), siehe battery.h/.cpp
-
-)=====";
-
-#define VERSION "1.0.4"
-
-const char update[] PROGMEM = R"=====(
-<!DOCTYPE html><html lang="de" style="height:100%;"><head>
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-<title>{title}</title>
-<style>
-.c{text-align: center;} 
-div,input{padding:5px;font-size:1em;} 
-input{width:95%;margin-bottom:5px;border-radius: 4px;} 
-body{
-  height:100%;
-  text-align: center;
-  font-family:verdana;
-  background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAEfnpUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjarVdttuMsCP7PKmYJAcSP5WiM57w7eJc/j8YmbW9vpp078SRYQEQeREvb//81+oVH2C3kLESfvF/wuOSSZHTisj875cWN7/6ESfmRT4dAwFJQ3X/6bepn8O0cENzkl0c+hXXaidPQbeZpUPvMgs7Ui9OQys7n+ZvSHJfd3XLmu27DxMLT6PNvFxCMamCqkGwKPr5jFoUHGjWDGr6sviuBZnVonZ9ex46O7lPwjt5T7JY8+foYClr8VPBPMZp8ttexGxG694jPmR8Ezg48v8SutRpb2/bVZecRKU9zUbeljB4UC0zpGObRAl5DP4yW0CKWuAKxCjQL2kqcWBDtxo4rZ268DbryChedbBJARVZEvPOiBkmyDlB6+B03CZq0EjASXYGagi2HLzzmTWO+lSNmrgxNYRhjjPjS6BXzb9phqLWeusxLPGIFv6QnINzoyPUvtAAItxlTG/Edje7yZrkDVoGgjTBHLDAvZTdRjM/c0oGzQs8WR8u+NTjUaQAhwtwGZ1iBwOJZjT0vQSQwI44R+GR4LuqkAAE2k8rUgI1iJwSJ0ufGmMBDV0x2NkoLgDD1GgBN0gywnDPkT3AROZRNzZGZeQsWLVn26p03733wvUbloMEFCz6EEEMKOWp00aKPIcaYYk6SFCXMkk+BUkwp5YxJM0xnjM7QyLlI0eKKFV9CiSWVvCJ9Vrfa6tewxjWtuUrViu1ffQ1UY001b7whlTa32ea3sMUtbbkh15o216z5FlpsqeUDtYnqI2r8hNw1ajxR64i5oRdO1MAO4WaCezmxjhkQE8dAPHQEkNDSMVsiOycduY7ZkgSbwgSosXVwKnfEgKDbWKzxgd2J3CVuZO4j3OQ75KhD9y+Qow7dRO4rbi9Qq3mcKDoA6ruwx3TRhsLWHCIRs5S41qV3YtdF2ssC95aDdU3pXUXQtGAdwq9V6IHxsR8npZ/5cVJCx3AGAjufModcNaO0leIq48WP3O8BVZ3Hu2X5TkiX0g+EdCEFuFFdy8iiHjVf2Vm/M9grSuggdQrG+9wsB+sXjC76kNKlQvX7FG+4RPwnlwoUkutl+bJD38nEcA6MjMdhv/sUTLnlCrxhP/WZuv7s0Jg1HjkRZHilNhPhtGVjQ3+bTXSRiYLKICmeoRgO6ZZiq74j+xxsqf/ALfrTBnnXLboh9FO36K368YZb3SM5ZmP/ZON9t+j9snbtFt3C9VO36KMyeOEWPaD4A7fo8+r82i36mlwXblkvE6h0MsvE/abFQYmzeR/kbqM/6CTpXQ/4T6N73HBW1w/8u5WxxwpZYLN8V5WvqBh9V8Ks9BKmuxduedqSp41cqk+4RWCLlNTdzLie4BgZ0QIoYGrop2KAeq2rj/1duDrTAMEXIV1KXwn7rXlTl0qseielKR5LYQhx5Uu6F+7rUD/dEyj+xYXhVWrSLezcU12PKJ4Fzg4cJu3g4lLp77fJXmofGO9RN3aYv8sc6ndO3Fxu2XQGRXHNw19z+g0EzfGFJDrJyAAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAAd0SU1FB+IFEAwsCt9fsxIAAABDSURBVAjXfc67DYBADATRMUf/hVAGCU1ZHgInp+Oz0kZPtjau8zAiWKOyA4wxHpiZjQDztXY3PuMf0m/VZcyEVfWKN854GDbTdSsxAAAAAElFTkSuQmCC");} button{border:0;background-color:#b2ad98;color:#545147;line-height:2.4rem;font-size:1.2rem;width:100%;} #header{height:120px;text-align: left;color:#cbc6af;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH4gUQDDYwqX6QewAAAA1JREFUCNdjMDXWOwMAApoBY44cvvsAAAAASUVORK5CYII=");}#footer{height:24px;color:#292723;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH4gUQDDg61yhU6wAAAA1JREFUCNdjMDXWSwMAAjQA/b8+kbgAAAAASUVORK5CYII=");
-}
-#body{text-align:left;display:inline-block;min-width:260px;min-height: calc(100% - 186px);
-color:#545147;}
-h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bottom: 0px;margin-left: 10px;}
-</style>
-<script>var redirect = false;
-{redirect};
-if(redirect) {
-  setTimeout('document.location.href="/sbms";', 6000);
-}
-</script>
-</head>
-<body>
-<div id="header">
-<h2>{banner}</h2>
-<p>{build}</p><p>{branch}</p><p>{deviceInfo}</p></div> 
-<div id="body"><form method='POST' action='' enctype='multipart/form-data'><input type='file' name='update'><br/>
-<br/><input type='submit' value='Update'></form><br>{footer}</div><div id="footer"><p>SBMS120 / LiFeOP4 2,7kWh</p>
-</div> </body></html>
-)=====";
-
-const char html[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
 <head>
@@ -224,12 +131,12 @@ div::-webkit-scrollbar-track {
 <table>
 <tr>
 <td colspan="2"><input type="button" class="bs" id="state" value="Status" onclick="setOn(this);updateServer(this.id);" style="width:107px"></td>
-<td><input type="text" class="bs" id="setv" value="75" onclick="updateServer(this.id);" style="width:43px;padding-left:5px;"></td>
+<td><input type="text" class="bs" id="setv" value="50" onclick="updateServer(this.id);" style="width:43px;padding-left:5px;"></td>
 <td><input type="button" class="bs" id="set" value="Setze" onclick="setOn(this);updateServer(this.id);" style="width:50px;"></td>
 </tr><tr>
 <td>
 <input type="button" class="bs" id="wakeup" value="Wake" onclick="setOn(this);updateServer(this.id);" style="height:18px">
-<br><input type="button" class="bs" id="w2" value="Frei" onclick="setOn(this);updateServer(this.id);" style="height:18px">
+<br><input type="button" class="bs" id="w2" value="xxxx" onclick="setOn(this);updateServer(this.id);" style="height:18px">
 </td>
 <td>
 <input type="button" class="bs" id="charge" value="Lade" onclick="updateServer(this.id);" style="width:52px;">
@@ -243,7 +150,6 @@ div::-webkit-scrollbar-track {
 </td>
 </tr>
 </table>
-
 
 <div2 id="teslaout" class="bt">
 ...
@@ -577,9 +483,6 @@ function updateServer(txt) {
         case "wakeup":
           o.wt = true; //request tesla wakeup
         break;
-        case "auth":
-          o.auth = true; //request tesla re-authentication
-        break;        
         case "lim50":
           o.lm = 50; //charge limit 50%
           queryTeslaStateAfter = true;
@@ -587,11 +490,6 @@ function updateServer(txt) {
         case "lim90":
           o.lm = 90; //charge limit 90%
           queryTeslaStateAfter = true;
-        break;
-        case "set":
-          o.lm = document.getElementById("setv").value;  //charge limit
-          queryTeslaStateAfter = true;
-          setOff(document.getElementById("set"));
         break;             
         case "charge":    
           var charge = document.getElementById("charge");      
@@ -788,4 +686,3 @@ document.getElementById("dbg").checked=false;
 </script>
 </body>
 </html>
-)=====";

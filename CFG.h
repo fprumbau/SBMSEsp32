@@ -9,7 +9,9 @@ class CFG {
         void init();
   public:
         void load();
+        const char* load(const String& key);        
         bool save();
+        bool save(const String& key, const String& val);
         void print();
         void set(const String& keyVal);
         void set(const char* key, const char* val);

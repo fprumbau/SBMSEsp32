@@ -30,6 +30,7 @@ int Tesla::wakeup() {
     } else {
         Serial.println(F("Error sending wakeup POST"));
         Serial.println(http.errorToString(rc));
+        wc.sendClients(http.errorToString(rc).c_str());
     }
     yield();
     http.end();
@@ -99,7 +100,7 @@ int Tesla::authorize(const char* password) {
 
     } else {
         Serial.println(F("Error sending wakeup POST"));
-        Serial.println(http.errorToString(rc));
+        Serial.println(http.errorToString(rc));        
     }
     yield();
     http.end();

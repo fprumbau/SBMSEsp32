@@ -27,6 +27,11 @@ boolean Battery::checkCellVoltages() {
   //Ueber die 8 Zellen iterieren
   for (int k = 0; k < 8; k++) {
 
+      int lowMilliVolts = LOW_MINIMAL_CV_MILLIS;
+      if(inverter.nacht) {
+          lowMilliVolts = LOW_NIGHTLY_CV_MILLIS;
+      }
+
       if(debugBattery) {
           String d = String((char*)0);
           d.reserve(64);
@@ -35,10 +40,10 @@ boolean Battery::checkCellVoltages() {
           d+="; Voltage: ";
           d+=cv[k];
           d+="; Limit: ";
-          d+=LOW_MINIMAL_CV_MILLIS;
+          d+=lowMilliVolts;
           wc.sendClients(d.c_str());
       }      
-      if (cv[k] < LOW_MINIMAL_CV_MILLIS) {    
+      if (cv[k] < lowMilliVolts) {    
           if(cv[k] > 0) {
             cvErrChg[k]++; 
           }
@@ -105,7 +110,7 @@ bool Battery::isReady2Activate() {
     }
     return true;
   }
-  if(enabled) {
+  if(enabled && debugBattery) {
       Serial.println(F("Battery::isReady2Activate enabled==true (Batterie wird NICHT aktiviert)"));
       Serial.print(F("Battery::isReady2Activate soc: "));
       Serial.println(soc);
