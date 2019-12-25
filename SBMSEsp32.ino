@@ -398,13 +398,14 @@ void commandLine() {
         String keyVal = cmd.substring(10); //alles hinter 'set'
         keyVal.trim();
         config.set(keyVal);
-      } else if(cmd.startsWith(F("config save"))) {
-        String keyVal = cmd.substring(11); //alles hinter 'save'
+      } else if(cmd.startsWith(F("config persist"))) {
+        String keyVal = cmd.substring(14); //alles hinter 'save'
+        keyVal.trim();
         String key = config.getValue(keyVal, ':', 0);
         String val = config.getValue(keyVal, ':', 1);
         config.save(key,val);
       } else if(cmd.startsWith(F("config show"))) {
-        String key = cmd.substring(14); //alles hinter 'load'
+        String key = cmd.substring(11); //alles hinter 'load'
         const char* val = config.load(key);
         Serial.println(val);
       } else if(cmd.startsWith(F("pwm "))) {      
@@ -503,7 +504,7 @@ void commandLine() {
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
         Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
         Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!), z.B. socLimit"));
-        Serial.println(F(" - config save key:value :: Speichern/aendern eines Konfigwertes (mit Speichern!), z.B. socLimit"));        
+        Serial.println(F(" - config persist key:value :: Speichern/aendern eines Konfigwertes (mit Speichern!), z.B. socLimit"));        
         Serial.println(F(" - config show key :: Ausgabe des gespeicherten Values von 'key' auf Serial"));
         Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
         Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
