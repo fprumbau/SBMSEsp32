@@ -35,7 +35,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.1     (5) Es braucht das access_token, nicht das refresh_token zur Authentifizierung des Tesla-Accounts 
 <li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
 <li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
-<li>1.0.2     (2) Läuft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
+<li>1.0.2     (2) L&auml;uft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
 <li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen ausl&ouml;st ) 
 <li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
 <li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese &uuml;berschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
@@ -51,11 +51,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.4     (2) Tritt beim Wakeup ein Fehler auf, so wird dieser im Client angezeigt
 <li>1.0.4     (3) Zur Re-Authentifizierung (alle 45d Pflicht) wurde ein Button eingef&uuml;hrt. ( geht noch nicht )
 <li>1.0.4     (4) Es wurde eine Load- und Save-Methode fuer die Konfigklasse vorbereitet
-<li>1.0.4     (5) Läuft der Inverter im Nachtmodus (wurde er also autom.bei >=75%SoC gestartet, dann ist die minimale Zellspg. 3050mV, sonst (Notmodus) 2800mV (vorher 2700mV), siehe battery.h/.cpp
-
+<li>1.0.4     (5) L&auml;uft der Inverter im Nachtmodus (wurde er also autom.bei >=75%SoC gestartet, dann ist die minimale Zellspg. 3050mV, sonst (Notmodus) 2800mV (vorher 2700mV), siehe battery.h/.cpp
+<li>1.0.5     (1) Der L&uuml;fter wird st&auml;ndig an- und ausgeschaltet, wenn die Temperatur 38°C ist und SOC>=99 angezeigt wird. Der SOC sollte hier nicht ber&uuml;cksichtigt werden.
+<li>1.0.6     (1) Die Tesla-API verwendet nun die API des HTTPClients korrekt, indem im .begin(..) der WiFiClient als erstes Argument &uuml;bergibt.
+<li>1.0.6     (2) Bei einem readChargeState des Tesla erfolgt meist ein Fehler, da der Wagen schl&auml;ft. In diesem Fall sollte der Webclient informiert werden.
 )=====";
 
-#define VERSION "1.0.4"
+#define VERSION "1.0.6"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

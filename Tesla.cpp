@@ -6,7 +6,7 @@
 //https://tesla-api.timdorr.com/api-basics/authentication
 
 int Tesla::wakeup() {
-
+  
     HTTPClient http;
 
     beginRequest(&http, _wakeup_url);
@@ -159,9 +159,12 @@ int Tesla::readChargeState() {
         //408 == 'vehicle not available' => Wakup
       }
   } else {
-      Serial.print(F("Error sending GET charge state; rc="));
-      Serial.println(rc);
-      Serial.println(http.errorToString(rc));
+      String msg = F("Error sending GET charge state; rc=");
+      msg+=rc;
+      msg+=" / ";
+      msg+=http.errorToString(rc);
+      Serial.println(msg);
+      wc.sendClients(msg.c_str());
   }
   
   yield();
@@ -383,7 +386,9 @@ const char* Tesla::status() {
 }
 
 void Tesla::beginRequest(HTTPClient *client, char *url) {
-    client->begin(url);
+
+    WiFiClient wifiClient;
+    client->begin(wifiClient, url);
     if(debugTesla) {
       Serial.print(F("Is connected: "));
       Serial.println(client->connected());      

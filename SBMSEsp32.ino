@@ -399,13 +399,13 @@ void commandLine() {
         keyVal.trim();
         config.set(keyVal);
       } else if(cmd.startsWith(F("config persist"))) {
-        String keyVal = cmd.substring(14); //alles hinter 'save'
+        String keyVal = cmd.substring(14); //alles hinter 'persist'
         keyVal.trim();
         String key = config.getValue(keyVal, ':', 0);
         String val = config.getValue(keyVal, ':', 1);
         config.save(key,val);
       } else if(cmd.startsWith(F("config show"))) {
-        String key = cmd.substring(11); //alles hinter 'load'
+        String key = cmd.substring(11); //alles hinter 'show'
         const char* val = config.load(key);
         Serial.println(val);
       } else if(cmd.startsWith(F("pwm "))) {      
