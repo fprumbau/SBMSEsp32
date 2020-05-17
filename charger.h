@@ -30,6 +30,7 @@ class Charger {
     void disableCharger(uint8_t nr, bool active, bool notify);
     int calculateDc(float netto);
     int getS2Power(); //S2 ist variabel
+    unsigned long wait_excess_power_start_millis = 0; //Solange muss ein Ueberangebot an Solarstrom herrschen, bevor S1 angeschaltet wird, v.1.0.7
     
   public:
     bool isOn();

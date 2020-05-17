@@ -162,10 +162,13 @@ void Inverter::check()  {
               }
           } 
       } else {
-          if(nacht) {
+          //Version v. 1.0.7, Am Tag nur auf Netz umschalten, WENN SOC kleiner 50%.
+          if(nacht && battery.soc < 50) {
               nacht = false;
               if(battery.isOn()) {
-                  starteNetzvorrang(F("Schalte ab 9 Uhr wieder aufs Netz zurück"));    
+                  String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
+                  msg+=battery.soc;
+                  starteNetzvorrang(msg);    
               } 
           }
       }

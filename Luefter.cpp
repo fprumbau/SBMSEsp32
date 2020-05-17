@@ -72,3 +72,15 @@ void Luefter::check() {
     }
   }
 }
+
+bool Luefter::isOn() {
+  !digitalRead(RELAY_4);
+}
+
+void Luefter::start() {
+  digitalWrite(RELAY_4, LOW);
+}
+
+void Luefter::stop() {
+  digitalWrite(RELAY_4, HIGH);
+}

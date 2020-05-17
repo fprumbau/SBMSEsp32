@@ -7,9 +7,6 @@ class CTRL {
     public:
 
       bool isUpForSeconds(int seconds);
-      bool fansRunning();
-      void fansOn();
-      void fansOff();
       void print(); 
 };      
 #endif

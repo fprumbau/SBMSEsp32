@@ -185,8 +185,10 @@ void Charger::checkOnIncome() {
     
     /**
      * Ist Charger2 aus UND ist der letzte Schaltvorgang
-     * mehr als 30s her UND gibt es einen Energieüberschuss von 
-     * mindestens 200W, dann aktiviere S2.  
+     * mehr als 60s (s1MinRestMilis) her UND gibt es einen Energieüberschuss von mindestens 600W, 
+     * und ( v. 1.0.7 ) gibt es diesen Überschuss mindestens schon 1Minute (wait_excess_power_millis > 60000),
+     * dann aktiviere S2. Der neue Timout wait_excess_power_millis reduziert weiter den Gebrauch von relay_1
+     * unter Last.
      * 
      * Wird nichts eingespeist, dann stoppe den Charger.
      * 
@@ -201,28 +203,41 @@ void Charger::checkOnIncome() {
       if(!s1on) {
         //Läuft S2 noch nicht, dann wird S1 gestartet, wenn netto > 600, also der Max-Wert von S1
         if(!s2on) {
-          if(netto > 600){         
-            netto-=600;
-            if(debugRelais) {
-                wc.sendClients("Aktiviere Solarcharger 1 weil netto > 600 und s2 off");
-            }
-            s1on=true;
-            toggleCharger(S1,true,false,true);
-            s1_countBeforeOff = -1;      
-          } 
+          if(netto > 600){  
+            if(wait_excess_power_start_millis > 60000) {
+              if(wait_excess_power_start_millis<1) {
+                wait_excess_power_start_millis = now;
+              } 
+              netto-=600;
+              if(debugRelais) {
+                  wc.sendClients("Aktiviere Solarcharger 1 weil netto > 600 und s2 off");
+              }
+              s1on=true;
+              toggleCharger(S1,true,false,true);
+              s1_countBeforeOff = -1; 
+            }     
+          } else {
+            wait_excess_power_start_millis = 0;
+          }
         } else {
             //S1 sollte gestartet werden, wenn der aktuelle Power von S2 + netto > 600W betragen. 
             if((netto + getS2Power()) > 600) {
-              s1on=true;
-              netto-=600;
-              toggleCharger(S1,true,false,true);
-              s1_countBeforeOff = -1;    
-              if(debugRelais) {
-                wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...");
-              }  
+              if(wait_excess_power_start_millis > 60000) {
+                if(wait_excess_power_start_millis<1) {
+                  wait_excess_power_start_millis = now;
+                } 
+                s1on=true;
+                netto-=600;
+                toggleCharger(S1,true,false,true);
+                s1_countBeforeOff = -1;    
+                if(debugRelais) {
+                  wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...");
+                }  
+              }
+            } else {
+              wait_excess_power_start_millis = 0;
             }
           } 
-       
       } else if(netto < -300 && !s1override) {        
           if(enableCountBeforeOff && s1_countBeforeOff < smaMeasurementsBeforSwitchoff) {
             s1_countBeforeOff++;
@@ -232,6 +247,7 @@ void Charger::checkOnIncome() {
             }
             netto+=600;
             s1on=false;
+            wait_excess_power_start_millis = 0;
             toggleCharger(S1,false,false,true);
           }
       }

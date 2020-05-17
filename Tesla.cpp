@@ -6,10 +6,24 @@
 //https://tesla-api.timdorr.com/api-basics/authentication
 
 int Tesla::wakeup() {
-  
+
+    WiFiClient client;
     HTTPClient http;
 
-    beginRequest(&http, _wakeup_url);
+    bool ok = http.begin(client, _wakeup_url);
+    if(!ok) {
+      wc.sendClients("error beginning equest");
+      return -1;
+    }
+    http.addHeader(_hd_user_agent, _user_agent);
+    http.addHeader(_hd_app_agent, _tesla_user_agent);
+    http.addHeader(_hd_content_type, _json_header);
+    String bearerToken = String((char*)0);
+    bearerToken.reserve(96);
+    bearerToken+=F("Bearer ");
+    bearerToken+=_authorization;
+    http.addHeader(_hd_authorization, bearerToken);   
+
     yield();
     
     int rc = http.POST("");
@@ -28,9 +42,12 @@ int Tesla::wakeup() {
         //401 == Bearer Token abgelaufen oder nicht richtig
 
     } else {
-        Serial.println(F("Error sending wakeup POST"));
-        Serial.println(http.errorToString(rc));
-        wc.sendClients(http.errorToString(rc).c_str());
+        String msg = F("Error sending POST wakeup; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());  
     }
     yield();
     http.end();
@@ -43,9 +60,22 @@ int Tesla::authorize(const char* password) {
     Serial.print(password);
     Serial.println(F("<<"));
 
+    WiFiClient client;
     HTTPClient http;
 
-    beginRequest(&http, _auth_url);
+    bool ok = http.begin(client, _auth_url);
+    if(!ok) {
+      wc.sendClients("error beginning equest");
+      return -1;
+    }
+    http.addHeader(_hd_user_agent, _user_agent);
+    http.addHeader(_hd_app_agent, _tesla_user_agent);
+    http.addHeader(_hd_content_type, _json_header);
+    String bearerToken = String((char*)0);
+    bearerToken.reserve(96);
+    bearerToken+=F("Bearer ");
+    bearerToken+=_authorization;
+    http.addHeader(_hd_authorization, bearerToken);   
     yield();
 
     //Prepare Requestdata
@@ -99,8 +129,12 @@ int Tesla::authorize(const char* password) {
         //401 == Bearer Token abgelaufen oder nicht richtig
 
     } else {
-        Serial.println(F("Error sending wakeup POST"));
-        Serial.println(http.errorToString(rc));        
+        String msg = F("Error sending POST (re-)authorize; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());     
     }
     yield();
     http.end();
@@ -110,9 +144,22 @@ int Tesla::authorize(const char* password) {
 
 int Tesla::readChargeState() {
 
+  WiFiClient client;
   HTTPClient http;
 
-  beginRequest(&http, _get_charge_state_url);
+  bool ok = http.begin(client, _get_charge_state_url);
+  if(!ok) {
+    wc.sendClients("error beginning equest");
+    return -1;
+  }
+  http.addHeader(_hd_user_agent, _user_agent);
+  http.addHeader(_hd_app_agent, _tesla_user_agent);
+  http.addHeader(_hd_content_type, _json_header);
+  String bearerToken = String((char*)0);
+  bearerToken.reserve(96);
+  bearerToken+=F("Bearer ");
+  bearerToken+=_authorization;
+  http.addHeader(_hd_authorization, bearerToken);   
   yield();
   
   int rc = http.GET();
@@ -157,6 +204,13 @@ int Tesla::readChargeState() {
         //200 == OK,
         //401 == Bearer Token abgelaufen oder nicht richtig
         //408 == 'vehicle not available' => Wakup
+      } else {
+        String msg = F("Error sending GET charge state; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());        
       }
   } else {
       String msg = F("Error sending GET charge state; rc=");
@@ -175,10 +229,23 @@ int Tesla::readChargeState() {
     
 int Tesla::startCharge() {
 
+    WiFiClient client;
     HTTPClient http;
       
-    yield();
-    beginRequest(&http, _charge_start_url);    
+    yield();  
+    bool ok = http.begin(client, _charge_start_url);
+    if(!ok) {
+      wc.sendClients("error beginning equest");
+      return -1;
+    }
+    http.addHeader(_hd_user_agent, _user_agent);
+    http.addHeader(_hd_app_agent, _tesla_user_agent);
+    http.addHeader(_hd_content_type, _json_header);
+    String bearerToken = String((char*)0);
+    bearerToken.reserve(96);
+    bearerToken+=F("Bearer ");
+    bearerToken+=_authorization;
+    http.addHeader(_hd_authorization, bearerToken);    
     yield();
     int rc = http.POST("");
     Serial.print(F("Trying to issue charge start: "));
@@ -192,8 +259,12 @@ int Tesla::startCharge() {
           wc.sendClients(response.c_str());
         }
     } else {
-        Serial.println(F("Error sending POST charge start"));
-        Serial.println(http.errorToString(rc));
+        String msg = F("Error sending POST start charge; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());
     }
     yield();
     http.end();
@@ -203,10 +274,23 @@ int Tesla::startCharge() {
 
 int Tesla::stopCharge() {
 
+    WiFiClient client;
     HTTPClient http;
 
     yield();
-    beginRequest(&http, _charge_stop_url);
+    bool ok = http.begin(client, _charge_stop_url);
+    if(!ok) {
+      wc.sendClients("error beginning equest");
+      return -1;
+    }
+    http.addHeader(_hd_user_agent, _user_agent);
+    http.addHeader(_hd_app_agent, _tesla_user_agent);
+    http.addHeader(_hd_content_type, _json_header);
+    String bearerToken = String((char*)0);
+    bearerToken.reserve(96);
+    bearerToken+=F("Bearer ");
+    bearerToken+=_authorization;
+    http.addHeader(_hd_authorization, bearerToken);   
     yield();
     
     int rc = http.POST("");
@@ -220,8 +304,12 @@ int Tesla::stopCharge() {
         Serial.println(response); 
         wc.sendClients(response.c_str());
     } else {
-        Serial.println(F("Error sending POST charge stop"));
-        Serial.println(http.errorToString(rc));
+        String msg = F("Error sending POST stop charge; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());
     }
     yield();
     http.end();
@@ -231,10 +319,23 @@ int Tesla::stopCharge() {
 
 int Tesla::setChargeLimit(int percent) {
 
+  WiFiClient client;
   HTTPClient http;
 
   yield();
-  beginRequest(&http, _set_charge_limit_url);
+  bool ok = http.begin(client, _set_charge_limit_url);
+  if(!ok) {
+    wc.sendClients("error beginning equest");
+    return -1;
+  }
+  http.addHeader(_hd_user_agent, _user_agent);
+  http.addHeader(_hd_app_agent, _tesla_user_agent);
+  http.addHeader(_hd_content_type, _json_header);
+  String bearerToken = String((char*)0);
+  bearerToken.reserve(96);
+  bearerToken+=F("Bearer ");
+  bearerToken+=_authorization;
+  http.addHeader(_hd_authorization, bearerToken);    
   yield();
 
   DynamicJsonDocument doc(32);
@@ -258,8 +359,12 @@ int Tesla::setChargeLimit(int percent) {
         wc.sendClients(response.c_str());
       }
   } else {
-      Serial.println(F("Error sending POST charge limit"));
-      Serial.println(http.errorToString(rc));
+        String msg = F("Error sending POST stop charge limit; rc=");
+        msg+=rc;
+        msg+=" / ";
+        msg+=http.errorToString(rc);
+        Serial.println(msg);
+        wc.sendClients(msg.c_str());
   }  
   yield();
   http.end();
@@ -383,36 +488,6 @@ const char* Tesla::status() {
   status+=_chargerVoltage;
 
   return status.c_str();
-}
-
-void Tesla::beginRequest(HTTPClient *client, char *url) {
-
-    WiFiClient wifiClient;
-    client->begin(wifiClient, url);
-    if(debugTesla) {
-      Serial.print(F("Is connected: "));
-      Serial.println(client->connected());      
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_user_agent);
-      Serial.print(F(" to "));
-      Serial.println(_user_agent);
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_app_agent);
-      Serial.print(F(" to "));
-      Serial.println(_tesla_user_agent);      
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_content_type);
-      Serial.print(F(" to "));
-      Serial.println(_json_header);            
-    }
-    client->addHeader(_hd_user_agent, _user_agent);
-    client->addHeader(_hd_app_agent, _tesla_user_agent);
-    client->addHeader(_hd_content_type, _json_header);
-    String bearerToken = String((char*)0);
-    bearerToken.reserve(96);
-    bearerToken+=F("Bearer ");
-    bearerToken+=_authorization;
-    client->addHeader(_hd_authorization, bearerToken);   
 }
 
 bool Tesla::isCharging() {

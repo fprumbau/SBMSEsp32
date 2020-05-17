@@ -439,12 +439,12 @@ void commandLine() {
             Serial.println(serialSBMS.available());
             break;             
           case 2:
-            Serial.println(F("controller.fansOn();"));
-            controller.fansOn();
+            Serial.println(F("luefter.start();"));
+            luefter.start();
             break;
           case 3:
-            Serial.println(F("controller.fansOff();"));
-            controller.fansOff();
+            Serial.println(F("luefter.stop();"));
+            luefter.stop();
             break;      
           case 4:
             Serial.println(F("Clear serialSBMS"));
@@ -492,8 +492,8 @@ void commandLine() {
         Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
         Serial.println(F(" -      0 :: serialSBMS.flush();"));
         Serial.println(F(" -      1 :: Serial.println(serialSBMS.available());"));
-        Serial.println(F(" -      2 :: fansOn();"));
-        Serial.println(F(" -      3 :: fansOff();"));
+        Serial.println(F(" -      2 :: luefter.start();"));
+        Serial.println(F(" -      3 :: luefter.stop();"));
         Serial.println(F(" -      4 :: clear serialSBMS"));        
         Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
         Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));

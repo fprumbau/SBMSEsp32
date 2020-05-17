@@ -53,11 +53,15 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.4     (4) Es wurde eine Load- und Save-Methode fuer die Konfigklasse vorbereitet
 <li>1.0.4     (5) L&auml;uft der Inverter im Nachtmodus (wurde er also autom.bei >=75%SoC gestartet, dann ist die minimale Zellspg. 3050mV, sonst (Notmodus) 2800mV (vorher 2700mV), siehe battery.h/.cpp
 <li>1.0.5     (1) Der L&uuml;fter wird st&auml;ndig an- und ausgeschaltet, wenn die Temperatur 38°C ist und SOC>=99 angezeigt wird. Der SOC sollte hier nicht ber&uuml;cksichtigt werden.
-<li>1.0.6     (1) Die Tesla-API verwendet nun die API des HTTPClients korrekt, indem im .begin(..) der WiFiClient als erstes Argument &uuml;bergibt.
-<li>1.0.6     (2) Bei einem readChargeState des Tesla erfolgt meist ein Fehler, da der Wagen schl&auml;ft. In diesem Fall sollte der Webclient informiert werden.
+<li>1.0.6     (1) Die Tesla-API verwendet nun die API des HTTPClients korrekt, indem im .begin(..) der WiFiClient als erstes Argument &uuml;bergibt.  (revert, weil crash; evtl. muss der WifiClient VOR dem HttpClient initialisiert werden)
+<li>1.0.6     (2) Bei einem readChargeState des Tesla erfolgt meist ein Fehler, da der Wagen schl&auml;ft. In diesem Fall sollte der Webclient informiert werden. 
+<li>1.0.7     (1) Ein neuer Schwellwert wait_excess_power_start_millis regelt nun, dass der statische Charter S1 erst aktiviert wird, wenn f&uuml;r mehr als 1 Minute positive Zahlen f&uuml;r ihn vorliegen
+<li>1.0.7     (2) Bisher wurde ab 10Uhr morgens aufs Netz geschaltet, dies wird nun mit der Bedingung verkn&uuml;pft, dass der SOC kleiner als 50% ist.
+<li>1.0.8     (1) L&uuml;ftersteuerung aus CTRL.h/cpp nach Luefter.h/cpp verlegt
+<li>1.0.8     (2) Versuch, den rc=5 connection error in der Testlasteuerung zu beheben, beginRequest inline gelegt.
 )=====";
 
-#define VERSION "1.0.6"
+#define VERSION "1.0.8"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -7,6 +7,9 @@ class Luefter {
 
     public:
       void check();
+      bool isOn();
+      void start();
+      void stop();
 
 };
 

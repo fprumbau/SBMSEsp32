@@ -1,3 +1,7 @@
 {
-  "socLimit": "25"
+  "socLimit": "25",
+  "webUser": "Perry",
+  "webPass": "5785340536886787", 
+  "vehicleId": "29870352820456595",
+  "authorization": "605ec1950fe3903afc63be9e7399b2b1b6cb6f114c58a11d015c3a6b340f50aa"
 }
