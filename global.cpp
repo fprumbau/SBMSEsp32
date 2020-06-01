@@ -28,7 +28,8 @@ bool debugConfig = false;
 bool debugTesla = false;
 bool fastResponse = false; //0.9.9.98 alle Ertragsnachrichten sofort an die Clients senden
 
-extern String bitset = "0000000000000";
+//v. 1.0.13: bitset[13]: charger.automatedCharging == true 
+extern String bitset = "00000000000001"; 
 
 int RELAY_S1 = 33;
 int RELAY_S2 = 32;    
@@ -84,11 +85,6 @@ String datetime;
 
 int dayOfMonthLastRestart = -1; //Wann wurde der ESP zum letzten Mal neu gestartet?
 bool s2ActForLowCV = false; //Notladungsflag fuer S2, falls Zellspannungen unter LOW_MINIMAL_CV_MILLIS abfallen
-long s1MinRestMillis = 60000; //0.9.9.53
-long s2MinRestMillis = 30000; //0.9.9.53
-
-int dutyCycle = 0; //0.9.9.60, 0...1023
-bool enableCountBeforeOff = false; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
 String TESLA_CLIENT_ID = F("81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384");
 String TESLA_CLIENT_SECRET = F("c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3");

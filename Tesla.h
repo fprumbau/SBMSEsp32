@@ -43,6 +43,9 @@ class Tesla {
 
     //Updated flag
     bool _hasUpdate;
+
+    //beginRequest
+    void beginRequest(HTTPClient *client, char *url);
         
   public:
     void vehicleId(const char* vehicleId);

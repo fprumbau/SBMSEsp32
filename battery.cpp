@@ -76,7 +76,7 @@ boolean Battery::checkCellVoltages() {
           m+=cv[cellNumber];
           Serial.println(m);
           wc.sendClients(m.c_str());
-          charger.toggleCharger(S2,true,true,true);
+          charger.toggleCharger(S2,true,true);
           s2ActForLowCV = true;
           
       } else {
@@ -86,7 +86,7 @@ boolean Battery::checkCellVoltages() {
               String m = F("Deaktiviere Solarcharger 2 nach 10 Minuten Ladezeit jetzt...");
               Serial.println(m);
               wc.sendClients(m.c_str());
-              charger.toggleCharger(S2,false,true, true);
+              charger.toggleCharger(S2,false,true);
               s2ActForLowCV = false;
           }
           

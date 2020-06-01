@@ -59,9 +59,19 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.7     (2) Bisher wurde ab 10Uhr morgens aufs Netz geschaltet, dies wird nun mit der Bedingung verkn&uuml;pft, dass der SOC kleiner als 50% ist.
 <li>1.0.8     (1) L&uuml;ftersteuerung aus CTRL.h/cpp nach Luefter.h/cpp verlegt
 <li>1.0.8     (2) Versuch, den rc=5 connection error in der Testlasteuerung zu beheben, beginRequest inline gelegt.
+<li>1.0.8     (3) Charger.cpp hat nun eigene Ausgabe mit print()
+<li>1.0.9     (1) Chargertuning ...
+<li>1.0.9     (2) Liefen Charger 1+2 mehr als eine Stunde, wurde bisher der Batteriebetrieb abgeschaltet, das wird nun zur&uuml;ckgenommen (Batterie l&auml;uft durch, unterst&uuml;tzt durch die Charger)
+<li>1.0.10    (1) Tesla-API zur&uuml;ckgestellt, wegen rc=5, connection lost
+<li>1.0.11    (1) Stringdaten vom Inverter und Temperatur Becken empfangen
+<li>1.0.11    (2) Fix: retrieveData wurde VIEL zu h&auml;fig aufgerufen, weil connectionCheck-Timestamp nicht zur&uuml;gesetzt wurde 
+<li>1.0.12    (1) Ein 'Automatik'-Modules (automatedCharging; default: true) lösen s1override und s2override ab.
+<li>1.0.12    (2) Die globalen Variablen s1_countBeforeOff, enableCountBeforeOff (war sei 0.9.9.64 off) entfallen; s1MinRestMillis, s2MinRestMillis, dutyCycle wurden in Charger verlegt.
+<li>1.0.12    (3) Die Variable s2_millisBeforeOff wird umbenannt in s2_lowNettoMillis, eine s1_lowNettoMillis (mind. 30s) wurde hinzugefügt
+<li>1.0.13    (1) Bei config load von der Kommandozeile wird nun debugConfig gesetzt 
 )=====";
 
-#define VERSION "1.0.8"
+#define VERSION "1.0.13"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
@@ -84,7 +94,7 @@ h2{margin-top: 4px;margin-left:10px;}p{margin-top: 2px;margin-bottom: 0px;margin
 <script>var redirect = false;
 {redirect};
 if(redirect) {
-  setTimeout('document.location.href="/sbms";', 6000);
+  setTimeout('document.location.href="/";', 8000);
 }
 </script>
 </head>
@@ -201,6 +211,7 @@ div::-webkit-scrollbar-track {
       <option name="10">Debug Tesla</option>
       <option name="11">Batterie Aktiv</option>
       <option name="12">Fast Response</option>
+      <option name="13">Automatisches Laden</option>
     </select>
 </input>
 </div2>
@@ -216,10 +227,10 @@ div::-webkit-scrollbar-track {
 <div2 style='left:510px;' id='mt1'></div2> 
 </div3>
 <div3>
-<div2 style='left:5px;color:#ea8;top:22px;'id='d6'>[Source]</div2>
-<div2 style='right:580px;text-align: right;'id='d7'>[A]</div2>
-<div2 style='right:490px;text-align: right;'id='d8'>[W]</div2>
-<div5 style='width: 360px;top:0px;height:22px;text-align: right;'id='d11'></div5>
+<div2 style='left:5px;color:#ea8;line-height:19px' id='d6'>[Source]</div2>
+<div2 style='right:580px;text-align:right;line-height:19px' id='d7'>[A]</div2>
+<div2 style='right:490px;text-align:right;line-height:19px' id='d8'>[W]</div2>
+<div5 style='width:250px;top:0px;height:23px;' id='d11'></div5>
 <div2 style="border:1px solid #918263;left:360px;width:355px;height:160px;border-radius:5px;">
 <meter style='height:10px; left: 202px; top:15px; width: 6px;' min='2' max='8' value='0'></meter>
 <meter id='bat2' style='height: 30px; width: 190px; top: 2px;margin-top:2px;' min='0' low='20' max='100'></meter>
@@ -411,7 +422,31 @@ var rts_reset = false;
  * Akualisierung nach Empfang von Serverdaten
  * Ab 0.8.11 Abloesung der Einzelnachrichten durch JSon
  */
+var string1='';
+var string2='';
+var pegel=0;
+var temp=0;
+var vorlauf='';
+var ruecklauf='';
 function updateUi() {
+  if(json.hasOwnProperty("str1")) {
+    string1=json.str1;
+  }
+  if(json.hasOwnProperty("str2")) {
+    string2=json.str2;
+  } 
+  if(json.hasOwnProperty("pgl")) {
+    pegel=json.pgl;
+  }  
+  if(json.hasOwnProperty("vl")) {
+    vorlauf=json.vl;
+  }  
+  if(json.hasOwnProperty("rl")) {
+    ruecklauf=json.rl;
+  }   
+  if(json.hasOwnProperty("temp")) {
+    temp=json.temp;
+  }   
   if(json.hasOwnProperty("dbg")) {
     var dbgBitset = json.dbg;
     bitset = dbgBitset;
@@ -723,19 +758,17 @@ function updateSbmsData(){
         for (i=2;i<5;i++){htm('d'+i,w[i-2]);}   
 
         //Batt
-        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var n2=w[8]=w[9]='';
         var cv=dcmp(29,3,data)/1000;
         n2=data.charAt(28);
-        w[8]='[A]</br>';
-        w[9]='[W]</br>';
-        w[10]='[Ah]</br>';
-        w[11]='[Wh]</br>';
-        w[3] +='Batt</br>' ;
+        w[8]='[A]<br style="line-height:22px;">';
+        w[9]='[W]<br style="line-height:22px;">';;
+        w[3] +='&nbsp;<br style="line-height:22px;">Batt</br>';
         w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
         w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';       
         
         //PV1
-        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var n2=w[8]=w[9]='';
         var cv=dcmp(32,3,data)/1000;
         pv3 +=cv;
         w[3] +='PV1</br>' ;
@@ -744,7 +777,7 @@ function updateSbmsData(){
   
         
         //PV2
-        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var n2=w[8]=w[9]='';
         var cv=dcmp(35,3,data)/1000;     
         pv3 +=cv;
         w[3] +='PV2</br>' ;
@@ -756,7 +789,7 @@ function updateSbmsData(){
         sv=cv;
 
         //PV1+PV2
-        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var n2=w[8]=w[9]='';
         var cv=dcmp(41,3,data)/1000;
         cv=pv3;
         w[3] +='PV1+2</br>' ;
@@ -764,12 +797,27 @@ function updateSbmsData(){
         w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
 
         //Ext.Load
-        var n2=w[8]=w[9]=w[10]=w[11]='';
+        var n2=w[8]=w[9]='';
         var cv=dcmp(47,3,data)/1000;
         cv=sv;
         w[3] +='ExtLd</br>';
         w[4] +=w[8]+n2+cv.toFixed(3)+'</br>';
         w[5] +=w[9]+n2+(cv*bv).toFixed(1)+'</br>';
+
+        //String 1/2
+        w[3] +='Strg 1/2</br>';
+        w[4] += string1 + 'W</br>';
+        w[5] += string2 + 'W</br>';
+
+        //Vorl./Rueckl.    
+        w[3] +='VL/RL</br>';
+        w[4] += vorlauf + '°C</br>';
+        w[5] += ruecklauf + '°C</br>';
+
+        //Temp./Pegel   
+        w[3] +='Pgl/Tp</br>';
+        w[4] += pegel + 'cm</br>';
+        w[5] += temp + '°C</br>';
 
         //div2#d6 Spalte mit 'Batt', 'PV1' etc....
         htm('d6',w[3]);

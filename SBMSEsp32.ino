@@ -234,12 +234,14 @@ void loop0(void * parameter) {
         digitalWrite(RELAY_4, HIGH); //Lüfter abschalten, da meist der Task1 hängt und darum keine Steuerung mehr erfolgt.
       } 
       //0.9.9.99 myWifi connection check
-      if((now - lastConnectCheck) > 10000) {
+      if((now - lastConnectCheck) > 30000) {
         if(!myWifi.connected()) {
           Serial.println(F("myWifi ist nicht verbunden, versuche einen Reconnect"));    
           myWifi.reconnect();
-          lastConnectCheck = now;
         }
+        //1.0.10 pegel und Stringdaten empfangen
+        lastConnectCheck = now;
+        controller.retrieveData();
       }
       //xSemaphoreGive(semaphore);
   }
@@ -345,29 +347,42 @@ void commandLine() {
         testData = cmd.substring(5); 
         msg+=testData;     
       } else if(cmd.startsWith(F("tesla status"))) {          
+        debugTesla=true;
         perry.readChargeState();
+        debugTesla=false;
       } else if(cmd.startsWith(F("tesla wakeup"))) {          
+        debugTesla=true;
         perry.wakeup();
-      } else if(cmd.startsWith(F("tesla charge start"))) {          
+      } else if(cmd.startsWith(F("tesla charge start"))) {     
+        debugTesla=true;     
         perry.startCharge();
-      } else if(cmd.startsWith(F("tesla charge stop"))) {         
+        debugTesla=false;
+      } else if(cmd.startsWith(F("tesla charge stop"))) {    
+        debugTesla=true;     
         perry.stopCharge();
+        debugTesla=false;
       } else if(cmd.startsWith(F("tesla authorize"))) {      
+        debugTesla=true;
         String password = cmd.substring(15); //alles hinter 'authorize'
         password.trim();
         perry.authorize(password.c_str());
+        debugTesla=false;
       } else if(cmd.startsWith(F("debug on"))) {        
         debug = true;
       } else if(cmd.startsWith(F("debug off"))) {         
         debug = false;
       } else if(cmd.startsWith(F("battery off"))) {        
+        debugInverter=true;
         inverter.stopBattery = true;
         inverter.starteNetzvorrang(F("Schalte Batterie ueber Kommandozeile ab"));
         inverter.setRed();        
-      } else if(cmd.startsWith(F("battery on"))) {         
+        debugInverter=false;
+      } else if(cmd.startsWith(F("battery on"))) {   
+        debugInverter=true;      
         inverter.stopBattery = false;
         inverter.starteBatterie(F("Schalte Batterie ueber Kommandozeile an"));
         inverter.setGreen();
+        debugInverter=false;
       } else if(cmd.startsWith(F("battery mode on"))) {        
         battery.enabled = true;      
       } else if(cmd.startsWith(F("battery mode off"))) {         
@@ -381,6 +396,7 @@ void commandLine() {
         controller.print();
         logs.print();
         myWifi.print();
+        charger.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -389,25 +405,37 @@ void commandLine() {
       } else if(cmd.startsWith(F("tesla control off"))) {
         teslaCtrlActive = false;
       } else if(cmd.startsWith(F("config load"))) {
+        debugConfig=true;
         config.load();
+        debugConfig=false;
       } else if(cmd.startsWith(F("config save"))) {
         config.save();
       } else if(cmd.startsWith(F("reset sma"))) {
+        debugSma=true;
         sma.reset();
+        debugSma=false;
       } else if(cmd.startsWith(F("config set"))) {
+        debugConfig=true;
         String keyVal = cmd.substring(10); //alles hinter 'set'
         keyVal.trim();
         config.set(keyVal);
+        debugConfig=false;
       } else if(cmd.startsWith(F("config persist"))) {
+        debugConfig=true;
         String keyVal = cmd.substring(14); //alles hinter 'persist'
         keyVal.trim();
         String key = config.getValue(keyVal, ':', 0);
         String val = config.getValue(keyVal, ':', 1);
         config.save(key,val);
+        debugConfig=false;
       } else if(cmd.startsWith(F("config show"))) {
         String key = cmd.substring(11); //alles hinter 'show'
         const char* val = config.load(key);
         Serial.println(val);
+      } else if(cmd.startsWith(F("retrieve data"))) {
+        controller.debugCtrl=true;
+        controller.retrieveData();
+        controller.debugCtrl=false;
       } else if(cmd.startsWith(F("pwm "))) {      
         msg = F("setze PWM:");     
         String pwm = cmd.substring(4); 
@@ -508,6 +536,7 @@ void commandLine() {
         Serial.println(F(" - config show key :: Ausgabe des gespeicherten Values von 'key' auf Serial"));
         Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
         Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
+        Serial.println(F(" - retrieve data :: Dateneinsammeln und ausgeben"));
         Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         return;

@@ -90,6 +90,11 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(12,48);
         } 
+        if(charger.automatedCharging) {
+          bitset.setCharAt(13,49);
+        } else {
+          bitset.setCharAt(13,48);
+        } 
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -107,6 +112,12 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["dt"]=datetime;
         doc["t"]=temp;
         doc["ta"]=teslaCtrlActive;
+        doc["str1"] = controller.string1;
+        doc["str2"] = controller.string2;
+        doc["pgl"] = controller.pegel;
+        doc["temp"] = controller.temp;
+        doc["vl"] = controller.vorlauf;
+        doc["rl"] = controller.ruecklauf;
         char jsonChar[512];
         serializeJson(doc, jsonChar);
         String str(jsonChar);
@@ -170,7 +181,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           bool s1 = doc["s1"];
           if(s1 != charger.isChargerOn(S1)) {    
             update = true;    
-            charger.toggleCharger(S1, s1, true, false);
+            charger.toggleCharger(S1, s1, false);
             buildMessage(&msg, "S1", String(s1).c_str());
           }
           yield();
@@ -180,7 +191,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           bool s2 = doc["s2"];
           if(s2 != charger.isChargerOn(S2)) {    
             update = true;    
-            charger.toggleCharger(S2, s2, true, false);
+            charger.toggleCharger(S2, s2, false);
             buildMessage(&msg, "S2", String(s2).c_str());
           }
           yield();
@@ -296,7 +307,16 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "fastResponse", String(fastResponse).c_str());      
                   config.save();
                 }
-                break;                                        
+                break;      
+             case 13:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  charger.automatedCharging = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "charger.automatedCharging", String(charger.automatedCharging).c_str());      
+                  config.save();
+                }
+                break;
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  

@@ -94,11 +94,6 @@ extern String datetime;
 
 extern int dayOfMonthLastRestart; //Wann wurde der ESP zum letzten Mal neu gestartet?
 extern bool s2ActForLowCV;  //0.9.9.46
-extern long s1MinRestMillis; //0.9.9.53
-extern long s2MinRestMillis; //0.9.9.53
-
-extern int dutyCycle; //0.9.9.60
-extern bool enableCountBeforeOff; //0.9.9.64 Die Charger werden nun direkt geschaltet, nicht erst nach n-Messungen (siehe 0.9.9.44)
 
 extern String TESLA_CLIENT_ID;
 extern String TESLA_CLIENT_SECRET;
