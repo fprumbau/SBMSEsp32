@@ -394,7 +394,7 @@ void commandLine() {
         wc.print();
         battery.print();
         controller.print();
-        logs.print();
+        logs.print(false);
         myWifi.print();
         charger.print();
       } else if(cmd.startsWith(F("show heap"))) {

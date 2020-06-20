@@ -9,6 +9,16 @@ void WebCom::sendClients(const char* msg) {
   ws.textAll(msg);
 }
 
+void WebCom::sendClients(const char* msg, bool save) { 
+  //Fixme save msg (wenn client sich connected, bekommt er alle im Buffer liegenden Nachrichten)
+  String str = String((char*)0);
+  str = timeClient.getFormattedDate();
+  str += ": ";
+  str += msg;
+  ws.textAll(str);
+  logs.append(str);
+}
+
 void WebCom::sendJson(const char* key, const char* value) {
   int len = strlen(key) + strlen(value) + 8;
   String msg = String((char *)0);
@@ -146,7 +156,8 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           //0.9.9.95 Verzicht auf: client->text(F("@ Connected"));
          
           //Aktualisieren von debug/debug1/s1/s2/netz bzw batt
-          wc.updateUi(client, false);      
+          wc.updateUi(client, false);  
+          logs.print(true); //die letzten Ereignisse zum client schreiben    
                  
           break;
       }    

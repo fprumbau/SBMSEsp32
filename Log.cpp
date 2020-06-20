@@ -104,28 +104,37 @@ String LOG::save() {
   return msg;
 }
 
-void LOG::print(){
-  Serial.print(F("\nEs traten bisher "));
-  Serial.print(eventCount);
-  Serial.println(F(" Logevents auf "));
+void LOG::print(bool web){
 
-  Serial.print(F("Oldest: "));
-  Serial.println(oldest);
-
-  Serial.print(F("Eventindex: "));
-  Serial.println(eventIndex);
-  
-  int actualEventCount = length();
-
-  Serial.print(F("actualEventCount: "));
-  Serial.println(actualEventCount);
-  
-  for(int i = oldest; i < actualEventCount; i++) {
-    Serial.print(logEvents[i]);
-  }
-  if(oldest > 0) {
-      for(int j = 0; j < oldest; j++) {
-        Serial.print(logEvents[j]);
+  if(!false) {
+      Serial.print(F("\nEs traten bisher "));
+      Serial.print(eventCount);
+      Serial.println(F(" Logevents auf "));
+    
+      Serial.print(F("Oldest: "));
+      Serial.println(oldest);
+    
+      Serial.print(F("Eventindex: "));
+      Serial.println(eventIndex);
+      
+      int actualEventCount = length();
+    
+      Serial.print(F("actualEventCount: "));
+      Serial.println(actualEventCount);
+      
+      for(int i = oldest; i < actualEventCount; i++) {
+        Serial.print(logEvents[i]);
+      }
+      if(oldest > 0) {
+          for(int j = 0; j < oldest; j++) {
+              Serial.print(logEvents[j]);
+          }
+      }
+  } else {
+      if(oldest > 0) {
+          for(int j = 0; j < oldest; j++) {
+               wc.sendClients(logEvents[j].c_str());
+          }
       }
   }
   /*

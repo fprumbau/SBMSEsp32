@@ -21,7 +21,7 @@ void Inverter::starteNetzvorrang(String reason) {
   Serial.println(msg);
   if (msg.length() > 0) {    
     logs.append(msg);
-    wc.sendClients(msg.c_str());
+    wc.sendClients(msg.c_str(), true);
   }
 }
 
@@ -49,7 +49,7 @@ bool Inverter::starteBatterie(String reason) {
         return false;
       }
       digitalWrite(RELAY_PIN, HIGH); //OFF, d.h. Batterie aktiv
-      wc.sendClients("Batterie -> An, Netz -> Aus");
+      wc.sendClients("Batterie -> An, Netz -> Aus", true);
       msg += F("Starte Batterie :: ");
       msg += reason;
       msg += '\n';
@@ -57,7 +57,7 @@ bool Inverter::starteBatterie(String reason) {
     Serial.println(msg);
     if (msg.length() > 0) {  
        logs.append(msg);
-       wc.sendClients(msg.c_str());
+       wc.sendClients(msg.c_str(), true);
     }    
     return true; //lief schon oder wurde aktiviert
   } else {
@@ -68,7 +68,7 @@ bool Inverter::starteBatterie(String reason) {
   Serial.println(msg);
   if (msg.length() > 0) {  
      logs.append(msg);
-     wc.sendClients(msg.c_str());
+     wc.sendClients(msg.c_str(), true);
   }
   return false;
 }

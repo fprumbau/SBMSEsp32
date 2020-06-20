@@ -133,8 +133,10 @@ bool SBMS::read() {
       return false;
     }
 
-    //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst der failureCount hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
-    battery.soc = 0;
+    //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst 
+    //                       der failureCount hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
+    //v.1.0.15 in SBMS.cpp wurd bei jedem SBMS-Datenpaket erst der soc auf 0 gestellt. Dadurch ist oft unn&ouml;tig auf Netzbetrieb umgeschaltet worden (ab 10Uhr)
+    //battery.soc = 0;
 
     //Werte nun ans Webfrontend schicken
     wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt

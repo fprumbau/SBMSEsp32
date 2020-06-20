@@ -67,11 +67,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.11    (2) Fix: retrieveData wurde VIEL zu h&auml;fig aufgerufen, weil connectionCheck-Timestamp nicht zur&uuml;gesetzt wurde 
 <li>1.0.12    (1) Ein 'Automatik'-Modules (automatedCharging; default: true) lösen s1override und s2override ab.
 <li>1.0.12    (2) Die globalen Variablen s1_countBeforeOff, enableCountBeforeOff (war sei 0.9.9.64 off) entfallen; s1MinRestMillis, s2MinRestMillis, dutyCycle wurden in Charger verlegt.
-<li>1.0.12    (3) Die Variable s2_millisBeforeOff wird umbenannt in s2_lowNettoMillis, eine s1_lowNettoMillis (mind. 30s) wurde hinzugefügt
+<li>1.0.12    (3) Die Variable s2_millisBeforeOff wird umbenannt in s2_lowNettoMillis, eine s1_lowNettoMillis (mind. 30s) wurde hinzugef&uuml;gt
 <li>1.0.13    (1) Bei config load von der Kommandozeile wird nun debugConfig gesetzt 
+<li>1.0.14    (1) Im WebCom wurde eine neue Methode hinzugef&uuml;gt, um einen Log-Ringpuffer bef&uuml;llen zu k&oouml;nnen, der bei Reconnect an den Client geschickt wird. Jeder neue Client bekommt ein Update der letzten Messages
+<li>1.0.15    (1) Im Inverter.cpp wird tags&uuml;ber auf Netzbetrieb gestellt, wenn der battery.soc unter 50% f&auml;llt. Wird in SBMS.cpp aber der battery.soc falsch gelesen, wird auf 0 gestellt. Das wird nun nicht mehr gemacht.
 )=====";
 
-#define VERSION "1.0.13"
+#define VERSION "1.0.15"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -4,7 +4,7 @@
 
 void Battery::print() {
   Serial.println(F("--------------------------------"));
-  Serial.print(F("Batterie: "));
+  Serial.print(F("Batterie isOn: "));
   Serial.println(isOn()); 
   Serial.print(F("Ladezustand: "));
   Serial.println(soc); 

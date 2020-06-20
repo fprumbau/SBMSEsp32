@@ -19,7 +19,7 @@ class LOG {
         String get(int index);
         String load();
         String save();
-        void print();
+        void print(bool web);
         bool append(String logEntry);
 };
 

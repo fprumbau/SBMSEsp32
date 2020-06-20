@@ -201,7 +201,7 @@ void Charger::checkOnIncome() {
               if ((now - wait_excess_power_start_millis) > 60000) {
                 netto -= 600;
                 if (debugRelais) {
-                  wc.sendClients("Aktiviere Solarcharger 1 weil netto > 600 und s2 off");
+                  wc.sendClients("Aktiviere Solarcharger 1 weil netto > 600 und s2 off", true);
                 }
                 s1on = true;
                 toggleCharger(S1, true, true);
@@ -220,7 +220,7 @@ void Charger::checkOnIncome() {
                 netto -= 600;
                 toggleCharger(S1, true, true);
                 if (debugRelais) {
-                  wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...");
+                  wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...", true);
                 }
                 return; //direkt nach Schalten von S1 nichts weiteres mehr machen
               }         
@@ -235,7 +235,7 @@ void Charger::checkOnIncome() {
             }
             if ( (now - s1_lowNettoMillis) > 30000) { //erst nach 30s negativen Energiebetrags Charger 1 abschalten
               if (debugRelais) {
-                wc.sendClients("Deaktiviere Solarcharger 1");
+                wc.sendClients("Deaktiviere Solarcharger 1, weil >30s ein negativer Ertrag ist", true);
               }
               netto += 600;
               s1on = false;
