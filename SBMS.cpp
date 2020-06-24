@@ -204,7 +204,7 @@ bool SBMS::read() {
 void SBMS::readSoc(const char* txt, int len) {
   int val = sbms.dcmp(6, 2, txt, len);
   if (val > 0 && val <= 100 ) {
-    if (battery.soc == 0) {
+    if (battery.soc <= 0) {
       battery.soc = val;  
     } else {
       if (std::abs(val - battery.soc) < 10) {
