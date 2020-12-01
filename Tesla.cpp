@@ -43,9 +43,13 @@ int Tesla::authorize(const char* password) {
     Serial.print(password);
     Serial.println(F("<<"));
 
+    WiFiClient client;
     HTTPClient http;
-
-    beginRequest(&http, _auth_url);
+    http.begin(client, _auth_url);
+    http.addHeader(_hd_user_agent, _user_agent);
+    http.addHeader(_hd_app_agent, _tesla_user_agent);
+    http.addHeader(_hd_content_type, _json_header);
+    
     yield();
 
     //Prepare Requestdata
@@ -65,7 +69,7 @@ int Tesla::authorize(const char* password) {
     Serial.println(rc);
     yield();
  
-    if(rc>0) {
+    if(rc == 200) {
       
         Serial.println(_auth_url);
         String response = http.getString();    
@@ -73,7 +77,13 @@ int Tesla::authorize(const char* password) {
         wc.sendClients(response.c_str());
         DynamicJsonDocument doc(256); 
         deserializeJson(doc, response);
-        String rt = doc["access_token"];
+
+        //"Bearer TOKEN"
+        String accessToken = doc["access_token"];
+        String rt = String((char *)0);
+        rt.reserve(128);
+        rt = "Bearer ";
+        rt += accessToken;
         _authorization = new char[rt.length()+1];
         rt.toCharArray(_authorization, rt.length()+1); 
                
@@ -403,11 +413,7 @@ void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->addHeader(_hd_user_agent, _user_agent);
     client->addHeader(_hd_app_agent, _tesla_user_agent);
     client->addHeader(_hd_content_type, _json_header);
-    String bearerToken = String((char*)0);
-    bearerToken.reserve(96);
-    bearerToken+=F("Bearer ");
-    bearerToken+=_authorization;
-    client->addHeader(_hd_authorization, bearerToken);   
+    client->addHeader(_hd_authorization, _authorization);   
 }
 
 bool Tesla::isCharging() {

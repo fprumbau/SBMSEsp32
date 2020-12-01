@@ -96,7 +96,8 @@ void OTA::setup(const char *path, String username, String password) {
         fileSize = len;
         
         // calculate sketch space required for the update; 1048576
-        uint32_t maxSketchSpace = (1248576 - 0x1000) & 0xFFFFF000;
+        // 1248576 auf 1348576 erhoeht
+        uint32_t maxSketchSpace = (1348576 - 0x1000) & 0xFFFFF000;
         Serial.print(F("maxSketchSpace: "));
         Serial.println(maxSketchSpace);
         if(!Update.begin(maxSketchSpace)){//start with max available size

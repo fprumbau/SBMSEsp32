@@ -71,9 +71,13 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.13    (1) Bei config load von der Kommandozeile wird nun debugConfig gesetzt 
 <li>1.0.14    (1) Im WebCom wurde eine neue Methode hinzugef&uuml;gt, um einen Log-Ringpuffer bef&uuml;llen zu k&oouml;nnen, der bei Reconnect an den Client geschickt wird. Jeder neue Client bekommt ein Update der letzten Messages
 <li>1.0.15    (1) Im Inverter.cpp wird tags&uuml;ber auf Netzbetrieb gestellt, wenn der battery.soc unter 50% f&auml;llt. Wird in SBMS.cpp aber der battery.soc falsch gelesen, wird auf 0 gestellt. Das wird nun nicht mehr gemacht.
+<li>1.0.16    (1) Libupates und IDF 3.3 ( 1.0.5-rc3)
+<li>1.0.16    (2) Tesla Re-Authentifizierung ohne Bearer Token (das ist ja abgelaufen) und mit anderer Zugriffsmechanik (Tesla.cpp)
+<li>1.0.16    (3) OTA.cpp, max. Groesse erhoeht: 1248576 auf 1348576 
+
 )=====";
 
-#define VERSION "1.0.15"
+#define VERSION "1.0.16"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
@@ -120,7 +124,6 @@ const char html[] PROGMEM = R"=====(
 <meta http-equiv='pragma' content='no-cache'>
 <style media='screen' type='text/css'>
 meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;border-radius:3px;}
-.bar{position:absolute;bottom:0px;display:inline-block;}
 mx1{border:1px solid #fff;color:#fff;padding:0px 3px}
 mn1{border:1px solid #fe9;color:#fe9;padding:0px 3px}
 Val{color:#fed;}
