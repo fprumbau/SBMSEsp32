@@ -148,6 +148,8 @@ void Inverter::check()  {
       Serial.print(":");
       Serial.println(secs);    
       wc.sendClients(datetime.c_str());
+      Serial.println(F("Flag 'badBattery': "));
+      Serial.print(badBattery);
   }
 
   if(!badBattery) { 

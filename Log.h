@@ -1,7 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#define LOGSIZE 10
+#define LOGSIZE 20
 #define BUFFSIZE LOGSIZE * 80
 
 //SPIFFS config disk

@@ -74,10 +74,11 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.16    (1) Libupates und IDF 3.3 ( 1.0.5-rc3)
 <li>1.0.16    (2) Tesla Re-Authentifizierung ohne Bearer Token (das ist ja abgelaufen) und mit anderer Zugriffsmechanik (Tesla.cpp)
 <li>1.0.16    (3) OTA.cpp, max. Groesse erhoeht: 1248576 auf 1348576 
-
+<li>1.0.17    (1) Loglines von 10 auf 20 erhoeht, battery.print gibt nun auch die Fehlercounter für Inverter und Charger aus (moegliche Analyse, warum Batterieumschaltung nach einiger Zeit nicht mehr automatisch erfolgt)
+<li>1.0.17    (2) Revert max-Size OTA.cpp (Bad Size Given bei jedem Updateversuch)
 )=====";
 
-#define VERSION "1.0.16"
+#define VERSION "1.0.17"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

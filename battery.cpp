@@ -14,6 +14,22 @@ void Battery::print() {
   Serial.println(enabled);     
   Serial.print(F("SOC_HYST: "));
   Serial.println(SOC_HYST);       
+
+  //Ueber die 8 Zellen iterieren
+  for (int k = 0; k < 8; k++) {
+          Serial.print(F(": Batteriezellefehlercounter Charger Zelle "));         
+          Serial.print(k); 
+          Serial.print(F(" : "));
+          Serial.println(cvErrChg[k]);       
+  }
+    //Ueber die 8 Zellen iterieren
+  for (int k = 0; k < 8; k++) {
+          Serial.print(F(": Batteriezellefehlercounter Inverter Zelle "));         
+          Serial.print(k); 
+          Serial.print(F(" : "));
+          Serial.println(cvErrInv[k]);       
+  }
+  
 }
 
 /**
