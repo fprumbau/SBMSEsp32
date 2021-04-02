@@ -17,14 +17,14 @@ void Battery::print() {
 
   //Ueber die 8 Zellen iterieren
   for (int k = 0; k < 8; k++) {
-          Serial.print(F(": Batteriezellefehlercounter Charger Zelle "));         
+          Serial.print(F("Cellerrors charger "));         
           Serial.print(k); 
           Serial.print(F(" : "));
           Serial.println(cvErrChg[k]);       
   }
     //Ueber die 8 Zellen iterieren
   for (int k = 0; k < 8; k++) {
-          Serial.print(F(": Batteriezellefehlercounter Inverter Zelle "));         
+          Serial.print(F("Cellerrors inverter "));         
           Serial.print(k); 
           Serial.print(F(" : "));
           Serial.println(cvErrInv[k]);       

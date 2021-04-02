@@ -76,9 +76,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.16    (3) OTA.cpp, max. Groesse erhoeht: 1248576 auf 1348576 
 <li>1.0.17    (1) Loglines von 10 auf 20 erhoeht, battery.print gibt nun auch die Fehlercounter für Inverter und Charger aus (moegliche Analyse, warum Batterieumschaltung nach einiger Zeit nicht mehr automatisch erfolgt)
 <li>1.0.17    (2) Revert max-Size OTA.cpp (Bad Size Given bei jedem Updateversuch)
+<li>1.0.18    (1) Meter-Rendering Chrome gefixed
 )=====";
 
-#define VERSION "1.0.17"
+#define VERSION "1.0.18"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
@@ -124,7 +125,9 @@ const char html[] PROGMEM = R"=====(
 <meta http-equiv='expires' content='0'>
 <meta http-equiv='pragma' content='no-cache'>
 <style media='screen' type='text/css'>
-meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;border-radius:3px;}
+meter {width:180px;height:18px;position:absolute;left:10px;}
+//meter {-moz-appearance:none;appearance:none;width:180px;height:12px;position:absolute;left:10px;box-shadow:1px 2px 3px #ec6;border-radius:3px;}
+#bat {height: 87px; width: 320px; top: 0px;}         
 mx1{border:1px solid #fff;color:#fff;padding:0px 3px}
 mn1{border:1px solid #fe9;color:#fe9;padding:0px 3px}
 Val{color:#fed;}
@@ -223,7 +226,7 @@ div::-webkit-scrollbar-track {
 </div2>
 </div3>
 <div3>
-<meter id='bat' style='height: 70px; width: 320px; top: 9px;' min='0' low='30' max='100'></meter>
+<meter id='bat' min='0' low='30' max='100'></meter>
 <meter style='height: 50px; left: 332px; top:18px; width: 15px;' min='2' max='8' value='0'></meter>
 <div2 style='color:#030;font-size:48px;top:35px;left:120px;text-shadow: -2px -2px 2px #efc;' id='SOC' ></div2>
 <div2 style='left:360px;color:#ea8;' id='d2'></div2>
@@ -738,6 +741,10 @@ function updateSbmsData(){
         }     
         sbms2[9]=minInd+1;
         sbms2[8]=maxInd+1;   
+        var mt = document.querySelector('#mt1');
+        while (mt.firstChild) {
+          mt.removeChild(mt.lastChild);
+        }
         for (x1=0;x1<8;x1++) {
           var n=n1='';   
           var cv=cvs[x1];
@@ -747,10 +754,8 @@ function updateSbmsData(){
           w[1] +=n+cv.toFixed(3)+n1+'</br>';
           if (sbms2[x1]!=1){w[2] +='<txt>V</txt></br>';}
           else {w[2] +='<lt><</lt></br>';};
-          bv +=cv;
-          var mt = document.querySelector('#mt1');
+          bv +=cv;         
           var x = document.createElement('meter');
-          //Frank: Divisor von 1000 auf 100 geaendert
           x.setAttribute('min',dcmp(5,2,xsbms)/100);
           x.setAttribute('max',dcmp(3,2,xsbms)/100);
           if(!isNaN(cv)) {
