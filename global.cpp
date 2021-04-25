@@ -38,7 +38,7 @@ int RELAY_S2 = 32;
 int RELAY_3 = 13; //Schalten von S1 (Remote), v.0.9.9.47 (R3 ist das einzige auf NC laufende Relais, d.h. Shorted == HLG600 ist aus)
 int RELAY_4 = 23; //Schalten des Luefters, v.0.9.9.40
 
-int RELAY_PIN = 21;    
+int RELAY_PIN = 0; //war bis v.1.0.18 auf GPIO21    
 int LED_S1 = 25;
 int LED_S2 = 26;
 int TASTER = 19; //manuelle Inverterumschaltung
@@ -104,3 +104,6 @@ HardwareSerial serialSBMS(1); //0.9.9.95, uart 1
 CTRL controller; //0.9.9.96
 unsigned long lastConnectCheck = 0; //0.9.9.99
 LOG logs; //0.9.9.99
+LiquidCrystal_I2C lcd(0x3F, 20, 4); //3.0.1
+ZMPT101B voltageSensor(34); //3.0.1, Analog read auf 34
+Display display; //3.0.1

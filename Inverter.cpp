@@ -20,8 +20,8 @@ void Inverter::starteNetzvorrang(String reason) {
   }
   Serial.println(msg);
   if (msg.length() > 0) {    
-    logs.append(msg);
-    wc.sendClients(msg.c_str(), true);
+     logs.append(msg);
+     wc.sendClients(msg.c_str(), true);
   }
 }
 
@@ -36,6 +36,7 @@ bool Inverter::starteBatterie(String reason) {
   if(!battery.enabled) {
     msg = F("Kann Batterie nicht starten, da battery.enabled==false");
     Serial.println(msg);
+    logs.append(msg);
     wc.sendClients(msg.c_str());
     return false;
   }
@@ -45,6 +46,7 @@ bool Inverter::starteBatterie(String reason) {
       if(!controller.isUpForSeconds(60)) {
         msg = F("Bevor der Batteriemodus aktiviert werden kann, muss der Controller mindestends 60s laufen");
         Serial.println(msg);
+        logs.append(msg);
         wc.sendClients(msg.c_str());        
         return false;
       }
@@ -97,6 +99,10 @@ void Inverter::setRed() {
  */
 void Inverter::check()  {
 
+  if (debugInverter) {
+    Serial.println(F("Inverter::check()"));
+  }
+
   //Zur weiteren Pruefung sollte die soc vorliegen
   if (battery.soc < 0) return; //die Main-Loop sollte erstmal Werte lesen
 
@@ -142,14 +148,17 @@ void Inverter::check()  {
   int secs = timeClient.getSeconds();
   datetime = timeClient.getFormattedDate();
   if (debugInverter) {
+      Serial.print(F("Time: "));
       Serial.print(hours);
       Serial.print(":");
       Serial.print(mins);
       Serial.print(":");
       Serial.println(secs);    
       wc.sendClients(datetime.c_str());
-      Serial.println(F("Flag 'badBattery': "));
-      Serial.print(badBattery);
+      Serial.print(F("Flag 'badBattery': "));
+      Serial.println(badBattery);
+      Serial.print(F("Flag 'nacht': "));
+      Serial.println(nacht);
   }
 
   if(!badBattery) { 
@@ -157,16 +166,16 @@ void Inverter::check()  {
       //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
       if(hours>=18 || hours < 9) {
           if(!nacht && !battery.isOn() && battery.isReady2Activate()) { //das 'nacht'-Flag verhindert, dass mehrfach versucht wird, auf Batterie umzuschalten; war die Umschaltung erfolgreich, ist nacht==true
-              nacht = starteBatterie("Batteriezeit ab 18 Uhr");  
+              nacht = starteBatterie(F("Batteriezeit ab 18 Uhr"));  
               //Laeuft der Charger noch, sollte er nun gestoppt werden
               if(charger.isOn()) {
                  charger.stop();
               }
           } 
       } else {
+          nacht = false;
           //Version v. 1.0.7, Am Tag nur auf Netz umschalten, WENN SOC kleiner 50%.
-          if(nacht && battery.soc < 50) {
-              nacht = false;
+          if(battery.isOn() && battery.soc < 50) {              
               if(battery.isOn()) {
                   String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
                   msg+=battery.soc;
@@ -198,4 +207,10 @@ void Inverter::handleButtonPressed() {
         }
       }
     }  
+}
+
+void Inverter::print() {
+  Serial.println(F("--------------------------------"));
+  Serial.print(F("Inverter.nacht: "));
+  Serial.println(nacht);
 }

@@ -200,6 +200,11 @@ void setup() {
   //config.save(); //NUR mit vorher eingestellten Werten einkommentieren!!!, siehe CFG.save(..)
   config.load();
 
+  //Initialisiere LCD
+  display.init();
+
+  adcAttachPin(34); //AC-Voltagesensor
+  analogReadResolution(12); //4095 Werte
 }
 
 /**********************************************************************/
@@ -292,7 +297,7 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
 
 void commandLine() {
   if(Serial.available()) {
-      String cmd = Serial.readString();
+      String cmd = Serial.readStringUntil('\n'); 
       Serial.print(F("Echo: "));
       Serial.println(cmd);
       String msg = String((char*)0);
@@ -396,6 +401,8 @@ void commandLine() {
         logs.print(false);
         myWifi.print();
         charger.print();
+        inverter.print();
+        display.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -487,10 +494,6 @@ void commandLine() {
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
         Serial.println(ok);
-      } else if(cmd.startsWith(F("logs save"))) { 
-        logs.save();
-      } else if(cmd.startsWith(F("logs load"))) { 
-        logs.load();
       } else if(cmd.startsWith(F("logs add"))) { 
         String entry = cmd.substring(8); 
         logs.append(entry);
@@ -500,6 +503,9 @@ void commandLine() {
         wc.updateUi();
       } else if(cmd.startsWith(F("verbose"))) { 
         esp_log_level_set("*", ESP_LOG_VERBOSE);
+      } else if(cmd.startsWith(F("calibrate"))) { 
+          Serial.println(F("voltageSensor.calibrate();"));
+          voltageSensor.calibrate();  
       } else {
         Serial.println(F("Available commands:"));
         Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
@@ -513,8 +519,6 @@ void commandLine() {
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
-        Serial.println(F(" - logs save :: Logeintraege im SPIFFS ablegen"));
-        Serial.println(F(" - logs load :: Logeintraege aus SPIFFS einlesen"));
         Serial.println(F(" - logs add 'some log entry' :: Logeintraeg schreiben"));
         Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
         Serial.println(F(" -      0 :: serialSBMS.flush();"));
@@ -538,6 +542,7 @@ void commandLine() {
         Serial.println(F(" - retrieve data :: Dateneinsammeln und ausgeben"));
         Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
+        Serial.println(F(" - calibrate :: Calibrate AC voltage sensor and output it to serial"));
         return;
       }
       Serial.println(msg);

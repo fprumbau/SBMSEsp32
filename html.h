@@ -77,9 +77,17 @@ const char changelog[] PROGMEM = R"=====(
 <li>1.0.17    (1) Loglines von 10 auf 20 erhoeht, battery.print gibt nun auch die Fehlercounter für Inverter und Charger aus (moegliche Analyse, warum Batterieumschaltung nach einiger Zeit nicht mehr automatisch erfolgt)
 <li>1.0.17    (2) Revert max-Size OTA.cpp (Bad Size Given bei jedem Updateversuch)
 <li>1.0.18    (1) Meter-Rendering Chrome gefixed
+<li>3.0.0     (1) RELAY_PIN(21) wird von GPIO21 auf GPIO0 gelegt
+<li>3.0.0     (2) LiquidCrystal_I2C Unterstützung
+<li>3.0.1     (1) Inverter bekommt print-Funktion, um 'nacht'-Flag ausgeben zu koennen
+<li>3.0.1     (1) Inverter: Das 'nacht'-Flag muss am Tage IMMER auf false gesetzt werden (es wurde sonst nur umgesetzt wenn der SOC<50%). Wurde dann der Inverter Manuell gestopped, startete er abends nicht mehr automatisch
+<li>3.0.1     (2) Funktion voltageSensor.calibrate() in CLI-Hilfe integriert
+<li>3.0.1     (3) Logs vereinfacht, nur noch 3 Zeilen, kein CIFS mehr.
+<li>3.0.1     (4) Commmandline-Input wird nur bis zum ersten Lineinput gelesen. 
+<li>3.0.1     (5) Wenn die Netzspannung fehlt, wird nun auch immer der Lüfter aktiviert (voltageSensor.hasNetzspannung())
 )=====";
 
-#define VERSION "1.0.18"
+#define VERSION "3.0.1"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

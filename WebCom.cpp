@@ -16,7 +16,6 @@ void WebCom::sendClients(const char* msg, bool save) {
   str += ": ";
   str += msg;
   ws.textAll(str);
-  logs.append(str);
 }
 
 void WebCom::sendJson(const char* key, const char* value) {
@@ -460,6 +459,17 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(F(" to "));
     msg->concat(value);
     msg->concat(F("; "));
+
+    /*String s = name;
+    float sens;
+    sens = voltageSensor.getSensitivity();
+    if(s.equals("debugWeb")) {    
+        sens-=0.00001;
+    } else {
+        sens+=0.00001;       
+    }
+    voltageSensor.setSensitivity(sens);
+    Serial.println(sens, 6);*/
 }
 
 void WebCom::print() {

@@ -25,6 +25,9 @@
 #include "Tesla.h"
 #include "CFG.h"
 #include "CTRL.h"
+#include "ZMPT101B.h"
+#include "LiquidCrystal_I2C.h"
+#include "Display.h"
  
 extern const int smaMeasurementsBeforSwitchoff;
 extern const int tenSeconds;
@@ -113,4 +116,7 @@ extern HardwareSerial serialSBMS; //0.9.9.95
 extern CTRL controller; //0.9.9.96
 extern unsigned long lastConnectCheck; //0.9.9.99
 extern LOG logs; //0.9.9.99
+extern LiquidCrystal_I2C lcd; //3.0.1
+extern ZMPT101B voltageSensor; //3.0.1
+extern Display display; //3.0.1
 #endif
