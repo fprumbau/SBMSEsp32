@@ -1,9 +1,11 @@
 #ifndef CFG_H
 #define CFG_H
 
+//if we cannot mount the LittleFS disk, shall we format one?
+#define FORMAT_LITTLEFS_IF_FAILED false
+
 class CFG {
   private:
-        //SPIFFS
         char* _webUser;
         char* _webPass;
         void init();

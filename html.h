@@ -85,9 +85,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.1     (3) Logs vereinfacht, nur noch 3 Zeilen, kein CIFS mehr.
 <li>3.0.1     (4) Commmandline-Input wird nur bis zum ersten Lineinput gelesen. 
 <li>3.0.1     (5) Wenn die Netzspannung fehlt, wird nun auch immer der Lüfter aktiviert (voltageSensor.hasNetzspannung())
+<li>3.0.2     (1) Nutzung von LittleFS anstatt SPIFFS
 )=====";
 
-#define VERSION "3.0.1"
+#define VERSION "3.0.2"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -6,9 +6,10 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <NTPClient.h>
+#include <LITTLEFS.h>
 #include <WiFiUdp.h>
-#include <SPIFFS.h>
 #include <FS.h>
+
 
 #include "MyWifi.h"
 #include "WebCom.h"

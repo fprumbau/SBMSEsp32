@@ -7,7 +7,7 @@
 #include "Tesla.h"
 
 #include <WiFiUdp.h>
- 
+
 const int smaMeasurementsBeforSwitchoff = 10;
 const int tenSeconds = 10000; //Pruefung der Kennwerte (SOC, Zellspannungen), minimales Interval in Millisekunden
 
