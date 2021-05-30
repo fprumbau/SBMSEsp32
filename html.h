@@ -86,9 +86,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.1     (4) Commmandline-Input wird nur bis zum ersten Lineinput gelesen. 
 <li>3.0.1     (5) Wenn die Netzspannung fehlt, wird nun auch immer der Lüfter aktiviert (voltageSensor.hasNetzspannung())
 <li>3.0.2     (1) Nutzung von LittleFS anstatt SPIFFS
+<li>3.0.3     (1) Eine Fehlermeldung, wenn die SBMS-Daten nicht zu dekodieren waren, konnte wegen der enthaltenen Sonderzeichen nicht zum Client geschickt werden. Sie wird nun zusätzlich auf Serial ausgegeben.
+<li>3.0.3     (2) Wird keine SBMS-Nachricht gelesen (zu kurz), dann wird die Status-LED wieder auf Blau gestellt, anderfalls auf Grün
+<li>3.0.4     (1) Versuch zu verhindern, dass RELAY_PIN (0) nach jedem Restart (Spannung weg) sofort schaltet und den Bootvorgang stört
+<li>3.0.5     (1) Die Variable 'wait_excess_power_start_millis' wurde von 0 auf 5000ms gesetzt (Zeit bevor S1 geschaltet wird)
+<li>3.0.5     (2) Die Reaktionszeit des Chargers 2 wird von 30s auf 5s heruntergesetzt ( s2MinRestMillis )
+<li>3.0.5     (3) Die Reaktionszeit des Chargers 1 wird von 60s auf 20s heruntergesetzt ( s1MinRestMillis )
+<li>3.0.5     (4) Charger.cpp (calculateDc) wurde jeder Wert um 10 erhöht (um den Solarstrom besser auszunutzen)
 )=====";
 
-#define VERSION "3.0.2"
+#define VERSION "3.0.5"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

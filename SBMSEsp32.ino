@@ -56,6 +56,7 @@ void setup() {
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW); //v.3.0.4 LOW sollte der Initialstatus sein. Mit nach 1.0.18 wurde wird hier PIN 0 genutzt. Der switched aber bei jedem kompletten An/Aus (Spannung weg)
 
   //FIXME: RELAY_S1 sollte nicht mehr den Charger S1 schalten; RELAY_3 könnte dann in RELAY_S1 umbenannt werden
   pinMode(RELAY_S1, OUTPUT); //Charger S2, hart (wird in der Loging aber RELAY_3 geschaltet); 

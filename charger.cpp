@@ -93,16 +93,16 @@ int Charger::calculateDc(float netto) {
   netto += (dutyCycle * 0.5);
 
   if (netto < 50) return 0;
-  if (netto < 100) return 100;
-  if (netto < 150) return 200;
-  if (netto < 200) return 300;
-  if (netto < 250) return 400;
-  if (netto < 300) return 500;
-  if (netto < 350) return 600;
-  if (netto < 400) return 700;
-  if (netto < 450) return 800;
-  if (netto < 500) return 900;
-  if (netto < 550) return 950;
+  if (netto < 100) return 110;
+  if (netto < 150) return 210;
+  if (netto < 200) return 310;
+  if (netto < 250) return 410;
+  if (netto < 300) return 510;
+  if (netto < 350) return 610;
+  if (netto < 400) return 710;
+  if (netto < 450) return 810;
+  if (netto < 500) return 910;
+  if (netto < 550) return 960;
   return 1023;
 }
 

@@ -460,7 +460,7 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(value);
     msg->concat(F("; "));
 
-    /*String s = name;
+    String s = name;
     float sens;
     sens = voltageSensor.getSensitivity();
     if(s.equals("debugWeb")) {    
@@ -469,7 +469,7 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
         sens+=0.00001;       
     }
     voltageSensor.setSensitivity(sens);
-    Serial.println(sens, 6);*/
+    Serial.println(sens, 6);
 }
 
 void WebCom::print() {
