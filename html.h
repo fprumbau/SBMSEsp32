@@ -93,9 +93,10 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.5     (2) Die Reaktionszeit des Chargers 2 wird von 30s auf 5s heruntergesetzt ( s2MinRestMillis )
 <li>3.0.5     (3) Die Reaktionszeit des Chargers 1 wird von 60s auf 20s heruntergesetzt ( s1MinRestMillis )
 <li>3.0.5     (4) Charger.cpp (calculateDc) wurde jeder Wert um 10 erhöht (um den Solarstrom besser auszunutzen)
+<li>3.0.6     (5) Charger.cpp (calculateDc) wurde jeder Wert um nochmals 10 erhöht (um den Solarstrom besser auszunutzen)
 )=====";
 
-#define VERSION "3.0.5"
+#define VERSION "3.0.6"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
