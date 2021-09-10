@@ -5,13 +5,13 @@
 void SMA::init() {
    
   if(udp.listenMulticast(IPAddress(239,12,255,254), portMulti)) {
-      Serial.println("UDP connected");
+      Log.notice("UDP connected");
       udp.onPacket([&](AsyncUDPPacket packet) {
           eval(&packet);
       });
   }  
   
-  Serial.println(F("\nUDP init fertig!\n"));
+  Log.notice(F("\nUDP init fertig!\n"));
 
   wlb[8]='\0';
   wll[8]='\0';
@@ -24,7 +24,7 @@ void SMA::reset() {
     udp.close();
     
     if(udp.listenMulticast(IPAddress(239,12,255,254), portMulti)) {
-        Serial.println(F("UDP connected"));
+        Log.notice(F("UDP connected"));
         udp.onPacket([&](AsyncUDPPacket packet) {
             eval(&packet);
         });
@@ -39,9 +39,7 @@ void SMA::eval(AsyncUDPPacket* packet) {
 
       long now = millis();
       if(debugSma) {
-        Serial.print(F("Received 600Byte UDP packet successfully after "));
-        Serial.print(now - lastUdpRead);
-        Serial.println(F("ms"));
+        Log.noticeln(F("Received 600Byte UDP packet successfully after %dms"), now - lastUdpRead);
       }    
       
       lastUdpRead = now;
@@ -65,8 +63,7 @@ void SMA::eval(AsyncUDPPacket* packet) {
       netto = lieferung - bezug;
 
       if(debugSma) {
-        Serial.print(F("Neuer Wert fuer Nettoertrag (sma.udp): "));
-        Serial.println(netto);
+        Log.warningln(F("Neuer Wert fuer Nettoertrag (sma.udp): %D"), netto);
       }
 
       //0.9.9.99 alle verfuegbaren Werte DIREKT an den/die Clients senden
@@ -85,8 +82,7 @@ void SMA::eval(AsyncUDPPacket* packet) {
   } else {
 
      if(debugSma) {
-        Serial.print(F("Received packet of size (sma.udp): "));
-        Serial.println(packetSize);
+        Log.warningln(F("Received packet of size (sma.udp): %d"), packetSize);
       }
 
       long now = millis();
@@ -94,7 +90,7 @@ void SMA::eval(AsyncUDPPacket* packet) {
       
       //0.9.9.91 Manchmal bricht der Wifistack zusammen, dann kann nur ein Reconnect desselben helfen.
       if(lastUdp > 600000) {
-        Serial.println(F("Das letzte UDP-Paket wurde vor mehr als 10Min empfangen, restarte Wifi jetzt..."));
+        Log.warningln(F("Das letzte UDP-Paket wurde vor mehr als 10Min empfangen, restarte Wifi jetzt..."));
         myWifi.reconnect();
         return;
       }
@@ -110,7 +106,7 @@ void SMA::eval(AsyncUDPPacket* packet) {
           msg += lastUdp;
           msg += F("ms ago; ReconnectCount: ");
           msg += udpResets;
-          Serial.println(msg);
+          Log.warning(msg.c_str());
           wc.sendClients(msg.c_str());
           udpResets++;
       }

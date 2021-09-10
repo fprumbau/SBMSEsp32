@@ -42,6 +42,9 @@ void setup() {
 
   Serial.begin(115200);  //USB Serial Pins 4,2, 
   Serial.setDebugOutput(true); //0.9.9.98
+
+  //3.0.7 LOG_LEVEL_SILENT, LOG_LEVEL_FATAL, LOG_LEVEL_ERROR, LOG_LEVEL_WARNING, LOG_LEVEL_INFO, LOG_LEVEL_TRACE, LOG_LEVEL_VERBOSE
+  Log.begin(LOG_LEVEL_WARNING, &Serial);
   
   //WROOM hat 16/17 auf RX2/TX2 verbunden
   serialSBMS.begin(9600, SERIAL_8N1, 16, 17); //Serial2 Pins 16,17
@@ -52,7 +55,7 @@ void setup() {
   
   Serial2.begin(115200); //wegen Restart
 
-  Serial.println(F("Starting..."));
+  Log.warningln(F("Starting..."));
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(RELAY_PIN, OUTPUT);
@@ -127,9 +130,7 @@ void setup() {
   server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
     //List headers
     for(int i = 0; i<request->headers(); i++) {
-        Serial.print(request->headerName(i));
-        Serial.print(":");
-        Serial.println(request->header(i));
+        Log.warningln(F("%s:%s"), request->headerName(i), request->header(i));
     }
     String header = request->header("User-Agent");
     if(header.indexOf("Tesla")>1) {
@@ -148,9 +149,7 @@ void setup() {
   server.on("/sbms", HTTP_GET, [](AsyncWebServerRequest *request){
     if(debug) {
         for(int i = 0; i<request->headers(); i++) {
-            Serial.print(request->headerName(i));
-            Serial.print(":");
-            Serial.println(request->header(i));
+            Log.notice(F("%s:%s"CR), request->headerName(i), request->header(i));
         }
     }
     String header = request->header("User-Agent");
@@ -193,7 +192,7 @@ void setup() {
 
   // v.0.9.9.65 favicon via LITTLEFS
   if(!LITTLEFS.begin()){
-    Serial.println(F(">> An Error has occurred while mounting LITTLEFS"));
+    Log.error(F(">> An Error has occurred while mounting LITTLEFS"));
     return;
   }
 
@@ -223,16 +222,8 @@ void loop0(void * parameter) {
       long lrm = lastReceivedMillis;
       long diff = now - lrm;
       if(battery.isOn() && diff > 600000 && !inverter.stopBattery) {
-        lastStatusMsg = F("Seit mehr als 10 Minuten wurde keine SBMS-Aktualisierung mehr empfangen, beende Batteriemodus");
-        Serial.println(lastStatusMsg);
-        Serial.print(F("now: "));
-        Serial.println(now);
-        Serial.print(F("lastReceivedMillis: "));
-        Serial.println(lastReceivedMillis);
-        Serial.print(F("diff: "));
-        Serial.println(diff);
-        Serial.print(F("lrm: "));
-        Serial.println(lrm);
+        Log.error(F("Seit mehr als 10 Minuten wurde keine SBMS-Aktualisierung mehr empfangen, beende Batteriemodus\nnow: %s\nlastReceivedMillis: %d\ndiff: %d\nlrm: %d" CR), 
+        now, lastReceivedMillis, diff, lrm);      
         inverter.stopBattery = true; //verhindert wiederanlaufen und die Wiederholung der Stopaufforderung ( loop geht vielfach pro Sekunde!!! )
         inverter.starteNetzvorrang(lastStatusMsg);
         inverter.setRed();
@@ -241,7 +232,7 @@ void loop0(void * parameter) {
       //0.9.9.99 myWifi connection check
       if((now - lastConnectCheck) > 30000) {
         if(!myWifi.connected()) {
-          Serial.println(F("myWifi ist nicht verbunden, versuche einen Reconnect"));    
+          Log.warning(F("myWifi ist nicht verbunden, versuche einen Reconnect"));    
           myWifi.reconnect();
         }
         //1.0.10 pegel und Stringdaten empfangen
@@ -299,15 +290,14 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
 void commandLine() {
   if(Serial.available()) {
       String cmd = Serial.readStringUntil('\n'); 
-      Serial.print(F("Echo: "));
-      Serial.println(cmd);
+      Log.warning(F("Echo: %s"), cmd);
       String msg = String((char*)0);
       msg.reserve(32);
       if(cmd.startsWith(F("restart wifi"))) {      
         myWifi.reconnect();
       } else if(cmd.startsWith(F("restart esp"))) {      
         msg = F("Restarting ESP...");
-        Serial.println(msg);
+        Log.warning(F("Restarting ESP..." CR));
         wc.sendClients(msg.c_str());
         ESP.restart();
       } else if(cmd.startsWith(F("start RELAY_S1"))) {      
@@ -405,8 +395,7 @@ void commandLine() {
         inverter.print();
         display.print();
       } else if(cmd.startsWith(F("show heap"))) {
-        Serial.print(F("Free heap: "));
-        Serial.println(ESP.getFreeHeap()); 
+       // Log.warning(F("Free heap: %d" CR),ESP.getFreeHeap()); 
       } else if(cmd.startsWith(F("tesla control on"))) {
         teslaCtrlActive = true;
       } else if(cmd.startsWith(F("tesla control off"))) {
@@ -438,7 +427,7 @@ void commandLine() {
       } else if(cmd.startsWith(F("config show"))) {
         String key = cmd.substring(11); //alles hinter 'show'
         const char* val = config.load(key);
-        Serial.println(val);
+        Log.warningln(val);
       } else if(cmd.startsWith(F("retrieve data"))) {
         controller.debugCtrl=true;
         controller.retrieveData();
@@ -466,87 +455,85 @@ void commandLine() {
         int nr = nrStr.toInt();
         switch(nr) {
           case 0:
-            Serial.println(F("serialSBMS.flush();"));
+            Log.warning(F("serialSBMS.flush();"));
             serialSBMS.flush();
             break;
           case 1:
-            Serial.println(F("Serial.println(serialSBMS.available());"));
-            Serial.println(serialSBMS.available());
+            Log.warning(F("Serial.println(serialSBMS.available()); %s" CR), serialSBMS.available());
             break;             
           case 2:
-            Serial.println(F("luefter.start();"));
+            Log.warning(F("luefter.start();"));
             luefter.start();
             break;
           case 3:
-            Serial.println(F("luefter.stop();"));
+            Log.warning(F("luefter.stop();"));
             luefter.stop();
             break;      
           case 4:
-            Serial.println(F("Clear serialSBMS"));
+            Log.warning(F("Clear serialSBMS"));
             while(serialSBMS.available()) {
               serialSBMS.read();
             }
             break;
           default:
-            Serial.println("Kein Kommando mit dieser Nummer gefunden");
+            Log.warning("Kein Kommando mit dieser Nummer gefunden");
         }
         
       } else if(cmd.startsWith(F("test wifi"))) { 
         bool ok = WiFi.status() == WL_CONNECTED;
-        Serial.print(F("Wifi status: "));
-        Serial.println(ok);
+        Log.warning(F("Wifi status: %T" CR), ok);
       } else if(cmd.startsWith(F("logs add"))) { 
         String entry = cmd.substring(8); 
         logs.append(entry);
       } else if(cmd.startsWith(F("reset flags"))) { 
-        Serial.println("Reset all debugging flags");
+        Log.warningln(F("Reset all debugging flags"));
         bitset = "0000000000";
         wc.updateUi();
       } else if(cmd.startsWith(F("verbose"))) { 
         esp_log_level_set("*", ESP_LOG_VERBOSE);
       } else if(cmd.startsWith(F("calibrate"))) { 
-          Serial.println(F("voltageSensor.calibrate();"));
+          Log.warningln(F("voltageSensor.calibrate();"));
           voltageSensor.calibrate();  
       } else {
-        Serial.println(F("Available commands:"));
-        Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
-        Serial.println(F(" - restart wifi  :: restarting Wifi connection"));
-        Serial.println(F(" - restart esp   :: restarting whole ESP32"));
-        Serial.println(F(" - reset flags   :: reset all debug flags"));  
-        Serial.println(F(" - reset sma   :: reset sma wg. udp.close()"));  
-        Serial.println(F(" - batterymode on|off   :: Batteriebetrieb blockieren (nur laden)"));  
-        Serial.println(F(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W"));
-        Serial.println(F(" - stop  RELAY_S1|_S2|_3|_4|_W :: stop relays S1,S2,3,4 und W"));
-        Serial.println(F(" - test  on|off :: enable/disable test simulation"));
-        Serial.println(F(" - debug  on|off :: enable/disable debug"));        
-        Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
-        Serial.println(F(" - logs add 'some log entry' :: Logeintraeg schreiben"));
-        Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
-        Serial.println(F(" -      0 :: serialSBMS.flush();"));
-        Serial.println(F(" -      1 :: Serial.println(serialSBMS.available());"));
-        Serial.println(F(" -      2 :: luefter.start();"));
-        Serial.println(F(" -      3 :: luefter.stop();"));
-        Serial.println(F(" -      4 :: clear serialSBMS"));        
-        Serial.println(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
-        Serial.println(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
-        Serial.println(F(" - tesla status :: Check tesla charge state"));
-        Serial.println(F(" - tesla wakeup :: Wake tesla"));
-        Serial.println(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));
-        Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
-        Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
-        Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus LITTLEFS"));
-        Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!), z.B. socLimit"));
-        Serial.println(F(" - config persist key:value :: Speichern/aendern eines Konfigwertes (mit Speichern!), z.B. socLimit"));        
-        Serial.println(F(" - config show key :: Ausgabe des gespeicherten Values von 'key' auf Serial"));
-        Serial.println(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
-        Serial.println(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
-        Serial.println(F(" - retrieve data :: Dateneinsammeln und ausgeben"));
-        Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
-        Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
-        Serial.println(F(" - calibrate :: Calibrate AC voltage sensor and output it to serial"));
+        Log.warningln(F("Available commands:"));
+        Log.warningln(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
+        Log.warningln(F(" - restart wifi  :: restarting Wifi connection"));
+        Log.warningln(F(" - restart esp   :: restarting whole ESP32"));
+        Log.warningln(F(" - reset flags   :: reset all debug flags"));  
+        Log.warningln(F(" - reset sma   :: reset sma wg. udp.close()"));  
+        Log.warningln(F(" - batterymode on|off   :: Batteriebetrieb blockieren (nur laden)"));  
+        Log.warningln(F(" - start RELAY_S1|_S2|_3|_4|_W :: start relays S1,S2,3,4 und W"));
+        Log.warningln(F(" - stop  RELAY_S1|_S2|_3|_4|_W :: stop relays S1,S2,3,4 und W"));
+        Log.warningln(F(" - test  on|off :: enable/disable test simulation"));
+        Log.warningln(F(" - debug  on|off :: enable/disable debug"));        
+        Log.warningln(F(" - data  TESTDATA :: Testdaten setzen"));
+        Log.warningln(F(" - logs add 'some log entry' :: Logeintraeg schreiben"));
+        Log.warningln(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
+        Log.warningln(F(" -      0 :: serialSBMS.flush();"));
+        Log.warningln(F(" -      1 :: Log.warningln(serialSBMS.available());"));
+        Log.warningln(F(" -      2 :: luefter.start();"));
+        Log.warningln(F(" -      3 :: luefter.stop();"));
+        Log.warningln(F(" -      4 :: clear serialSBMS"));        
+        Log.warningln(F(" - pwm io26|io25|io05 PERCENTAGE :: PWM setzen (nur wenn test on)"));
+        Log.warningln(F(" - tesla authorize password :: Wieder anmelden (neues bearer token erzeugen)"));
+        Log.warningln(F(" - tesla status :: Check tesla charge state"));
+        Log.warningln(F(" - tesla wakeup :: Wake tesla"));
+        Log.warningln(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));
+        Log.warningln(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
+        Log.warningln(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
+        Log.warningln(F(" - config load|save :: Schreiben/Lesen der Konfig aus LITTLEFS"));
+        Log.warningln(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!), z.B. socLimit"));
+        Log.warningln(F(" - config persist key:value :: Speichern/aendern eines Konfigwertes (mit Speichern!), z.B. socLimit"));        
+        Log.warningln(F(" - config show key :: Ausgabe des gespeicherten Values von 'key' auf Serial"));
+        Log.warningln(F(" - show heap :: Schreibe den noch verfuegbaren Heap in die Ausgabe"));
+        Log.warningln(F(" - test wifi :: Verbindungsstatus von Wifi ausgeben"));
+        Log.warningln(F(" - retrieve data :: Dateneinsammeln und ausgeben"));
+        Log.warningln(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
+        Log.warningln(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
+        Log.warningln(F(" - calibrate :: Calibrate AC voltage sensor and output it to serial"));
         return;
       }
-      Serial.println(msg);
+      Log.warningln(msg.c_str());
       wc.sendClients(msg.c_str());
     }  
 } 

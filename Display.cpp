@@ -60,8 +60,7 @@ void Display::prepareLine(int ln, int offset) {
 void Display::line2buff(const char* txt, int offset) {
 
   for(int i=offset; i<offset+20; i++) {
-    char c = txt[i-offset];
-    //Serial.println(c);  
+    char c = txt[i-offset];  
     if(c == '\0') break;
     screen[i]=c;  
   }
@@ -75,8 +74,7 @@ void Display::draw() {
 }
 
 void Display::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Displaybuffer: "));
+  Log.warningln(F("--------------------------------"));
   String s = screen;
-  Serial.println(s);
+  Log.warning(F("Displaybuffer: %s"CR), s);
 }

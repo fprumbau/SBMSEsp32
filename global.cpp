@@ -62,7 +62,6 @@ Inverter inverter;
 AsyncWebServer server(80);
 OTA updater;
 SBMS sbms;
-Utils utils;
 AsyncUDP udp;
 WiFiUDP ntpUdp;
 NTPClient timeClient(ntpUdp);

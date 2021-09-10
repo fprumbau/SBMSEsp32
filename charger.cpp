@@ -92,18 +92,32 @@ int Charger::calculateDc(float netto) {
   //0.9.9.63 Netto neu berechnen: Eine DC-Berechnung sollte auch den aktuellen Wert des Ladestroms mit inkludieren
   netto += (dutyCycle * 0.5);
 
-  if (netto < 50) return 0;
-  if (netto < 100) return 120;
-  if (netto < 150) return 220;
-  if (netto < 200) return 320;
-  if (netto < 250) return 420;
-  if (netto < 300) return 520;
-  if (netto < 350) return 620;
-  if (netto < 400) return 720;
-  if (netto < 450) return 820;
-  if (netto < 500) return 920;
-  if (netto < 550) return 980;
-  return 1023;
+  int retVal = 0;
+
+  if (netto < 50) retVal = 0;
+  else if (netto < 100) retVal = 120;
+  else if (netto < 150) retVal = 220;
+  else if (netto < 200) retVal = 320;
+  else if (netto < 250) retVal = 420;
+  else if (netto < 300) retVal = 520;
+  else if (netto < 350) retVal = 620;
+  else if (netto < 400) retVal = 720;
+  else if (netto < 450) retVal = 820;
+  else if (netto < 500) retVal = 920;
+  else if (netto < 550) retVal = 980;
+  else retVal = 1023;
+
+  if(debugCharger) {
+    String m((char *)0);
+    m.reserve(128);
+    m = "Charger S2 calc: Netto: ";
+    m+=netto;
+    m+="; DcValue: ";
+    m+=retVal;
+    wc.sendClients(m.c_str());
+  }
+  
+  return retVal;
 }
 
 /**
@@ -128,8 +142,7 @@ void Charger::checkOnIncome() {
   unsigned long now = millis();
 
   if (debugCharger) {
-    Serial.print(F("charger.checkOnIncome(): "));
-    Serial.println(now);
+    Log.warningln(F("charger.checkOnIncome(): %s"), now);
   }
 
   //Sind ALLE Lademoeglichkeiten ausgeschoepft, dann versuche, den Tesla zu laden; TODO: tatsaechlichen Status des Wagens abfragen
@@ -378,37 +391,26 @@ int Charger::getS2Power() {
 }
 
 void Charger::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Charger.wait_excess_power_start_millis: "));
+  Log.warningln(F("--------------------------------"));
   long wait;
   if(wait_excess_power_start_millis > 0) {
     wait = millis() - wait_excess_power_start_millis;
   } else wait = wait_excess_power_start_millis;
-  Serial.println(wait);
-  Serial.print(F("Charger.isChargerOn(1): "));
-  Serial.println(isChargerOn(1));
-  Serial.print(F("Charger.isChargerOn(1): "));
-  Serial.println(isChargerOn(2));
-  Serial.print(F("Charger.s1_switched: "));
-  Serial.println(s1_switched);
-  Serial.print(F("Charger.s2_switched: "));
-  Serial.println(s2_switched);
-  Serial.print(F("Charger.s1_lowNettoMillis: "));
+  Log.warningln(F("Charger.wait_excess_power_start_millis: %d"), wait);
+  Log.warningln(F("Charger.isChargerOn(1): %T"), isChargerOn(1));
+  Log.warningln(F("Charger.isChargerOn(1): %T"), isChargerOn(2));
+  Log.warningln(F("Charger.s1_switched: %s"), s1_switched);
+  Log.warningln(F("Charger.s2_switched: %s"), s2_switched);
   if(s1_lowNettoMillis > 0) {
     wait = millis() - s1_lowNettoMillis;
   } else wait = s1_lowNettoMillis;
-  Serial.println(wait);
-  Serial.print(F("Charger.s2_lowNettoMillis: "));
+  Log.warningln(F("Charger.s2_lowNettoMillis: %s"), wait);
   if(s2_lowNettoMillis > 0) {
     wait = millis() - s2_lowNettoMillis;
   } else wait = s2_lowNettoMillis;
-  Serial.println(wait);
-  Serial.print(F("Charger.automatedCharging: "));
-  Serial.println(automatedCharging);
-  Serial.print(F("Charger.dutyCycle: "));
-  Serial.println(dutyCycle);
-  Serial.print(F("Charger.getS2Power: "));
-  Serial.println(getS2Power());
-  Serial.print(F("Netto: "));
-  Serial.println(netto);
+  Log.warningln(F("Charger.s1_lowNettoMillis: %s"), wait);
+  Log.warningln(F("Charger.automatedCharging: %T"), automatedCharging);
+  Log.warningln(F("Charger.dutyCycle: %s"), dutyCycle);
+  Log.warningln(F("Charger.getS2Power: %s"), getS2Power());
+  Log.warningln(F("Netto: %s"), netto);
 }

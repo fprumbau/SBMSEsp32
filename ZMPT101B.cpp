@@ -1,5 +1,7 @@
 #include "ZMPT101B.h"
 
+#include "global.h"
+
 ZMPT101B::ZMPT101B(uint8_t _pin) {
   pin = _pin;
   sensitivity = 0.003745;
@@ -11,8 +13,7 @@ int ZMPT101B::calibrate() {
     acc += analogRead(pin);
   }
   zero = acc / 100;
-  Serial.print(F("Calibated zero point: "));
-  Serial.println(zero);
+  Log.warningln(F("Calibated zero point: %s"), zero);
   return zero;
 }
 
@@ -39,17 +40,13 @@ float ZMPT101B::getVoltageAC(uint16_t frequency) {
 
   uint32_t Vsum = 0, measurements_count = 0;
   int32_t Vnow;
-
- //Serial.println(String("\nZero: ") + zero);
- //Serial.println("Values: ");
- while (micros() - t_start < period) {
-    Vnow = analogRead(pin) - zero;
-
-    //Serial.print(String(",") + Vnow);
-    
-    Vsum += Vnow*Vnow;
-    measurements_count++;
-  }
+  
+   while (micros() - t_start < period) {
+      Vnow = analogRead(pin) - zero;
+      
+      Vsum += Vnow*Vnow;
+      measurements_count++;
+    }
   
   currentAc = sqrt(Vsum / measurements_count) / ADC_SCALE * VREF / sensitivity;
   return currentAc;

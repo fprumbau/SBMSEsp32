@@ -12,7 +12,7 @@ void LOG::print(bool web){
 
   if(!false) {      
       for(int j = 0; j < LOGSIZE; j++) {
-          Serial.println(logEvents[j]);
+          Log.warning(logEvents[j].c_str());
       }  
   } else {
       for(int j = 0; j < LOGSIZE; j++) {

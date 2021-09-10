@@ -12,13 +12,12 @@
 void OTA::init(const char* host) {
   //OTA is possible only with 4mb memory
   long flashSize = ESP.getFlashChipSize();
-  Serial.print(F("Flash Size: "));
-  Serial.println(flashSize);
+  Log.warningln(F("Flash Size: %d"), flashSize);
   if(flashSize > 4000000) {
      //set web UI
      MDNS.begin(host);
      MDNS.addService("http", "tcp", 80);
-     Serial.printf("\n\nHTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
+     Log.warningln(F("\n\nHTTPUpdateServer ready! Open http://%s.local/update in your browser\n"), host);
      String _version = F("Build : ");
      _version += VERSION;
      updater.setUpdaterUi("Title", _version, "SBMS120 Solar Charger", "Branch : master", String(changelog));
@@ -26,7 +25,7 @@ void OTA::init(const char* host) {
      //updater.setup("/update", "admin", "Go8319!");
      updater.setup("/update", "", "");
   } else {
-     Serial.println(F("Flash OTA programming only possible with 4Mb Flash size!!!"));
+     Log.warningln(F("Flash OTA programming only possible with 4Mb Flash size!!!"));
   }
 }
 
@@ -90,24 +89,22 @@ void OTA::setup(const char *path, String username, String password) {
         delay(1500); //geht das hier?? unsicher!!!; 0.9.9.89: -1s
         udp.close(); //0.9.9.98 statt stop()
         
-        Serial.printf("UploadStart: %s\n", filename.c_str());
-        Serial.setDebugOutput(true);
+        Log.warningln("UploadStart: %s", filename.c_str());
         t_start = millis();
         fileSize = len;
         
         // calculate sketch space required for the update; 1048576
         // 1248576 auf 1348576 erhoeht, 1.0.17 reverted
         uint32_t maxSketchSpace = (1248576 - 0x1000) & 0xFFFFF000;
-        Serial.print(F("maxSketchSpace: "));
-        Serial.println(maxSketchSpace);
+        Log.warningln(F("maxSketchSpace: %s"), maxSketchSpace);
         if(!Update.begin(maxSketchSpace)){//start with max available size
           Update.printError(Serial);
         }
         //Update.runAsync(true); // tell the updaterClass to run in async mode (nicht da fuer ESP32)
       } else {
         ct++;
-        if(ct%70==0) Serial.println("");
-        Serial.print(".");
+        if(ct%70==0) Log.warningln("");
+        Log.warning(".");
         fileSize += len;
       }
       //Write chunked data to the free sketch space
@@ -118,59 +115,55 @@ void OTA::setup(const char *path, String username, String password) {
       if(final){ // if the final flag is set then this is the last frame of data
         if(Update.end(true)){ //true to set the size to the current progress
             t_stop = millis();
-            Serial.print(F("\nTime UPLOAD: ")); Serial.print((t_stop - t_start) / 1000.0); Serial.println(F(" sec."));
-            Serial.print(F("Speed UPLOAD: ")); Serial.print(calcSpeed(t_stop - t_start, fileSize)); Serial.println(F(" Kbit/s"));
-            Serial.printf("Upload Success, Rebooting: %u bytes\n", fileSize);
+            Log.warningln(F("\nTime UPLOAD: %d sec. Speed UPLOAD:  %dKbit/s; Upload Success, Rebooting: %d bytes"),(t_stop - t_start) / 1000.0, calcSpeed(t_stop - t_start, fileSize), fileSize); 
             restartRequired = true;  // Tell the main loop to restart the ESP
         } else {
             Update.printError(Serial);
         }
-        Serial.setDebugOutput(false);
       }
   });
 
   //Hmmh not found, gehoert eigentlich nicht hier hin
   server.onNotFound([](AsyncWebServerRequest *request){
-      Serial.print(F("NOT_FOUND: "));
+      Log.warning(F("NOT_FOUND: "));
       if(request->method() == HTTP_GET)
-        Serial.print(F("GET"));
+        Log.warning(F("GET"));
       else if(request->method() == HTTP_POST)
-        Serial.print(F("POST"));
+        Log.warning(F("POST"));
       else if(request->method() == HTTP_DELETE)
-        Serial.print(F("DELETE"));
+        Log.warning(F("DELETE"));
       else if(request->method() == HTTP_PUT)
-        Serial.print(F("PUT"));
+        Log.warning(F("PUT"));
       else if(request->method() == HTTP_PATCH)
-        Serial.print(F("PATCH"));
+        Log.warning(F("PATCH"));
       else if(request->method() == HTTP_HEAD)
-        Serial.print(F("HEAD"));
+        Log.warning(F("HEAD"));
       else if(request->method() == HTTP_OPTIONS)
-        Serial.println(F("OPTIONS"));
+        Log.warning(F("OPTIONS"));
       else
-        Serial.println(F("UNKNOWN"));
-      Serial.printf(" http://%s%s\n", request->host().c_str(), request->url().c_str());
+        Log.warning(F("UNKNOWN"));
+      Log.warningln(" http://%s%s", request->host().c_str(), request->url().c_str());
   
       if(request->contentLength()){
-        Serial.printf("_CONTENT_TYPE: %s\n", request->contentType().c_str());
-        Serial.printf("_CONTENT_LENGTH: %u\n", request->contentLength());
+        Log.warningln("_CONTENT_TYPE: %s\n_CONTENT_LENGTH: %u", request->contentType().c_str(), request->contentLength());
       }
   
       int headers = request->headers();
       int i;
       for(i=0;i<headers;i++){
         AsyncWebHeader* h = request->getHeader(i);
-        Serial.printf("_HEADER[%s]: %s\n", h->name().c_str(), h->value().c_str());
+        Log.warningln("_HEADER[%s]: %s", h->name().c_str(), h->value().c_str());
       }
   
       int params = request->params();
       for(i=0;i<params;i++){
         AsyncWebParameter* p = request->getParam(i);
         if(p->isFile()){
-          Serial.printf("_FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+          Log.warningln("_FILE[%s]: %s, size: %u", p->name().c_str(), p->value().c_str(), p->size());
         } else if(p->isPost()){
-          Serial.printf("_POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+          Log.warningln("_POST[%s]: %s", p->name().c_str(), p->value().c_str());
         } else {
-          Serial.printf("_GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+          Log.warningln("_GET[%s]: %s", p->name().c_str(), p->value().c_str());
         }
       }
 

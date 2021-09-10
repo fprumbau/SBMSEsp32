@@ -1,6 +1,7 @@
 #ifndef BATT_H
 #define BATT_H
 
+#include <ArduinoJson.h>
 
 class Battery {
 
@@ -15,6 +16,7 @@ class Battery {
 
   public:
 
+    String status;
     bool enabled = false; //wegen Belgienurlaub, Batterie SOLL aus bleiben
     int cv[8]; //aktuelle Zellspannungen    
     int soc = -1; //aktueller Wert State Of Charge
@@ -23,6 +25,7 @@ class Battery {
     bool isOn();
     bool checkCellVoltages();    
     bool isReady2Activate(); //Alle Regeln OK zur Nutzung (SoC + Aktivflag)
+   
     
 };
 

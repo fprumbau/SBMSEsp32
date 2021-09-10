@@ -20,7 +20,7 @@ void CFG::load() {
   }
   size_t size = configFile.size();
   if(size>8192) {
-     Serial.println(F("Config file is to large"));
+     Log.error(F("Config file is to large"));
      return;
   }
   //allocate a buffer to store contents of the file.
@@ -31,7 +31,7 @@ void CFG::load() {
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
   if(debugConfig) {
-    Serial.println(buf.get());
+    Log.warning(buf.get());
   }
 
   DynamicJsonDocument doc(1024);
@@ -39,7 +39,7 @@ void CFG::load() {
   auto error = deserializeJson(doc, buf.get());
 
   if(error) {
-    Serial.println(F("Failed to parse config file"));
+    Log.error(F("Failed to parse config file"));
   }
 
   if(doc.containsKey(AUTHORIZATION) && doc.containsKey(VEHICLEID)) {
@@ -49,11 +49,7 @@ void CFG::load() {
 
       if(debugConfig) {
         serializeJson(doc, Serial);
-        Serial.print(F("\nInitialisiere Teslakonfig: authorization:|"));
-        Serial.print(auth);
-        Serial.print(F("|; vehicleId:|"));
-        Serial.print(vehicleId);
-        Serial.println(F("|"));
+        Log.error(F("\nInitialisiere Teslakonfig: authorization:|%s|; vehicleId:|%s|" CR), auth, vehicleId);
       }
     
       perry.vehicleId(vehicleId);
@@ -71,33 +67,26 @@ void CFG::load() {
     strcpy(_webPass, webPass);
 
     if(debugConfig) {
-      Serial.print(F("\nInitialisiere User/Pw: user:|"));
-      Serial.print(_webUser);
-      Serial.print(F("|; password:|"));
-      Serial.print(_webPass);
-      Serial.println(F("|"));
+      Log.notice(F("\nInitialisiere User/Pw: user:|%s|; password:|%s|" CR), _webUser, _webPass);
     }
   
     //Lese andere Konfigwerte fuer global.h    
     if(doc.containsKey(TESLAACTIVE)) {
       teslaCtrlActive = doc[TESLAACTIVE];
       if(debugConfig) {
-        Serial.print(TESLAACTIVE);
-        Serial.println(teslaCtrlActive);  
+        Log.notice(F("%s%T"),TESLAACTIVE, teslaCtrlActive);
       }
     }
     if(doc.containsKey(SOCLIMIT)) {
       battery.socLimit = doc[SOCLIMIT];
       if(debugConfig) {
-        Serial.print(SOCLIMIT);
-        Serial.println(battery.socLimit);  
+        Log.notice(F("%s%s"),SOCLIMIT, battery.socLimit);
       }
     }  
     if(doc.containsKey(BATTERYENABLED)) {
       battery.enabled = doc[BATTERYENABLED];  
       if(debugConfig) {
-        Serial.print(BATTERYENABLED);
-        Serial.println(battery.enabled);  
+        Log.notice(F("%s%T"),BATTERYENABLED, battery.enabled);;  
       }      
     }
   }
@@ -121,14 +110,14 @@ bool CFG::save() {
 
   File configFile = LITTLEFS.open("/config.json", "w");
   if (!configFile) {
-    Serial.println(F("Failed to open config file for writing"));
+    Log.error(F("Failed to open config file for writing"));
     return false;
   }
   if(debugConfig) {
     serializeJson(doc, Serial);
   }
   serializeJson(doc, configFile);
-  Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
+  Log.notice(F("\nKonfiguration wurde erfolgreich gespeichert."));
 
   configFile.flush();
   configFile.close();
@@ -147,11 +136,7 @@ void CFG::set(const String& keyVal) {
 void CFG::set(const char* key, const char* val) {
 
   if(debugConfig) {
-    Serial.print(F("Set config value '"));
-    Serial.print(key);
-    Serial.print(F("' to '"));
-    Serial.print(val);
-    Serial.println(F("'; Still has to be saved"));
+    Log.warningln(F("Set config value '%s' to '%s'; Still has to be saved"), key, val);
   }
 
   String keyStr = String(key);
@@ -175,8 +160,7 @@ void CFG::set(const char* key, const char* val) {
   } else if(keyStr == SOCLIMIT) {
       battery.socLimit = String(val).toInt();
   } else {
-      Serial.print(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: "));
-      Serial.println(key);
+      Log.warning(F("Fuer diesen Konfigwert wurde keine Verarbeitung gefunden: %s" CR), key);
   }
 }
 
@@ -212,7 +196,7 @@ const char* CFG::load(const String& key) {
   }
   size_t size = configFile.size();
   if(size>8192) {
-     Serial.println(F("Config file is to large"));
+     Log.error(F("Config file is to large"));
      return NULL;
   }
   //allocate a buffer to store contents of the file.
@@ -223,7 +207,7 @@ const char* CFG::load(const String& key) {
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
   if(debugConfig) {
-    Serial.println(buf.get());
+    Log.warning(buf.get());
   }
 
   DynamicJsonDocument doc(1024);
@@ -231,7 +215,7 @@ const char* CFG::load(const String& key) {
   auto error = deserializeJson(doc, buf.get());
 
   if(error) {
-    Serial.println(F("Failed to parse config file"));
+    Log.error(F("Failed to parse config file"));
   }
   
   const char* val = doc[key];    
@@ -248,7 +232,7 @@ bool CFG::save(const String& key, const String& val) {
   }
   size_t size = configFile.size();
   if(size>8192) {
-     Serial.println(F("Config file is to large"));
+     Log.error(F("Config file is to large"));
      return NULL;
   }
   //allocate a buffer to store contents of the file.
@@ -259,7 +243,7 @@ bool CFG::save(const String& key, const String& val) {
   // configFile.readString instead
   configFile.readBytes(buf.get(), size);
   if(debugConfig) {
-    Serial.println(buf.get());
+    Log.warning(buf.get());
   }
 
   DynamicJsonDocument doc(1024);
@@ -267,46 +251,37 @@ bool CFG::save(const String& key, const String& val) {
   auto error = deserializeJson(doc, buf.get());
 
   if(error) {
-    Serial.println(F("Failed to parse config file"));
+    Log.error(F("Failed to parse config file"));
   }  
 
   doc[key]=val;  
 
-  Serial.print("Key: ");
-  Serial.print(key);
-  Serial.print("; Value: ");
-  Serial.println(val);
+  
+  Log.warning(F("Key: %s; Value: %s" CR), key, val);
   
   serializeJson(doc, Serial);
   serializeJson(doc, configFile);
-  Serial.println(F("\nKonfiguration wurde erfolgreich gespeichert."));
+  Log.notice(F("\nKonfiguration wurde erfolgreich gespeichert."));
 
   configFile.flush();
   configFile.close();  
 }
 
 void CFG::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("_webUser: "));
-  Serial.println(_webUser);  
-  Serial.print(F("_webPass: "));
-  Serial.println(_webPass); 
-  Serial.print(F("debug: "));
-  Serial.println(debug); 
-  Serial.print(F("debugSma: "));
-  Serial.println(debugSma); 
-  Serial.print(F("debugSbms: "));
-  Serial.println(debugSbms);   
-  Serial.print(F("debugJson: "));
-  Serial.println(debugJson); 
-  Serial.print(F("debugConfig: "));
-  Serial.println(debugConfig);   
-  Serial.print(F("debugRelais: "));
-  Serial.println(debugRelais);      
-  Serial.print(F("debugCharger: "));
-  Serial.println(debugCharger); 
-  Serial.print(F("debugBattery: "));
-  Serial.println(debugBattery); 
-  Serial.print(F("debugInverter: "));
-  Serial.println(debugInverter);  
+  Log.warning(F("--------------------------------"));
+  Log.warning(F("_webUser: %s" CR), _webUser);
+  Log.warning(F("_webPass: %s" CR), _webPass);
+  Log.warning(F("debug: %s" CR), debug);
+  Log.warning(F("debugSma: %s" CR), debugSma);
+  Log.warning(F("debugSbms: %s" CR), debugSbms);
+  Log.warning(F("debugJson: %s" CR), debugJson);
+  Log.warning(F("debugConfig: %s" CR), debugConfig);
+  Log.warning(F("debugRelais: %s" CR), debugRelais);
+  Log.warning(F("debugCharger: %s" CR), debugCharger);
+  Log.warning(F("debugBattery: %s" CR), debugBattery);
+  Log.warning(F("debugInverter: %s" CR), debugInverter); 
+}
+
+long CFG::secondsSince(long milliSeconds) {
+  return (millis() - milliSeconds) / 1000;
 }

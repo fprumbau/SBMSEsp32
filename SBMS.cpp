@@ -93,10 +93,7 @@ bool SBMS::read() {
           stringBuffer[index++] = c;
         } else {
           if (debugSbms) {
-            Serial.print(F("Empfangenes String-Endezeichen / aktueller Index: "));
-            Serial.print((int)c);
-            Serial.print(F(" / "));
-            Serial.println(index);
+            Log.warningln(F("Empfangenes String-Endezeichen / aktueller Index: %c / %d"), c, index);
           }
           if (index > 0) {
             stringBuffer[index] = '\0';
@@ -118,11 +115,7 @@ bool SBMS::read() {
     yield();
 
     if (debugSbms && len > 0) {
-      Serial.print(">");
-      Serial.print(data);
-      Serial.println("<");
-      Serial.print("Length 'data': ");
-      Serial.println(len);
+      Log.warning(F(">%s<Length 'data': %d"),data, len);
     };
 
     if (len < 50) {
@@ -132,7 +125,7 @@ bool SBMS::read() {
         errData += "Fehler, SBMS-Daten scheinen zu kurz zu sein: (len: ";
         errData += len;
         errData += ");";
-        Serial.println(errData);
+        Log.warningln(errData.c_str());
         wc.sendClients(errData.c_str());
       }
       inverter.setBlue();
@@ -176,9 +169,7 @@ bool SBMS::read() {
         //((dcmp(24,2,data)/10)-45)
         temp = (sbms.dcmp(24, 2, txt, len) / 10) - 45;
       }
-      Serial.print(outString);
-      Serial.print(F("; StopBattery: "));
-      Serial.println(inverter.stopBattery);
+      Log.warningln(F("%s; StopBattery: %T"),outString, inverter.stopBattery);
     } else {
       if (len >= 8) {
         readSoc(txt,len);
@@ -217,19 +208,13 @@ void SBMS::readSoc(const char* txt, int len) {
       if (std::abs(val - battery.soc) < 10) {
         battery.soc = val;         
       } else {
-        Serial.println(F("SBMS: Ignoriere den Wert von SoC, weil Abweichung zu gross; alt: "));
-        Serial.print(battery.soc); 
-        Serial.print(F(" ; neu: "));
-        Serial.println(val);          
+        Log.warning(F("SBMS: Ignoriere den Wert von SoC, weil Abweichung zu gross; alt: %d ; neu: %s"), battery.soc, val);        
       }
     }
   }
 }
 
 void SBMS::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("SBMS.lastReceivedMillis (in Sekunden): "));
-  Serial.println(utils.secondsSince(lastReceivedMillis));
-  Serial.print(F("SBMS.testFixed: "));
-  Serial.println(testFixed);
+  Log.warningln(F("--------------------------------"));
+  Log.warningln(F("SBMS.lastReceivedMillis (in Sekunden): %s; SBMS.testFixed: %s"), config.secondsSince(lastReceivedMillis), testFixed);
 }

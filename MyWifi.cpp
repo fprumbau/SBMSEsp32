@@ -7,8 +7,7 @@ void MyWifi::connect() {
   WiFi.disconnect(true);
   WiFi.setSleep(false);
   WiFi.enableSTA(true);
-  Serial.print(F("WIFI status = "));
-  Serial.println(WiFi.getMode());
+  Log.warning(F("WIFI status = %s"CR), WiFi.getMode());
   WiFi.mode(WIFI_STA);
   //Ende silly mode 
  
@@ -20,20 +19,19 @@ void MyWifi::connect() {
         WiFi.disconnect(true);
         WiFi.mode(WIFI_STA);
         WiFi.begin(_ssid, _password);
-        Serial.print(F("."));
+        Log.warning(F("."));
         delay(3000); 
   }
 
   if(connected()) {
-        Serial.printf("\nNew Client. RSSi: %ld dBm\n",WiFi.RSSI()); 
-        Serial.print(F("Ip Address: "));
       
         IPAddress ip = WiFi.localIP();
-        Serial.println(ip);
+
         _localIP = ip;
         _ip=ip.toString();
+
+        Log.warningln("\nNew Client. RSSi: %ld dBm\nIp Address: %s; Initializing sma.init",WiFi.RSSI(), ip); 
       
-        Serial.println(F("Initializing sma.init"));
         sma.init();
       
         //Running since
@@ -68,14 +66,14 @@ void MyWifi::reconnect() {
     if(wifiReconnects >= myWifiRestartLimit) {
       String msg = F("Nach {myWifiRestartLimit} Wifi Reconnects: Esp.restart()");
       wc.sendClients(msg.c_str());
-      Serial.println(msg);
+      Log.warningln(msg.c_str());
       wifiReconnects=0;
       ESP.restart();
     } else {    
-      Serial.println(F("Restarting WiFi..."));
+      Log.warningln(F("Restarting WiFi..."));
       connect();
     }
-    Serial.println(F("And reinitializing sma: reset()"));
+    Log.warningln(F("And reinitializing sma: reset()"));
     sma.reset();
   }
 }
@@ -85,11 +83,9 @@ bool MyWifi::connected() {
 }
 
 void MyWifi::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Wifi reconnects: "));
-  Serial.println(wifiReconnects);
-  Serial.print(F("Wifi IP: "));
-  Serial.println(localIP());  
-  Serial.print(F("MyWifi.connected() :: "));
-  Serial.println(connected());   
+  Log.warningln(F("--------------------------------"));
+  Log.warningln(F("Wifi reconnects: %s"), wifiReconnects);
+  Log.warningln(F("Wifi IP: %s"), _localIP);
+  bool conn = connected();
+  Log.warningln(F("MyWifi.connected() :: %T"), conn); 
 }

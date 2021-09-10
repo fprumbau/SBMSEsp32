@@ -1,67 +1,6 @@
 const char changelog[] PROGMEM = R"=====(
 <b>Device info</b>: Frank's Solar Charge monitor
 
-<li>0.9.9.97  (1) Nachricht 'Trying to open Webclient socket' wird nun nur noch auf die Konsole gelogged; Kommen non-Jsondaten an, werden sie nur noch ins UI gelogged, wenn der Debugschalter gesetzt ist (Webclient)
-<li>0.9.9.97  (2) Das Flag debugConfig wurde im config.print() nicht ausgegeben
-<li>0.9.9.97  (3) Die mit 96/4 eingef&uuml;hrte Karenzzeit von 60s triggert nun dauert, obwohl der Controller schon mehr als 60s l&auml;uft. 
-<li>0.9.9.97  (4) Es SCHEINT, der H&auml;nger kommt aus invert.checkIncome() im Bereich timeClient.update() ( while-Schleife OHNE Exit ). Ein break beendet den Loop nun nach 10 Fehlversuchen. 
-<li>0.9.9.97  (5) Eine Zellunterspannung sollte auf jeden Fall auf Kommandozeile UND GUI gelogged werden (inverter.cpp, wenn debugInverter == true)
-<li>0.9.9.97  (6) LOW_VOLTAGE_MILLIS wird von 3100 auf 2800mv heruntergenommen. Damit ist im Netzmodus eine Umschaltung auf Batterie bei 2850mV (durch Hysterese) m&ouml;glich.
-<li>0.9.9.97  (7) failureCount und errLimit wurden in inverter.h/cpp integriert, das errLimit von 5 auf 10 angehoben 
-<li>0.9.9.97  (8) Der Solarcharger sollte nicht 5, sondern 10Minuten laufen
-<li>0.9.9.97  (9) Zur Meldung "Aktiviere Solarcharger 2 wegen Zellunterspannung Zelle 7" sollte die gemessene Spannung angegeben werden 
-<li>0.9.9.98  (1) DebugTesla-Variable eingerichtet und in Tesla.cpp verarbeitet
-<li>0.9.9.98  (2) Loginabschnitt aus html.h entfernen (Formbased-Login, nicht verwendet), der Redirecting-Timeout im u.a. Updatetemplate wurde von 3 auf 6s erh&ouml;ht
-<li>0.9.9.98  (3) Tesla.cpp gibt nun eine Erkl&auml;rung f&uuml;r den gefunden rc<0 aus
-<li>0.9.9.98  (4) Das neue Flag (momentan nur per Kommandozeile setzbar) deaktiviert den Batteriemodus (nur laden m&ouml;glich); DEFAULT: false ( wegen Belgienurlaub )
-<li>0.9.9.98  (5) Batteriemodus in CFG speichern, beim starten wiederherstellen und in GUI &auml;nderbar machen, in CFG nur 'debugConfig' verwenden
-<li>0.9.9.98  (6) Ausgabe myWifi-Verbindungsstatus mit myWifi.connected &uuml;ber print() 
-<li>0.9.9.98  (7) Statt WifiUdp in sma.read() wird nun AsyncUDP verwendet ( damit wird fast jede Sekunde automatisch ein UDP-Paket empfangen )
-<li>0.9.9.98  (8) Wird der Charger s2 in charger.cpp wg. Zellunterspannungen an oder der Inverter abgeschaltet, dann erfolgt dies nun aufgrund von Fehlercountern in battery.h ab count>3.
-<li>0.9.9.98  (9) Kommandozeile: Ein "reset sma" und ein sma.reset() nach myWifi.reconnect() wurden verdrahtet.
-<li>0.9.9.99  (1) Einf&uuml;hrung eines Connection-Checks der alle 5Min. l&auml;uft und bei myWifi.connected()==false einen Reconnect einleitet (anders als bei udp in SMA.h hier aus loop0)
-<li>0.9.9.99  (2) Kommt in SMA.cpp ein neues UDP-Paket an, wird ein Flag gesetzt, welches steuert, dass charger.checkOnIncome() aufgerufen wird. Nach Verarbeitung setzt die Chargermethode das Flag zur&uuml;ck (Schnellere Justierung der Charger)
-<li>0.9.9.99  (3) Das Flag debugInverter in Inverter.cpp sollte beim Start- und Stop des Netzmodus keine Nachrichten unterdr&uuml;cken
-<li>0.9.9.99  (4) Konfigoption, alle einkommenden Ertragswerte (netto) direkt an alle verbundenen Clients schicken zu k&ouml;nnen (fastResponse)
-<li>0.9.9.99  (5) Die mit 0.9.9.93(2) herausgenommene Ber&uuml;cksichtigung von socLimit wird f&uuml;r den automatischen Abendbetrieb wieder aktiviert. Der beginnt nur, wenn soc>socLimit(70)+SOC_HYST(5) ist, also ab 75% StateOfCharge
-<li>0.9.9.99  (6) Logs.h/Logs.cpp aus PegelControl &uuml;bernommen, wird zwischen Netz- und Batteriemodus geschaltet, wird dies hier gelogged.
-<li>0.9.9.99  (7) Fix Tesla UserAgent Header 
-<li>0.9.9.99  (8) M&ouml;glichkeit einen Logeintrag zu schreiben (Test, Kommandozeile)
-<li>1.0.0     (0) Release
-<li>1.0.1     (1) Wird die inverter.starteBatterie(..) gerufen, wurde meist keine Lognachricht geschrieben (vorzeitiges return)
-<li>1.0.1     (2) Logging beim Einschalten der Batterie um den 'soc'-Wert erweitert
-<li>1.0.1     (3) Fehler in der loop0-Methode behoben, hier wurde der myWifi.connected()-Check IMMER durchgef&uuml;hrt, da 'lastConnectCheck' nie gesetzt wurde.
-<li>1.0.1     (4) Logs.cpp optimiert und Ausgabe verschlankt
-<li>1.0.1     (5) Es braucht das access_token, nicht das refresh_token zur Authentifizierung des Tesla-Accounts 
-<li>1.0.1     (6) Der Timeclient wird nur noch in MyWifi.cpp, nicht aber in Inverter.cpp initialisiert/abgefragt
-<li>1.0.2     (1) Luefterfunktionen in Luefter.h/.cpp ausgelagert
-<li>1.0.2     (2) L&auml;uft ein Charger, dann sollte SOC>=99% ODER Temp<TempMax reichen, nicht UND.
-<li>1.0.2     (3) Inverter errLimit und failureCount entfernt ( es reicht, wenn battery.checkCellVoltages() erst ab 3 Fehlmessungen ausl&ouml;st ) 
-<li>1.0.2     (4) Die doppelte Messung von Cellspannungen in Inverter.cpp (zur Abschaltung) und in battery.checkCellVoltags (zur Steuerung von Charger2 im Unterspannungsfall wurde aufgehoben
-<li>1.0.2     (5) Es gibt nur noch eine untere Zellspannung ( LOW_VOLTAGE_CV_MILLIS ). Sobald diese &uuml;berschritten wird, erlischt der Fehler (durch Abschaltung des Inverters steigen Spannungen automatisch).
-<li>1.0.2     (6) 5 globale Variablen wurden nach battery.h verlegt
-<li>1.0.3     (1) MyWifi.print() gibt eigenen Status aus    
-<li>1.0.3     (2) Debugvariable sbmsAnalyzer und loopAnalyzer entfernt
-<li>1.0.3     (3) Wird im Inverter beim Check die Nachtzeit geprueft, so erfolgt dies alle paar Sekunden. Ein falscher SoC-Wert (einmal: 4858) kann die Batterie einschalten. Es werden nun alle Werte > 100 ignoriert. 
-<li>1.0.3     (4) SBMS.readSoc beruecksichtigt nun nur noch neu SoC-Werte, wenn sie vom alten weniger als 10% abweichen (Und der alte > 0 war)
-<li>1.0.3     (5) Da die Batterie regelm&auml;ssig mit Zellunterspannungsfehlern ausgestiegen ist, wurde nun der Error-Threshold von 3 auf 10 hochgesetzt (Serialdebugmeldungen im Fehlerfalle hinzugef&uuml;gt)
-<li>1.0.3     (6) Der Fehlerz&auml;hler wird nur hochgestellt, wenn die gemessene Zellspannung > 0 ist (sonst liegt eh eine Fehlmessung vor) 
-<li>1.0.3     (7) Die L&uuml;fter werden nur eingeschaltet, wenn die gemessene Temperatur UNTER 80Grad ist, alles andere wird als Fehlmessung verworfen (Luefter.cpp)
-<li>1.0.4     (1) Die Limits der Teslasteuerung lassen sich nun mit einer Eingabe stufenlos setzen.
-<li>1.0.4     (2) Tritt beim Wakeup ein Fehler auf, so wird dieser im Client angezeigt
-<li>1.0.4     (3) Zur Re-Authentifizierung (alle 45d Pflicht) wurde ein Button eingef&uuml;hrt. ( geht noch nicht )
-<li>1.0.4     (4) Es wurde eine Load- und Save-Methode fuer die Konfigklasse vorbereitet
-<li>1.0.4     (5) L&auml;uft der Inverter im Nachtmodus (wurde er also autom.bei >=75%SoC gestartet, dann ist die minimale Zellspg. 3050mV, sonst (Notmodus) 2800mV (vorher 2700mV), siehe battery.h/.cpp
-<li>1.0.5     (1) Der L&uuml;fter wird st&auml;ndig an- und ausgeschaltet, wenn die Temperatur 38°C ist und SOC>=99 angezeigt wird. Der SOC sollte hier nicht ber&uuml;cksichtigt werden.
-<li>1.0.6     (1) Die Tesla-API verwendet nun die API des HTTPClients korrekt, indem im .begin(..) der WiFiClient als erstes Argument &uuml;bergibt.  (revert, weil crash; evtl. muss der WifiClient VOR dem HttpClient initialisiert werden)
-<li>1.0.6     (2) Bei einem readChargeState des Tesla erfolgt meist ein Fehler, da der Wagen schl&auml;ft. In diesem Fall sollte der Webclient informiert werden. 
-<li>1.0.7     (1) Ein neuer Schwellwert wait_excess_power_start_millis regelt nun, dass der statische Charter S1 erst aktiviert wird, wenn f&uuml;r mehr als 1 Minute positive Zahlen f&uuml;r ihn vorliegen
-<li>1.0.7     (2) Bisher wurde ab 10Uhr morgens aufs Netz geschaltet, dies wird nun mit der Bedingung verkn&uuml;pft, dass der SOC kleiner als 50% ist.
-<li>1.0.8     (1) L&uuml;ftersteuerung aus CTRL.h/cpp nach Luefter.h/cpp verlegt
-<li>1.0.8     (2) Versuch, den rc=5 connection error in der Testlasteuerung zu beheben, beginRequest inline gelegt.
-<li>1.0.8     (3) Charger.cpp hat nun eigene Ausgabe mit print()
-<li>1.0.9     (1) Chargertuning ...
-<li>1.0.9     (2) Liefen Charger 1+2 mehr als eine Stunde, wurde bisher der Batteriebetrieb abgeschaltet, das wird nun zur&uuml;ckgenommen (Batterie l&auml;uft durch, unterst&uuml;tzt durch die Charger)
 <li>1.0.10    (1) Tesla-API zur&uuml;ckgestellt, wegen rc=5, connection lost
 <li>1.0.11    (1) Stringdaten vom Inverter und Temperatur Becken empfangen
 <li>1.0.11    (2) Fix: retrieveData wurde VIEL zu h&auml;fig aufgerufen, weil connectionCheck-Timestamp nicht zur&uuml;gesetzt wurde 
@@ -93,10 +32,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.5     (2) Die Reaktionszeit des Chargers 2 wird von 30s auf 5s heruntergesetzt ( s2MinRestMillis )
 <li>3.0.5     (3) Die Reaktionszeit des Chargers 1 wird von 60s auf 20s heruntergesetzt ( s1MinRestMillis )
 <li>3.0.5     (4) Charger.cpp (calculateDc) wurde jeder Wert um 10 erhöht (um den Solarstrom besser auszunutzen)
-<li>3.0.6     (5) Charger.cpp (calculateDc) wurde jeder Wert um nochmals 10 erhöht (um den Solarstrom besser auszunutzen)
+<li>3.0.6     (1) Charger.cpp (calculateDc) wurde jeder Wert um nochmals 10 erhoeht (um den Solarstrom besser auszunutzen)
+<li>3.0.6     (2) Battery.cpp generiert nun eine Nachricht bei Zellunterspannung, die im Inverterevent aufs Display gebracht wird (inkl. SOC)
+<li>3.0.6     (3) Die Zellspannungsgrenze im Nachtbetrieb wird von 3050mV auf 3100mV erhoeht, damit mehr für Notfälle übrig bleibt
+<li>3.0.6     (4) Im Nicht-Nachtmodus (inverter.cpp) wurde bei <50% immer auf Netzbetrieb geschaltet. Dies wird nun nur gemacht, wenn Netzspannung anliegt
+<li>3.0.6     (5) Im Nachtbetrieb (battery.cpp) wird die hoehere Zellspannungsgrenze nur dann genommen, wenn Netzspannung vorliegt, sonst die niedere (2800mV)
+<li>3.0.6     (6) Charger.cpp: Wird debugCharger gesetzt, dann werden die Kalkulationsergebnisse in den Webclient gesendet ( netto, dcValue )
+<li>3.0.7     (1) Add ArduinoLog
 )=====";
 
-#define VERSION "3.0.6"
+#define VERSION "3.0.7"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
@@ -237,7 +182,7 @@ div::-webkit-scrollbar-track {
       <option name="10">Debug Tesla</option>
       <option name="11">Batterie Aktiv</option>
       <option name="12">Fast Response</option>
-      <option name="13">Automatisches Laden</option>
+      <option name="13">Autocharging S1/S2</option>
     </select>
 </input>
 </div2>
@@ -857,7 +802,7 @@ function updateSbmsData(){
         htm('d8',w[5]);
 
         //Ext: <val>'+ ((dcmp(26,2,data)/10)-45).toFixed(1)+'</val>&#8451
-        htm('d'+12,'Typ: LiIon <val>260</val>Ah Status: <val>'+dcmp(56,3,data)+'</val></br>'+'SBMS Temp Int: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451</br>'+'BattVoltage <Val>'+ bv.toFixed(3)+'</Val>V Cell &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val>mV');
+        htm('d'+12,'LiIon <val>200</val> Ah / <val>5</val> kWh</br>'+'SBMS: <val>'+ ((dcmp(24,2,data)/10)-45).toFixed(1)+'</val>&#8451 / Status: <val>'+dcmp(56,3,data)+'</val></br>'+'Batterie <Val>'+ bv.toFixed(2)+'</Val> V / Zelle &#916 <Val>'+((max1-min1)*1000).toFixed(0)+'</Val> mV');
       }
   } catch(err) {
     log("ERROR_595: " + err.message);

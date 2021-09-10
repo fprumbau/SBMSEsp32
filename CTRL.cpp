@@ -8,32 +8,21 @@ bool CTRL::isUpForSeconds(int seconds) {
 }
 
 void CTRL::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Running since: "));
-  Serial.println(runningSince);
-  Serial.print(F("Lüfter aktiv: "));
-  Serial.println(luefter.isOn());
-  Serial.print(F("Temperatur: "));
-  Serial.println(temp);  
-  Serial.print(F("Now (millis): "));
-  Serial.println(millis());        
-  Serial.print(F("Udp resets: "));
-  Serial.println(udpResets);  
-  Serial.print(F("Last status message: "));
-  Serial.println(lastStatusMsg );
-  Serial.print(F("Free Heap: "));
-  Serial.println(ESP.getFreeHeap());  
-  Serial.print(F("===== DATA ===== "));
-  Serial.print(F("currentdc1power: "));
-  Serial.println(string1);
-  Serial.print(F("currentdc2power: "));
-  Serial.println(string2);
-  Serial.print(F("vorlauf: "));
-  Serial.println(vorlauf);  
-  Serial.print(F("ruecklauf: "));
-  Serial.println(ruecklauf);    
-  Serial.print(F("pegel: "));
-  Serial.println(pegel);
+  Log.warning(F("--------------------------------"));
+  Log.warning(F("Running since: %s" CR), runningSince);
+  Log.warning(F("Lüfter aktiv: %T" CR), luefter.isOn());
+  Log.warning(F("Temperatur: %s" CR), temp);
+  Log.warning(F("Now (millis): %d" CR), millis());
+  Log.warning(F("Udp resets: %s" CR), udpResets);
+  Log.warning(F("Last status message: %s" CR), lastStatusMsg);
+  Log.warning(F("Free Heap: %s" CR), ESP.getFreeHeap());
+
+  Log.warning(F("===== DATA ===== "));
+  Log.warning(F("currentdc1power: %s" CR), string1);
+  Log.warning(F("currentdc2power: %s" CR), string2);
+  Log.warning(F("vorlauf: %s" CR), vorlauf);
+  Log.warning(F("ruecklauf: %s" CR), ruecklauf);
+  Log.warning(F("pegel: %s" CR), pegel);
 }
 
 void CTRL::retrieveData() {
@@ -54,7 +43,7 @@ void CTRL::retrieveData() {
       
           yield();
           if(debugCtrl) {
-            Serial.println(F("CTRL.retrieveData: SerializeJsonPretty to Serial"));
+            Log.warning(F("CTRL.retrieveData: SerializeJsonPretty to Serial"));
             serializeJsonPretty(doc, Serial);
           }
 
@@ -71,13 +60,10 @@ void CTRL::retrieveData() {
           pegel = doc["pegel"];
           temp = doc["temp"];
 
-          Serial.println(F("CTRL.retrieveData GET: read ok"));
+          Log.notice(F("CTRL.retrieveData GET: read ok"));
               
-      } else {
-        
-        Serial.print(F("CTRL.retrieveData: Error sending GET: "));
-        Serial.println(http.errorToString(httpCode));
-
+      } else {       
+        Log.error(F("CTRL.retrieveData: Error sending GET: " CR), http.errorToString(httpCode));
       }    
       http.end();
       yield();      

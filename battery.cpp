@@ -3,33 +3,17 @@
 #include "global.h"
 
 void Battery::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Batterie isOn: "));
-  Serial.println(isOn()); 
-  Serial.print(F("Ladezustand: "));
-  Serial.println(soc); 
-  Serial.print(F("SOC-Limit: "));
-  Serial.println(socLimit);    
-  Serial.print(F("battery.enabled: "));
-  Serial.println(enabled);     
-  Serial.print(F("SOC_HYST: "));
-  Serial.println(SOC_HYST);       
+  Log.warningln(F("--------------------------------"));
+  Log.warningln(F("Batterie isOn: %T"), isOn()); 
+  Log.warningln(F("Ladezustand: %d"), soc); 
+  Log.warningln(F("SOC-Limit: %d"), socLimit);    
+  Log.warningln(F("battery.enabled: %T"), enabled);     
+  Log.warningln(F("SOC_HYST: %d"), SOC_HYST);       
 
   //Ueber die 8 Zellen iterieren
   for (int k = 0; k < 8; k++) {
-          Serial.print(F("Cellerrors charger "));         
-          Serial.print(k); 
-          Serial.print(F(" : "));
-          Serial.println(cvErrChg[k]);       
+          Log.warningln(F("Cellerrors charger %s : %s"), k, cvErrChg[k]);       
   }
-    //Ueber die 8 Zellen iterieren
-  for (int k = 0; k < 8; k++) {
-          Serial.print(F("Cellerrors inverter "));         
-          Serial.print(k); 
-          Serial.print(F(" : "));
-          Serial.println(cvErrInv[k]);       
-  }
-  
 }
 
 /**
@@ -44,30 +28,28 @@ boolean Battery::checkCellVoltages() {
   for (int k = 0; k < 8; k++) {
 
       int lowMilliVolts = LOW_MINIMAL_CV_MILLIS;
-      if(inverter.nacht) {
+      if(inverter.nacht && voltageSensor.hasNetzspannung()) {
           lowMilliVolts = LOW_NIGHTLY_CV_MILLIS;
       }
 
       if(debugBattery) {
-          String d = String((char*)0);
-          d.reserve(64);
-          d+="Cell: ";
-          d+=k;
-          d+="; Voltage: ";
-          d+=cv[k];
-          d+="; Limit: ";
-          d+=lowMilliVolts;
-          wc.sendClients(d.c_str());
+          status = String((char*)0);
+          status.reserve(128);
+          status+="Cell: ";
+          status+=k;
+          status+="; Volts: ";
+          status+=cv[k];
+          status+="; Limit: ";
+          status+=lowMilliVolts;
+          status+="; SOC: ";
+          status+=soc;
+          wc.sendClients(status.c_str());
       }      
       if (cv[k] < lowMilliVolts) {    
           if(cv[k] > 0) {
             cvErrChg[k]++; 
           }
-          Serial.print(cvErrChg[k]);       
-          Serial.print(F(": Batteriezelle "));         
-          Serial.print(k); 
-          Serial.print(F(" meldet Unterspannung: "));
-          Serial.println(cv[k]);                    
+          Log.warningln("%s: %s", cvErrChg[k], status);                                     
       } else {
           cvErrChg[k]=0;
       }
@@ -90,7 +72,7 @@ boolean Battery::checkCellVoltages() {
           m+=cellNumber;
           m+=F("; gemessene Spannung (in mv): ");
           m+=cv[cellNumber];
-          Serial.println(m);
+          Log.warningln(m.c_str());
           wc.sendClients(m.c_str());
           charger.toggleCharger(S2,true,true);
           s2ActForLowCV = true;
@@ -100,7 +82,7 @@ boolean Battery::checkCellVoltages() {
           //nachdem S2 10 Minuten gelaufen ist, abschalten (nächste Messung kann Charger wieder aktivieren)
           if(s2ActForLowCV && charger.getRunningMillis(2) > 600000) { 
               String m = F("Deaktiviere Solarcharger 2 nach 10 Minuten Ladezeit jetzt...");
-              Serial.println(m);
+              Log.warningln(m.c_str());
               wc.sendClients(m.c_str());
               charger.toggleCharger(S2,false,true);
               s2ActForLowCV = false;
@@ -116,24 +98,12 @@ bool Battery::isReady2Activate() {
   int limit = socLimit + SOC_HYST;
   if(enabled && soc > limit && soc <= 100) {
     if(debugBattery) {
-      Serial.println(F("Battery::isReady2Activate enabled==true"));
-      Serial.print(F("Battery::isReady2Activate soc: "));
-      Serial.println(soc);
-      Serial.print(F("Battery::isReady2Activate socLimit: "));
-      Serial.println(socLimit);
-      Serial.print(F("Battery::isReady2Activate limit: "));
-      Serial.println(limit);
+      Log.warningln(F("Battery::isReady2Activate enabled==true\nBattery::isReady2Activate soc: %d\nBattery::isReady2Activate socLimit: %d\nBattery::isReady2Activate limit: %d"), soc, socLimit, limit);
     }
     return true;
   }
   if(enabled && debugBattery) {
-      Serial.println(F("Battery::isReady2Activate enabled==true (Batterie wird NICHT aktiviert)"));
-      Serial.print(F("Battery::isReady2Activate soc: "));
-      Serial.println(soc);
-      Serial.print(F("Battery::isReady2Activate socLimit: "));
-      Serial.println(socLimit);
-      Serial.print(F("Battery::isReady2Activate limit: "));
-      Serial.println(limit);
+    Log.warningln(F("Battery::isReady2Activate enabled==true (Batterie wird NICHT aktiviert)\nBattery::isReady2Activate soc: %d\nBattery::isReady2Activate socLimit: %d\nBattery::isReady2Activate limit: %d"), soc, socLimit, limit);
   }
   return false;
 }

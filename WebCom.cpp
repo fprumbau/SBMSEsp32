@@ -131,7 +131,7 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         serializeJson(doc, jsonChar);
         String str(jsonChar);
         if(debugJson) {
-          Serial.println(str);
+          Log.warningln(str.c_str());
         }
         if(debugWeb) {
           doc["fh"]=ESP.getFreeHeap();
@@ -162,12 +162,9 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
       }    
       case WS_EVT_DATA: 
       
-      if(debug) {
-        Serial.println(String((char *)data));
-      }
       if(data[0] == '{') {
         if(debugJson) {
-          Serial.println(String((char *)data));
+          Log.warningln(String((char *)data).c_str());
         }
         //Umstellung auf JSon
         StaticJsonDocument<300> doc;
@@ -335,9 +332,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             }
           }
           if(update) {
-            Serial.print(F("Aktualisierung von Bitset: "));
-            Serial.println(bitset);
-            Serial.println(msg);
+            Log.warningln(F("Aktualisierung von Bitset: %s\n%s"), bitset, msg);
           }
           yield();
         }     
@@ -442,6 +437,11 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
           yield();     
         }   
       } else {
+
+        if(debug) {
+          Log.noticeln(String((char *)data).c_str());
+        }
+
         String msg = String((char*)0);
         msg.reserve(32);
         msg+=F("Cannot process data: ");
@@ -469,11 +469,9 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
         sens+=0.00001;       
     }
     voltageSensor.setSensitivity(sens);
-    Serial.println(sens, 6);
+    Log.warningln(F("%F6"), sens);
 }
 
 void WebCom::print() {
-    Serial.println(F("--------------------------------"));
-    Serial.print(F("WebCom clients: "));
-    Serial.println(ws.count());  
+    Log.warningln(F("--------------------------------\nWebCom clients: %d"), ws.count());
 }

@@ -13,23 +13,21 @@ int Tesla::wakeup() {
     yield();
     
     int rc = http.POST("");
-    Serial.print(F("Trying to issue wakeup: "));
-    Serial.println(rc);
+    Log.noticeln(F("Trying to issue wakeup: %s"), rc);
     yield();
  
     if(rc>0) {
         if(debugTesla) {
-          Serial.println(_wakeup_url);
+          Log.noticeln(_wakeup_url);
           String response = http.getString();    
-          Serial.println(response);  
+          Log.noticeln(response.c_str());  
           wc.sendClients(response.c_str());
         }
         //200 == OK,
         //401 == Bearer Token abgelaufen oder nicht richtig
 
     } else {
-        Serial.println(F("Error sending wakeup POST"));
-        Serial.println(http.errorToString(rc));
+        Log.errorln(F("Error sending wakeup POST"), http.errorToString(rc));
         wc.sendClients(http.errorToString(rc).c_str());
     }
     yield();
@@ -39,9 +37,7 @@ int Tesla::wakeup() {
 }
 
 int Tesla::authorize(const char* password) {
-    Serial.print(F("Re-authorization mit password >>"));
-    Serial.print(password);
-    Serial.println(F("<<"));
+    Log.noticeln(F("Re-authorization mit password >>%s<<"), password);
 
     WiFiClient client;
     HTTPClient http;
@@ -62,18 +58,17 @@ int Tesla::authorize(const char* password) {
     String reqData = String((char *)0);
     reqData.reserve(256);
     serializeJson(doc, reqData);
-    Serial.println(reqData);
+    Log.noticeln(reqData.c_str());
     
     int rc = http.POST(reqData);
-    Serial.print(F("Trying to renew bearer token: "));
-    Serial.println(rc);
+    Log.noticeln(F("Trying to renew bearer token: %s"), rc);
     yield();
  
     if(rc == 200) {
       
-        Serial.println(_auth_url);
+        Log.noticeln(_auth_url);
         String response = http.getString();    
-        Serial.println(response);  
+        Log.notice(response.c_str());  
         wc.sendClients(response.c_str());
         DynamicJsonDocument doc(256); 
         deserializeJson(doc, response);
@@ -89,12 +84,10 @@ int Tesla::authorize(const char* password) {
                
         yield();
         config.save();
-        Serial.println(response);  
-        Serial.print(F("Authorization: "));
-        Serial.println(_authorization); 
-        Serial.print(F("VehicleId: "));
-        Serial.println(_vehicle_id);         
-        Serial.println(F("Der AuthToken wurde erneuert und gespeichert"));       
+
+        Log.warningln(response.c_str());  
+        Log.warningln(F("Authorization: %s"), _authorization);
+        Log.warningln(F("VehicleId: %s\nDer AuthToken wurde erneuert und gespeichert"), _vehicle_id);               
         /*
         {
           "access_token": "abc123",
@@ -109,8 +102,7 @@ int Tesla::authorize(const char* password) {
         //401 == Bearer Token abgelaufen oder nicht richtig
 
     } else {
-        Serial.println(F("Error sending wakeup POST"));
-        Serial.println(http.errorToString(rc));        
+        Log.warningln(F("Error sending wakeup POST"), http.errorToString(rc));        
     }
     yield();
     http.end();
@@ -126,14 +118,13 @@ int Tesla::readChargeState() {
   yield();
   
   int rc = http.GET();
-  Serial.print(F("Trying to issue read charge state: "));
-  Serial.println(rc);
+  Log.warningln(F("Trying to issue read charge state: "), rc);
   yield();
   
   if(rc>0) {
-      Serial.println(_get_charge_state_url);
+      Log.warningln(_get_charge_state_url);
       String response = http.getString();    
-      Serial.println(response);  
+      Log.warningln(response.c_str());  
       wc.sendClients(response.c_str());
       yield();
 
@@ -169,9 +160,7 @@ int Tesla::readChargeState() {
         //408 == 'vehicle not available' => Wakup
       }
   } else {
-      Serial.print(F("Error sending GET charge state; rc="));
-      Serial.println(rc);
-      Serial.println(http.errorToString(rc));
+      Log.errorln(F("Error sending GET charge state; rc=%s\n%s"), rc, http.errorToString(rc));
   }
   
   yield();
@@ -188,19 +177,17 @@ int Tesla::startCharge() {
     beginRequest(&http, _charge_start_url);    
     yield();
     int rc = http.POST("");
-    Serial.print(F("Trying to issue charge start: "));
-    Serial.println(rc);
+    Log.warningln(F("Trying to issue charge start: %s"), rc);
     
     if(rc>0) {  
         if(debugTesla) {
-          Serial.println(_charge_start_url);
           String response = http.getString();                        
-          Serial.println(response);  
+          Log.warningln(_charge_start_url);
+          Log.warningln(response.c_str());
           wc.sendClients(response.c_str());
         }
     } else {
-        Serial.println(F("Error sending POST charge start"));
-        Serial.println(http.errorToString(rc));
+        Log.warningln(F("Error sending POST charge start %s"), http.errorToString(rc));
     }
     yield();
     http.end();
@@ -217,18 +204,16 @@ int Tesla::stopCharge() {
     yield();
     
     int rc = http.POST("");
-    Serial.print(F("Trying to issue charge stop: "));
-    Serial.println(rc);
+    Log.warningln(F("Trying to issue charge stop: %s"), rc);
     yield();
 
     if(rc>0) {  
-        Serial.println(_charge_stop_url);    
+        Log.warningln(_charge_stop_url);    
         String response = http.getString(); 
-        Serial.println(response); 
+        Log.warningln(response.c_str()); 
         wc.sendClients(response.c_str());
     } else {
-        Serial.println(F("Error sending POST charge stop"));
-        Serial.println(http.errorToString(rc));
+        Log.warningln(F("Error sending POST charge stop\n%s"), http.errorToString(rc));
     }
     yield();
     http.end();
@@ -249,24 +234,22 @@ int Tesla::setChargeLimit(int percent) {
   String reqData = String((char *)0);
   reqData.reserve(32);
   serializeJson(doc, reqData);
-  Serial.println(reqData);
+  Log.noticeln(reqData.c_str());
   yield();
 
   int rc = http.POST(reqData);
   yield();
-  Serial.print(F("Trying to issue set charge limit: "));
-  Serial.println(rc);
+  Log.warningln(F("Trying to issue set charge limit: %s"), rc);
   
   if(rc>0) {  
       if(debugTesla) {
-        Serial.println(_set_charge_limit_url);
+        Log.warningln(_set_charge_limit_url);
         String response = http.getString();                        
-        Serial.println(response);  
+        Log.warningln(response.c_str());  
         wc.sendClients(response.c_str());
       }
   } else {
-      Serial.println(F("Error sending POST charge limit"));
-      Serial.println(http.errorToString(rc));
+      Log.errorln(F("Error sending POST charge limit\n%s"), http.errorToString(rc));
   }  
   yield();
   http.end();
@@ -337,35 +320,24 @@ void Tesla::vehicleId(const char* vehicleid) {
 }
 
 void Tesla::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.println(_set_charge_limit_url);
-  Serial.println(_charge_start_url);
-  Serial.println(_charge_stop_url);
-  Serial.println(_get_charge_state_url);
-  Serial.println(_wakeup_url);
-  Serial.println(_auth_url);
-  Serial.print(F("Has update: "));
-  Serial.println(_hasUpdate);
-  Serial.print(F("Chargerate: "));
-  Serial.println(_chargeRate);
-  Serial.print(F("ChargePhases: "));
-  Serial.println(_chargerPhases);
-  Serial.print(F("ChargerActualCurrent: "));
-  Serial.println(_chargerActualCurrent);
-  Serial.print(F("ChargerPower: "));
-  Serial.println(_chargerPower);
-  Serial.print(F("BatteryLevel: "));
-  Serial.println(_batteryLevel);
-  Serial.print(F("ChargeLimitSoc: "));
-  Serial.println(_chargeLimitSoc);
-  Serial.print(F("ChargingState: "));
-  Serial.println(_chargingState);
-  Serial.print(F("Ladespannung: "));
-  Serial.println(_chargerVoltage);  
-  Serial.print(F("VehicleId: "));
-  Serial.println(_vehicle_id);   
-  Serial.print(F("Bearer Token: "));
-  Serial.println(_authorization);  
+  Log.warningln(F("--------------------------------"));
+  Log.warningln(_set_charge_limit_url);
+  Log.warningln(_charge_start_url);
+  Log.warningln(_charge_stop_url);
+  Log.warningln(_get_charge_state_url);
+  Log.warningln(_wakeup_url);
+  Log.warningln(_auth_url);
+  Log.warningln(F("Has update: %T"), _hasUpdate);
+  Log.warningln(F("Chargerate: %s"), _chargeRate);
+  Log.warningln(F("ChargePhases: %s"), _chargerPhases);
+  Log.warningln(F("ChargerActualCurrent: %s"), _chargerActualCurrent);
+  Log.warningln(F("ChargerPower: %s"), _chargerPower);
+  Log.warningln(F("BatteryLevel: %s"), _batteryLevel);
+  Log.warningln(F("ChargeLimitSoc: %s"), _chargeLimitSoc);
+  Log.warningln(F("ChargingState: %s"), _chargingState);
+  Log.warningln(F("Ladespannung: %s"), _chargerVoltage);
+  Log.warningln(F("VehicleId: %s"), _vehicle_id);
+  Log.warningln(F("Bearer Token: %s"), _authorization);
 } 
 
 const char* Tesla::status() {
@@ -395,20 +367,10 @@ const char* Tesla::status() {
 void Tesla::beginRequest(HTTPClient *client, char *url) {
     client->begin(url);
     if(debugTesla) {
-      Serial.print(F("Is connected: "));
-      Serial.println(client->connected());      
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_user_agent);
-      Serial.print(F(" to "));
-      Serial.println(_user_agent);
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_app_agent);
-      Serial.print(F(" to "));
-      Serial.println(_tesla_user_agent);      
-      Serial.print(F("Setting Header: "));
-      Serial.print(_hd_content_type);
-      Serial.print(F(" to "));
-      Serial.println(_json_header);            
+      Log.warningln(F("Is connected: %s"), client->connected());      
+      Log.warningln(F("Setting Header: %s to %s"), _hd_user_agent, _user_agent);  
+      Log.warningln(F("Setting Header: %s to %s"), _hd_app_agent, _tesla_user_agent); 
+      Log.warningln(F("Setting Header: %s to %s"), _hd_content_type, _json_header);           
     }
     client->addHeader(_hd_user_agent, _user_agent);
     client->addHeader(_hd_app_agent, _tesla_user_agent);

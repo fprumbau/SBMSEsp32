@@ -37,7 +37,7 @@ void Luefter::check() {
   if(isInverterRunning) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
     if(!fansRunning) { //Versuche die Luefter anzuschalten, wenn sie nicht schon laufen
       msg = F("Schalte Luefter an, da der Batteriebetrieb aktiv ist");
-      Serial.println(msg);
+      Log.warning(msg.c_str());
       wc.sendClients(msg.c_str());
       digitalWrite(RELAY_4, LOW);
     }
@@ -47,7 +47,7 @@ void Luefter::check() {
         msg = F("Schalte Luefter an, da gerade geladen wird; Temperatur: ");
         msg+=temp;
         msg+=F("°C");
-        Serial.println(msg);
+        Log.warning(msg.c_str());
         wc.sendClients(msg.c_str());
         digitalWrite(RELAY_4, LOW);
       }
@@ -56,7 +56,7 @@ void Luefter::check() {
         msg = F("Schalte Luefter aus: Balanciere oder Temp < TEMP_THRESHOLD_LOW; Temp: ");
         msg+=temp;
         msg+=F("°C");
-        Serial.println(msg);
+        Log.warning(msg.c_str());
         wc.sendClients(msg.c_str());
         digitalWrite(RELAY_4, HIGH);
       }      
@@ -66,13 +66,12 @@ void Luefter::check() {
       if(temp<TEMP_THRESHOLD_LOW) {
         if(fansRunning) {
           msg = F("Schalte Luefter ab, da weder Batterie noch Charger laufen");
-          Serial.println(msg);
+          Log.warning(msg.c_str());
           wc.sendClients(msg.c_str());
           digitalWrite(RELAY_4, HIGH);
         }
       } else {
-        Serial.println(F("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): "));
-        Serial.println(temp);
+        Log.warning(F("Luefter bleibt aktiv, da die Temperatur zu hoch ist (Grad Celsius): %s"CR), temp);
       }
     }
   }

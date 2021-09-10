@@ -17,10 +17,10 @@ void Inverter::starteNetzvorrang(String reason) {
     msg = F("Kann Netzvorrang nicht starten, da schon aktiv :: ");
     msg += reason;
     msg += '\n';
-  }
-  Serial.println(msg);
+  }  
   if (msg.length() > 0) {    
      logs.append(msg);
+     Log.warning(msg.c_str());
      wc.sendClients(msg.c_str(), true);
   }
 }
@@ -35,7 +35,7 @@ bool Inverter::starteBatterie(String reason) {
   msg.reserve(60);
   if(!battery.enabled) {
     msg = F("Kann Batterie nicht starten, da battery.enabled==false");
-    Serial.println(msg);
+    Log.warning(msg.c_str());
     logs.append(msg);
     wc.sendClients(msg.c_str());
     return false;
@@ -45,7 +45,7 @@ bool Inverter::starteBatterie(String reason) {
       //0.9.9.6 Batteriemodus erst 'erlauben', wenn ESP32>1Min laeuft (um SW-Updates zu erlauben)
       if(!controller.isUpForSeconds(60)) {
         msg = F("Bevor der Batteriemodus aktiviert werden kann, muss der Controller mindestends 60s laufen");
-        Serial.println(msg);
+        Log.warning(msg.c_str());
         logs.append(msg);
         wc.sendClients(msg.c_str());        
         return false;
@@ -56,9 +56,10 @@ bool Inverter::starteBatterie(String reason) {
       msg += reason;
       msg += '\n';
     }
-    Serial.println(msg);
+    
     if (msg.length() > 0) {  
-       logs.append(msg);
+      Log.warning(msg.c_str());
+      logs.append(msg);
        wc.sendClients(msg.c_str(), true);
     }    
     return true; //lief schon oder wurde aktiviert
@@ -67,8 +68,8 @@ bool Inverter::starteBatterie(String reason) {
     msg += reason;
     msg += '\n';
   }
-  Serial.println(msg);
   if (msg.length() > 0) {  
+     Log.warning(msg.c_str());
      logs.append(msg);
      wc.sendClients(msg.c_str(), true);
   }
@@ -100,7 +101,7 @@ void Inverter::setRed() {
 void Inverter::check()  {
 
   if (debugInverter) {
-    Serial.println(F("Inverter::check()"));
+    Log.warning(F("Inverter::check()"));
   }
 
   //Zur weiteren Pruefung sollte die soc vorliegen
@@ -127,7 +128,7 @@ void Inverter::check()  {
 
       if (!stopBattery) {
         if (debugInverter) {
-          Serial.println(F("Stopflag was set, stopping inverter..."));
+          Log.warning(F("Stopflag was set, stopping inverter..."));
         }
       }
       stopBattery = true; 
@@ -148,17 +149,8 @@ void Inverter::check()  {
   int secs = timeClient.getSeconds();
   datetime = timeClient.getFormattedDate();
   if (debugInverter) {
-      Serial.print(F("Time: "));
-      Serial.print(hours);
-      Serial.print(":");
-      Serial.print(mins);
-      Serial.print(":");
-      Serial.println(secs);    
+      Log.warning(F("Time: %s:%s:%s ;Flag 'badBattery': %T; Flag 'nacht': %T"CR), hours, mins, secs, badBattery, nacht);  
       wc.sendClients(datetime.c_str());
-      Serial.print(F("Flag 'badBattery': "));
-      Serial.println(badBattery);
-      Serial.print(F("Flag 'nacht': "));
-      Serial.println(nacht);
   }
 
   if(!badBattery) { 
@@ -177,9 +169,16 @@ void Inverter::check()  {
           //Version v. 1.0.7, Am Tag nur auf Netz umschalten, WENN SOC kleiner 50%.
           if(battery.isOn() && battery.soc < 50) {              
               if(battery.isOn()) {
-                  String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
-                  msg+=battery.soc;
-                  starteNetzvorrang(msg);    
+                  if(voltageSensor.hasNetzspannung()) {               
+                    String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
+                    msg+=battery.soc;
+                    starteNetzvorrang(msg);    
+                  } else {
+                    String msg = F("SOC kleiner 50%: ");
+                    msg+=battery.soc;
+                    msg+="Kann nicht umschalten, weil Netzspannung fehlt!";
+                    wc.sendClients(msg.c_str());
+                  }
               } 
           }
       }
@@ -192,7 +191,7 @@ void Inverter::check()  {
  */
 void Inverter::handleButtonPressed() {
 
-    Serial.println(F("Button pressed"));
+    Log.warning(F("Button pressed"));
 
     bool relayStatus = digitalRead(RELAY_PIN);
     if (relayStatus == HIGH) {
@@ -203,14 +202,13 @@ void Inverter::handleButtonPressed() {
         starteBatterie(BUTTONACTION);
       } else {
         if (debugInverter) {
-          Serial.println(F("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)"));
+          Log.warning(F("ON, kann Netzvorrang nicht abschalten (Stop wegen SOC oder Low Voltage)"));
         }
       }
     }  
 }
 
 void Inverter::print() {
-  Serial.println(F("--------------------------------"));
-  Serial.print(F("Inverter.nacht: "));
-  Serial.println(nacht);
+  Log.warning(F("--------------------------------"CR));
+  Log.warning(F("Inverter.nacht: %T"CR), nacht);
 }

@@ -20,8 +20,8 @@
 #include "SMA.h"
 #include "battery.h"
 #include "charger.h"
-#include "Utils.h"
 #include "Log.h"
+#include <ArduinoLog.h>
 
 #include "Tesla.h"
 #include "CFG.h"
@@ -79,8 +79,7 @@ extern OTA updater; //Over-the-air updater
 extern AsyncUDP udp;
 extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
-extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
-extern Utils utils; 
+extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc. 
 extern int udpResets; //0.9.9.92 Zaehlen von Resets
 
 extern float temp; //SBMS Temperatur

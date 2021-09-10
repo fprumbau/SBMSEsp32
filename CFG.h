@@ -20,6 +20,7 @@ class CFG {
         String getValue(String data, char separator, int index);
         char* webUser();
         char* webPass();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       long secondsSince(long milliSeconds);
 };
 
 #endif
