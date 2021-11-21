@@ -455,18 +455,18 @@ void commandLine() {
         int nr = nrStr.toInt();
         switch(nr) {
           case 0:
-            Log.warning(F("serialSBMS.flush();"));
+            Log.warningln(F("serialSBMS.flush();"));
             serialSBMS.flush();
             break;
           case 1:
-            Log.warning(F("Serial.println(serialSBMS.available()); %s" CR), serialSBMS.available());
+            Log.warningln(F("serialSBMS.available()"), serialSBMS.available());
             break;             
           case 2:
-            Log.warning(F("luefter.start();"));
+            Log.warningln(F("luefter.start();"));
             luefter.start();
             break;
           case 3:
-            Log.warning(F("luefter.stop();"));
+            Log.warningln(F("luefter.stop();"));
             luefter.stop();
             break;      
           case 4:

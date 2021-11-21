@@ -398,7 +398,7 @@ void Charger::print() {
   } else wait = wait_excess_power_start_millis;
   Log.warningln(F("Charger.wait_excess_power_start_millis: %d"), wait);
   Log.warningln(F("Charger.isChargerOn(1): %T"), isChargerOn(1));
-  Log.warningln(F("Charger.isChargerOn(1): %T"), isChargerOn(2));
+  Log.warningln(F("Charger.isChargerOn(2): %T"), isChargerOn(2));
   Log.warningln(F("Charger.s1_switched: %s"), s1_switched);
   Log.warningln(F("Charger.s2_switched: %s"), s2_switched);
   if(s1_lowNettoMillis > 0) {
