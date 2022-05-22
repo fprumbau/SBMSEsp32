@@ -29,7 +29,7 @@ class Tesla {
     int _chargeLimitSoc;
     int _chargerVoltage; //229 (V)
     String _chargingState; //Complete|Charging|Stopped|Disconnected|Starting
-    //SPIFFS
+    //LITTLEFS
     char* _authorization;
     char* _vehicle_id;
     //init(..)

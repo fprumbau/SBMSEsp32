@@ -3,15 +3,20 @@
 
 //v. 0.9.9.40 laeuft weder die Batterie noch ein Charger, schalte die Luefter ueber Relais 4 ab
 void Luefter::check() {
+
+  bool hasNetz = voltageSensor.hasNetzspannung();
   bool fansRunning = !digitalRead(RELAY_4);
-  bool isBatOn = battery.isOn();
+  bool isInverterRunning = battery.isOn() || !hasNetz; //v.3.0.1 der Inverter laeuft auch, wenn die Netzspannung fehlt; battery.isOn() zeigt nur das Batterierelais an
+  
   if(debugBattery) {
     String m((char *)0);
     m.reserve(128);
     m += F("Lueft.: ");
     m += fansRunning;
-    m += F("; Batt: ");
-    m += isBatOn;
+    m += F("; Inverter: ");
+    m += isInverterRunning;
+    m += F("; Netzspg.: ");
+    m += hasNetz;    
     m += F("; Chrg: ");
     m += charger.isOn();
     m += F("; RS1: ");
@@ -29,8 +34,8 @@ void Luefter::check() {
     wc.sendClients(m.c_str());
   }
   String msg;
-  if(isBatOn) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
-    if(!fansRunning) { //Versuche die Luefter nur anzuschalten, wenn sie nicht schon laufen
+  if(isInverterRunning) { //Batteriebetrieb, Wechselrichter braucht Kuehlung
+    if(!fansRunning) { //Versuche die Luefter anzuschalten, wenn sie nicht schon laufen
       msg = F("Schalte Luefter an, da der Batteriebetrieb aktiv ist");
       Serial.println(msg);
       wc.sendClients(msg.c_str());

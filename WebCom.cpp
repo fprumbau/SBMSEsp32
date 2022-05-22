@@ -16,7 +16,6 @@ void WebCom::sendClients(const char* msg, bool save) {
   str += ": ";
   str += msg;
   ws.textAll(str);
-  logs.append(str);
 }
 
 void WebCom::sendJson(const char* key, const char* value) {
@@ -105,6 +104,11 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         } else {
           bitset.setCharAt(13,48);
         } 
+        if(charger.s1Activated) {
+          bitset.setCharAt(14,49);
+        } else {
+          bitset.setCharAt(14,48);
+        }        
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -191,7 +195,7 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         if(doc.containsKey("s1")) { //Charger S1
           bool s1 = doc["s1"];
           if(s1 != charger.isChargerOn(S1)) {    
-            update = true;    
+            update = true;  
             charger.toggleCharger(S1, s1, false);
             buildMessage(&msg, "S1", String(s1).c_str());
           }
@@ -328,6 +332,15 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   config.save();
                 }
                 break;
+             case 14:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  charger.s1Activated = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "charger.s1Activated", String(charger.s1Activated).c_str());      
+                  config.save();
+                }
+                break;                
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  
@@ -460,6 +473,17 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(F(" to "));
     msg->concat(value);
     msg->concat(F("; "));
+
+    String s = name;
+    float sens;
+    sens = voltageSensor.getSensitivity();
+    if(s.equals("debugWeb")) {    
+        sens-=0.00001;
+    } else {
+        sens+=0.00001;       
+    }
+    voltageSensor.setSensitivity(sens);
+    Serial.println(sens, 6);
 }
 
 void WebCom::print() {

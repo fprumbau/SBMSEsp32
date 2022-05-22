@@ -12,7 +12,12 @@ void Charger::toggleCharger(uint8_t nr, bool onOff, bool notify) {
     if (isOn) {
       disableCharger(nr, notify);
     } else {
-      enableCharger(nr, notify);
+        //3.0.8 Charger S1+S2 arbeiten zusammen, S1 (600W konstant) kann jetzt deaktiviert werden (s1Activated)
+        if(nr == S1 && s1Activated) {
+            enableCharger(nr, notify);
+        } else {    
+            enableCharger(nr, notify);
+        }
     }
     if (nr == S1) {
       s1_switched = millis();
@@ -93,16 +98,16 @@ int Charger::calculateDc(float netto) {
   netto += (dutyCycle * 0.5);
 
   if (netto < 50) return 0;
-  if (netto < 100) return 100;
-  if (netto < 150) return 200;
-  if (netto < 200) return 300;
-  if (netto < 250) return 400;
-  if (netto < 300) return 500;
-  if (netto < 350) return 600;
-  if (netto < 400) return 700;
-  if (netto < 450) return 800;
-  if (netto < 500) return 900;
-  if (netto < 550) return 950;
+  if (netto < 100) return 120;
+  if (netto < 150) return 220;
+  if (netto < 200) return 320;
+  if (netto < 250) return 420;
+  if (netto < 300) return 520;
+  if (netto < 350) return 620;
+  if (netto < 400) return 720;
+  if (netto < 450) return 820;
+  if (netto < 500) return 920;
+  if (netto < 550) return 980;
   return 1023;
 }
 
@@ -220,7 +225,7 @@ void Charger::checkOnIncome() {
                 netto -= 600;
                 toggleCharger(S1, true, true);
                 if (debugRelais) {
-                  wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...", true);
+                   wc.sendClients("Aktiviere Solarcharger 1 weil netto+power(S2)>600; S2 wird jetzt mit netto-600W neu bewertet...", true);
                 }
                 return; //direkt nach Schalten von S1 nichts weiteres mehr machen
               }         
@@ -233,7 +238,7 @@ void Charger::checkOnIncome() {
             if (s1_lowNettoMillis < 1) {
               s1_lowNettoMillis = now; //Start des LowNetto-Timers
             }
-            if ( (now - s1_lowNettoMillis) > 30000) { //erst nach 30s negativen Energiebetrags Charger 1 abschalten
+            if ( (now - s1_lowNettoMillis) > 60000) { //erst nach 30s negativen Energiebetrags Charger 1 abschalten
               if (debugRelais) {
                 wc.sendClients("Deaktiviere Solarcharger 1, weil >30s ein negativer Ertrag ist", true);
               }
@@ -405,6 +410,8 @@ void Charger::print() {
   Serial.println(wait);
   Serial.print(F("Charger.automatedCharging: "));
   Serial.println(automatedCharging);
+  Serial.print(F("Charger.s1Activated: "));
+  Serial.println(s1Activated);
   Serial.print(F("Charger.dutyCycle: "));
   Serial.println(dutyCycle);
   Serial.print(F("Charger.getS2Power: "));

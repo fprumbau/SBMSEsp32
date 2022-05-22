@@ -8,6 +8,7 @@ class SBMS {
   private:
     unsigned int char_off(char c);    
     unsigned long lastChecked;
+    unsigned long lastDisplayUpdate;
     unsigned int oldSoc;
     void readSoc(const char* txt, int len);
 

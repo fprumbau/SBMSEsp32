@@ -7,7 +7,7 @@
 #include "Tesla.h"
 
 #include <WiFiUdp.h>
- 
+
 const int smaMeasurementsBeforSwitchoff = 10;
 const int tenSeconds = 10000; //Pruefung der Kennwerte (SOC, Zellspannungen), minimales Interval in Millisekunden
 
@@ -31,14 +31,15 @@ bool fastResponse = false; //0.9.9.98 alle Ertragsnachrichten sofort an die Clie
 //v. 1.0.13: bitset[13]: charger.automatedCharging == true 
 extern String bitset = "00000000000001"; 
 
-int RELAY_S1 = 33;
-int RELAY_S2 = 32;    
+//09.04.22 S2 Relais (war: 32) defekt, Tausch mit S1
+int RELAY_S1 = 32;
+int RELAY_S2 = 33;    
 
 //Achtung IO34 und IO35 haben keine Outputdriver, sie sind nur als Input zu gebrauchen!!!
 int RELAY_3 = 13; //Schalten von S1 (Remote), v.0.9.9.47 (R3 ist das einzige auf NC laufende Relais, d.h. Shorted == HLG600 ist aus)
 int RELAY_4 = 23; //Schalten des Luefters, v.0.9.9.40
 
-int RELAY_PIN = 21;    
+int RELAY_PIN = 0; //war bis v.1.0.18 auf GPIO21    
 int LED_S1 = 25;
 int LED_S2 = 26;
 int TASTER = 19; //manuelle Inverterumschaltung
@@ -71,8 +72,8 @@ int udpResets = 0;
 AsyncWebSocket ws("/ws");
 
 float temp = 0.0; //aktuelle Temperatur des SBMS120
-int TEMP_THRESHOLD_HIGH = 37; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
-int TEMP_THRESHOLD_LOW = 35; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
+int TEMP_THRESHOLD_HIGH = 33; //Wird diese Temperatur ueberschritten, werden die Luefter aktiv
+int TEMP_THRESHOLD_LOW = 30; //Wird diese Temperatur unterschritten (und laeuft nichts mehr), dann werden die Luefter abgeschaltet
 
 //nicht auf serialSBMS warten, Feste Werte annehmen
 bool testFixed = false;
@@ -104,3 +105,6 @@ HardwareSerial serialSBMS(1); //0.9.9.95, uart 1
 CTRL controller; //0.9.9.96
 unsigned long lastConnectCheck = 0; //0.9.9.99
 LOG logs; //0.9.9.99
+LiquidCrystal_I2C lcd(0x3F, 20, 4); //3.0.1
+ZMPT101B voltageSensor(34); //3.0.1, Analog read auf 34
+Display display; //3.0.1

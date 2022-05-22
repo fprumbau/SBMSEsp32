@@ -44,6 +44,13 @@ unsigned int SBMS::char_off(char c) {
 
 bool SBMS::read() {
 
+
+  long now = millis();
+  if((now -lastDisplayUpdate) > 300) {
+      display.update();
+      lastDisplayUpdate = now;
+  }
+
   /**
      Solange etwas empfangen wird (data gefuellt) sollte ausgewertet werden.
      Wenn aber der Timeout zuschlaegt, dann fuehrt das Lesen der nicht empfangenen
@@ -53,8 +60,7 @@ bool SBMS::read() {
 
      Ist die Batterie gerade aktiv, wird das Relais wieder zurückgeschaltet (normal connected)
   */
-  long now = millis();
-  if (( now - lastReceivedMillis ) > 4000 && ( now - lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )
+  if (( now - lastReceivedMillis ) > 4000 && ( now - lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )   
 
     lastChecked = now;
 
@@ -125,13 +131,14 @@ bool SBMS::read() {
         errData.reserve(100);
         errData += "Fehler, SBMS-Daten scheinen zu kurz zu sein: (len: ";
         errData += len;
-        errData += "); Inhalt: ";
-        errData += data;
+        errData += ");";
+        Serial.println(errData);
         wc.sendClients(errData.c_str());
       }
-
+      inverter.setBlue();
       return false;
     }
+    inverter.setGreen();
 
     //Wert soc zurücksetzen (Wichtig, wenn mehrere Male nichts gelesen wird, also data.length=0,dann muss erst 
     //                       der failureCount hochgehen und nachher und schliesslich der Fehlermodus aktiviert werden (Batteriesperre)
