@@ -56,6 +56,7 @@ void setup() {
 
   //Pins fuer Taster und Relay initialisieren
   pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW); //v.3.0.4 LOW sollte der Initialstatus sein. Mit nach 1.0.18 wurde wird hier PIN 0 genutzt. Der switched aber bei jedem kompletten An/Aus (Spannung weg)
 
   //FIXME: RELAY_S1 sollte nicht mehr den Charger S1 schalten; RELAY_3 könnte dann in RELAY_S1 umbenannt werden
   pinMode(RELAY_S1, OUTPUT); //Charger S2, hart (wird in der Loging aber RELAY_3 geschaltet); 
@@ -170,7 +171,7 @@ void setup() {
   });
 
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/favicon.ico", "image/x-icon");
+    request->send(LITTLEFS, "/favicon.ico", "image/x-icon");
   });
 
   //Registriere Eventhandler WebsocketEvents
@@ -190,16 +191,21 @@ void setup() {
   //neuer Taskcode Multicore
   xTaskCreatePinnedToCore(loop0, "Task0", 5000, NULL, 0, &Task0, 0);
 
-  // v.0.9.9.65 favicon via SPIFFS
-  if(!SPIFFS.begin()){
-    Serial.println(F(">> An Error has occurred while mounting SPIFFS"));
+  // v.0.9.9.65 favicon via LITTLEFS
+  if(!LITTLEFS.begin()){
+    Serial.println(F(">> An Error has occurred while mounting LITTLEFS"));
     return;
   }
 
-  //0.9.9.76 Load config SPIFFS
+  //0.9.9.76 Load config LITTLEFS
   //config.save(); //NUR mit vorher eingestellten Werten einkommentieren!!!, siehe CFG.save(..)
   config.load();
 
+  //Initialisiere LCD
+  display.init();
+
+  adcAttachPin(34); //AC-Voltagesensor
+  analogReadResolution(12); //4095 Werte
 }
 
 /**********************************************************************/
@@ -292,7 +298,7 @@ void handleButton(AceButton* /* button */, uint8_t eventType, uint8_t /* buttonS
 
 void commandLine() {
   if(Serial.available()) {
-      String cmd = Serial.readString();
+      String cmd = Serial.readStringUntil('\n'); 
       Serial.print(F("Echo: "));
       Serial.println(cmd);
       String msg = String((char*)0);
@@ -396,6 +402,8 @@ void commandLine() {
         logs.print(false);
         myWifi.print();
         charger.print();
+        inverter.print();
+        display.print();
       } else if(cmd.startsWith(F("show heap"))) {
         Serial.print(F("Free heap: "));
         Serial.println(ESP.getFreeHeap()); 
@@ -487,10 +495,6 @@ void commandLine() {
         bool ok = WiFi.status() == WL_CONNECTED;
         Serial.print(F("Wifi status: "));
         Serial.println(ok);
-      } else if(cmd.startsWith(F("logs save"))) { 
-        logs.save();
-      } else if(cmd.startsWith(F("logs load"))) { 
-        logs.load();
       } else if(cmd.startsWith(F("logs add"))) { 
         String entry = cmd.substring(8); 
         logs.append(entry);
@@ -500,6 +504,9 @@ void commandLine() {
         wc.updateUi();
       } else if(cmd.startsWith(F("verbose"))) { 
         esp_log_level_set("*", ESP_LOG_VERBOSE);
+      } else if(cmd.startsWith(F("calibrate"))) { 
+          Serial.println(F("voltageSensor.calibrate();"));
+          voltageSensor.calibrate();  
       } else {
         Serial.println(F("Available commands:"));
         Serial.println(F(" - battery on|off :: Schalte Batteriebetrieb an / aus"));
@@ -513,8 +520,6 @@ void commandLine() {
         Serial.println(F(" - test  on|off :: enable/disable test simulation"));
         Serial.println(F(" - debug  on|off :: enable/disable debug"));        
         Serial.println(F(" - data  TESTDATA :: Testdaten setzen"));
-        Serial.println(F(" - logs save :: Logeintraege im SPIFFS ablegen"));
-        Serial.println(F(" - logs load :: Logeintraege aus SPIFFS einlesen"));
         Serial.println(F(" - logs add 'some log entry' :: Logeintraeg schreiben"));
         Serial.println(F(" - cmd NR :: Kommando mit der u.a. Nummer ausfuehren"));
         Serial.println(F(" -      0 :: serialSBMS.flush();"));
@@ -529,7 +534,7 @@ void commandLine() {
         Serial.println(F(" - tesla charge start :: Start charging tesla and setting charge level to 90%"));
         Serial.println(F(" - tesla charge stop :: Stop charging tesla and setting charge level to 50%"));
         Serial.println(F(" - tesla control on|off :: Starte/Stoppe Tesla ChargeKontrolle (wird nicht gespeichert)"));
-        Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus SPIFFS"));
+        Serial.println(F(" - config load|save :: Schreiben/Lesen der Konfig aus LITTLEFS"));
         Serial.println(F(" - config set key:value :: Hinzufuegen/aendern eines Konfigwertes (ohne Speichern!), z.B. socLimit"));
         Serial.println(F(" - config persist key:value :: Speichern/aendern eines Konfigwertes (mit Speichern!), z.B. socLimit"));        
         Serial.println(F(" - config show key :: Ausgabe des gespeicherten Values von 'key' auf Serial"));
@@ -538,6 +543,7 @@ void commandLine() {
         Serial.println(F(" - retrieve data :: Dateneinsammeln und ausgeben"));
         Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
+        Serial.println(F(" - calibrate :: Calibrate AC voltage sensor and output it to serial"));
         return;
       }
       Serial.println(msg);

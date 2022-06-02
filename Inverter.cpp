@@ -166,7 +166,11 @@ void Inverter::check()  {
       //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
       if(hours>=18 || hours < 9) {
           if(!nacht && !battery.isOn() && battery.isReady2Activate()) { //das 'nacht'-Flag verhindert, dass mehrfach versucht wird, auf Batterie umzuschalten; war die Umschaltung erfolgreich, ist nacht==true
-              nacht = starteBatterie(F("Batteriezeit ab 18 Uhr"));  
+              String msg = F("Batteriezeit ab 18 Uhr: ");
+              msg+=hours;
+              msg+=":";
+              msg+mins;
+              nacht = starteBatterie(msg);                         
               //Laeuft der Charger noch, sollte er nun gestoppt werden
               if(charger.isOn()) {
                  charger.stop();
