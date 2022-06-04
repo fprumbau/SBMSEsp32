@@ -159,6 +159,8 @@ void Inverter::check()  {
       Serial.println(badBattery);
       Serial.print(F("Flag 'nacht': "));
       Serial.println(nacht);
+      Serial.print(F("Flag 'dauerbetrieb': "));
+      Serial.println(dauerbetrieb);      
   }
 
   if(!badBattery) { 
@@ -177,14 +179,16 @@ void Inverter::check()  {
               }
           } 
       } else {
-          nacht = false;
-          //Version v. 1.0.7, Am Tag nur auf Netz umschalten, WENN SOC kleiner 50%.
-          if(battery.isOn() && battery.soc < 50) {              
-              if(battery.isOn()) {
-                  String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
-                  msg+=battery.soc;
-                  starteNetzvorrang(msg);    
-              } 
+          if(!dauerbetrieb) { //3.0.9
+            nacht = false;
+            //Version v. 1.0.7, Am Tag nur auf Netz umschalten, WENN SOC kleiner 50%.
+            if(battery.isOn() && battery.soc < 50) {              
+                if(battery.isOn()) {
+                    String msg = F("Schalte nach 10 Uhr auf Netzversorgung; SOC kleiner 50%: ");
+                    msg+=battery.soc;
+                    starteNetzvorrang(msg);    
+                } 
+            }
           }
       }
 

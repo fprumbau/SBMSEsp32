@@ -6,6 +6,7 @@ class Inverter {
     unsigned long lastCheckedMillis = -1;    
   public:
     bool nacht = false;
+    bool dauerbetrieb = false;
     void setBlue();
     void setGreen();
     void setRed();   

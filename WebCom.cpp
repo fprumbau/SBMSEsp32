@@ -108,7 +108,12 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
           bitset.setCharAt(14,49);
         } else {
           bitset.setCharAt(14,48);
-        }        
+        }  
+        if(inverter.dauerbetrieb) {
+          bitset.setCharAt(15,49);
+        } else {
+          bitset.setCharAt(15,48);
+        }  
         doc["dbg"]=bitset;
         doc["s1"]=charger.isChargerOn(1);
         doc["s2"]=charger.isChargerOn(2);
@@ -340,7 +345,16 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
                   buildMessage(&msg, "charger.s1Activated", String(charger.s1Activated).c_str());      
                   config.save();
                 }
-                break;                
+                break;    
+             case 15:
+                if(c != bitset.charAt(i)) {
+                  bitset.setCharAt(i, c);
+                  inverter.dauerbetrieb = (c == 49);   
+                  update = true;      
+                  buildMessage(&msg, "inverter.dauerbetrieb", String(inverter.dauerbetrieb).c_str());      
+                  config.save();
+                }
+                break;   
               default:   
                 if(c != bitset.charAt(i)) {
                   bitset.setCharAt(i, c);  

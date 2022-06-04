@@ -29,7 +29,7 @@ bool debugTesla = false;
 bool fastResponse = false; //0.9.9.98 alle Ertragsnachrichten sofort an die Clients senden
 
 //v. 1.0.13: bitset[13]: charger.automatedCharging == true 
-extern String bitset = "00000000000001"; 
+extern String bitset = "0000000000000100"; 
 
 //09.04.22 S2 Relais (war: 32) defekt, Tausch mit S1
 int RELAY_S1 = 32;

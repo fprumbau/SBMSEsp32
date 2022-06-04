@@ -8,6 +8,7 @@
 #define TESLAACTIVE "teslaCtrlActive"
 #define SOCLIMIT "socLimit"
 #define BATTERYENABLED "batteryEnabled"
+#define BATTERYDAUERBRIEB "batteryDauerbetrieb"
 
 void CFG::load() {
 
@@ -100,6 +101,13 @@ void CFG::load() {
         Serial.println(battery.enabled);  
       }      
     }
+    if(doc.containsKey(BATTERYDAUERBRIEB)) {
+      inverter.dauerbetrieb = doc[BATTERYDAUERBRIEB];
+      if(debugConfig) {         
+        Serial.print(BATTERYDAUERBRIEB);
+        Serial.println(inverter.dauerbetrieb);         
+      }     
+    }
   }
 }
 
@@ -118,6 +126,7 @@ bool CFG::save() {
   doc[WEBPASS] = _webPass;
   doc[SOCLIMIT] = battery.socLimit;
   doc[BATTERYENABLED] = battery.enabled;
+  doc[BATTERYDAUERBRIEB] = inverter.dauerbetrieb;
 
   File configFile = LITTLEFS.open("/config.json", "w");
   if (!configFile) {
@@ -309,4 +318,6 @@ void CFG::print() {
   Serial.println(debugBattery); 
   Serial.print(F("debugInverter: "));
   Serial.println(debugInverter);  
+  Serial.print(BATTERYDAUERBRIEB);
+  Serial.println(inverter.dauerbetrieb);   
 }
