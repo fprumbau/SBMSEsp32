@@ -284,8 +284,10 @@ void Charger::checkOnIncome() {
               if (s2_lowNettoMillis < 1) {
                 s2_lowNettoMillis = now; //Start des LowNetto-Timers
               }
-        
-              if ( (now - s2_lowNettoMillis) > 300000) { //erst nach 5 Minuten negativen Energiebetrags Charger 2 abschalten
+
+
+              boolean badBattery = battery.checkCellVoltages(); //3.0.10 den S2 Notmodus nicht mehr abschalten (Zellunterspannung)
+              if (!badBattery && (now - s2_lowNettoMillis) > 300000) { //erst nach 5 Minuten negativen Energiebetrags Charger 2 abschalten
                 if (debugRelais) {
                   wc.sendClients("Deaktiviere Solarcharger 2");
                 }

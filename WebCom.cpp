@@ -15,6 +15,7 @@ void WebCom::sendClients(const char* msg, bool save) {
   str = timeClient.getFormattedDate();
   str += ": ";
   str += msg;
+  Serial.println(msg);
   ws.textAll(str);
 }
 

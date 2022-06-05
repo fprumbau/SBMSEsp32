@@ -32,13 +32,17 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.9     (1) Der Inverter hat um 07:48 ( 02.06.22 ) auf Nachtmodus geschaltet und gemeint 'Batteriezeit ab 18 Uhr'. Die Uhrzeit wird nun mit ausgegeben.
 <li>3.0.9     (2) Flag f&uuml;r den Inverterdauerbetrieb ( 'dauerbetrieb' ) eingef&uuml;hrt, muss noch in WebCom-Optionsleiste aufgenommen werden
 <li>3.0.9     (3) Dauerbetrieb &uuml;ber Web-UI schaltbar, Status wird in Config abgelegt
-<li>3.0.10    (1)
+<li>3.0.10    (1) Der S2-Notmodus (in Inverter.cpp aktiviert) darf nur abgeschaltet werden, wenn die Batterie keinen Fehler mehr meldet (checkCellVoltages)
+<li>3.0.10    (2) Alle an wc.sendClients &uuml;berrgebenen Meldungen sollten auch auf STDOUT landen
+<li>3.0.11    (1) 
 <p>
 <h3>Offen:</h3>
-Beim Aktiv-Batterietest werden 60s Laufzeit getestet. Kommt es hier zu einem Int-Ueberlauf (nach vielen Tagen Laufzeit) ist der Wert immer negativ, so dass die Batterie nicht mehr aktiv geschaltet werden kann
+- Beim Aktiv-Batterietest werden 60s Laufzeit getestet. Kommt es hier zu einem Int-Ueberlauf (nach vielen Tagen Laufzeit) ist der Wert immer negativ, so dass die Batterie nicht mehr aktiv geschaltet werden kann
+- Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
+- Teslaintration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "3.0.10"
+#define VERSION "3.0.11"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
