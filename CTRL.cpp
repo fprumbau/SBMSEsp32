@@ -3,6 +3,7 @@
 
 bool CTRL::isUpForSeconds(int seconds) {
   //falls das Geraet zu lange laeuft ( >50d 70min ) muss der Code 'schlauer' sein
+  //https://www.norwegiancreations.com/2018/10/arduino-tutorial-avoiding-the-overflow-issue-when-using-millis-and-micros/
   if((unsigned long)(millis() - time_now) > seconds) {
     time_now = millis();
     return true;
