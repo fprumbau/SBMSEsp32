@@ -15,5 +15,6 @@ class CTRL {
       void print(); 
       void retrieveData();
       bool debugCtrl=false;
+      unsigned long time_now = 0;
 };      
 #endif

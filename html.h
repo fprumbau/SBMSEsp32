@@ -34,10 +34,9 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.9     (3) Dauerbetrieb &uuml;ber Web-UI schaltbar, Status wird in Config abgelegt
 <li>3.0.10    (1) Der S2-Notmodus (in Inverter.cpp aktiviert) darf nur abgeschaltet werden, wenn die Batterie keinen Fehler mehr meldet (checkCellVoltages)
 <li>3.0.10    (2) Alle an wc.sendClients &uuml;berrgebenen Meldungen sollten auch auf STDOUT landen
-<li>3.0.11    (1) 
+<li>3.0.11    (1) CTRL.isUpForSeconds gibt true zurueck, wenn millis() negativ wird
 <p>
 <h3>Offen:</h3>
-- Beim Aktiv-Batterietest werden 60s Laufzeit getestet. Kommt es hier zu einem Int-Ueberlauf (nach vielen Tagen Laufzeit) ist der Wert immer negativ, so dass die Batterie nicht mehr aktiv geschaltet werden kann
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
 - Teslaintration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";

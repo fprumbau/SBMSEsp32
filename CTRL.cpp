@@ -2,9 +2,12 @@
 
 
 bool CTRL::isUpForSeconds(int seconds) {
-  long sinceMillis = seconds * 1000;
-  long diff = millis() - sinceMillis;
-  return  diff > 0;
+  //falls das Geraet zu lange laeuft ( >50d 70min ) muss der Code 'schlauer' sein
+  if((unsigned long)(millis() - time_now) > seconds) {
+    time_now = millis();
+    return true;
+  }
+  return false;
 }
 
 void CTRL::print() {
