@@ -20,6 +20,10 @@ void SMA::init() {
 
 void SMA::reset() {
 
+    if(debugSma) {
+        Serial.print(F("udp.close() and listenMulticast(239,12,255,254)"));
+    } 
+
     initialized = false;
     udp.close();
     
