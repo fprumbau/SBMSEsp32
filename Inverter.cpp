@@ -168,18 +168,22 @@ void Inverter::check()  {
       //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
       if(hours>=18 || hours < 9) {
           if(!nacht && !battery.isOn() && battery.isReady2Activate()) { //das 'nacht'-Flag verhindert, dass mehrfach versucht wird, auf Batterie umzuschalten; war die Umschaltung erfolgreich, ist nacht==true
-              String msg = F("Batteriezeit ab 18 Uhr: ");
-              msg+=hours;
-              msg+=":";
-              msg+mins;
-              nacht = starteBatterie(msg);                         
-              //Laeuft der Charger noch, sollte er nun gestoppt werden
-              if(charger.isOn()) {
-                 charger.stop();
+              //3.0.14 Umschaltung auf Batterie  nur zwischen 18...24Uhr
+              if(hours >= 18) {
+                String msg = F("Batteriezeit ab 18 Uhr: ");
+                msg+=hours;
+                msg+=":";
+                msg+mins;
+                nacht = starteBatterie(msg);                         
+                //Laeuft der Charger noch, sollte er nun gestoppt werden
+                if(charger.isOn()) {
+                  charger.stop();
+                }
               }
           } 
       } else {
-          if(!dauerbetrieb) { //3.0.9
+          //3.0.14 Umschaltung auf Netz nur zwischen 0..9Uhr
+          if(!dauerbetrieb && hours < 9) { //3.0.9
             nacht = false;
             if(battery.isOn()) {              
                 if(battery.isOn()) {

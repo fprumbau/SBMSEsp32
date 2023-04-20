@@ -35,15 +35,16 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.10    (1) Der S2-Notmodus (in Inverter.cpp aktiviert) darf nur abgeschaltet werden, wenn die Batterie keinen Fehler mehr meldet (checkCellVoltages)
 <li>3.0.10    (2) Alle an wc.sendClients &uuml;berrgebenen Meldungen sollten auch auf STDOUT landen
 <li>3.0.11    (1) CTRL.isUpForSeconds scheitert nicht mehr nach 50d70min wegen unsigned long rollover
-<li>3.0.12    (1) Build mit neuen Libs, 11.04.23
-<li>3.0.13    (1) Umschaltung Nachtersatzstrom auf Netz wurde mit 1.0.7 ab 9 Uhr nur bei SOC<50% gemacht, das wurde entfernt und die Meldung von 10 auf 9 Uhr korrigiert
+<li>3.0.12    (1) 11.04.23 :: Build mit neuen Libs
+<li>3.0.13    (1) 16.04.23 :: Umschaltung Nachtersatzstrom auf Netz wurde mit 1.0.7 ab 9 Uhr nur bei SOC<50% gemacht, das wurde entfernt und die Meldung von 10 auf 9 Uhr korrigiert
+<li>3.0.14    (1) 20.04.23 :: Abends sollte der Inverter nur automatisch an-, Morgends nur automatisch abschalten, um manuelle Eingriffe zu ermöglichen
 <p>
 <h3>Offen:</h3>
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
 - Teslaintration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "3.0.13"
+#define VERSION "3.0.14"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
