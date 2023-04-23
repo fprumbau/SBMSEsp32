@@ -138,6 +138,8 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["temp"] = controller.temp;
         doc["vl"] = controller.vorlauf;
         doc["rl"] = controller.ruecklauf;
+        doc["t1"] = t1;
+        doc["t2"] = t2;
         char jsonChar[512];
         serializeJson(doc, jsonChar);
         String str(jsonChar);
@@ -369,7 +371,23 @@ void WebCom::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             Serial.println(msg);
           }
           yield();
-        }     
+        }   
+
+        //3.0.14 Batteriestart- und Endezeit setzbar
+        if(doc.containsKey("t1")) {
+          int chgt1 = doc["t1"];
+          if(chgt1 != t1) {
+            t1 = chgt1;
+            config.save();
+          }          
+        }  
+        if(doc.containsKey("t2")) {
+          int chgt2 = doc["t2"];
+          if(chgt2 != t2) {
+            t2 = chgt2;
+            config.save();
+          }          
+        }  
         
         if(doc.containsKey("vr")) {
           String netzOderBatt = doc["vr"];

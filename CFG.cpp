@@ -9,6 +9,8 @@
 #define SOCLIMIT "socLimit"
 #define BATTERYENABLED "batteryEnabled"
 #define BATTERYDAUERBRIEB "batteryDauerbetrieb"
+#define BATTERYSTART "batterystart"
+#define BATTERYSTOP "batterystop"
 
 void CFG::load() {
 
@@ -108,6 +110,20 @@ void CFG::load() {
         Serial.println(inverter.dauerbetrieb);         
       }     
     }
+    if(doc.containsKey(BATTERYSTART)) {
+      t1 = doc[BATTERYSTART];
+      if(debugConfig) {         
+        Serial.print(BATTERYSTART);
+        Serial.println(t1);         
+      }     
+    }  
+    if(doc.containsKey(BATTERYSTOP)) {
+      t2 = doc[BATTERYSTOP];
+      if(debugConfig) {         
+        Serial.print(BATTERYSTOP);
+        Serial.println(t2);         
+      }     
+    }       
   }
 }
 
@@ -127,6 +143,8 @@ bool CFG::save() {
   doc[SOCLIMIT] = battery.socLimit;
   doc[BATTERYENABLED] = battery.enabled;
   doc[BATTERYDAUERBRIEB] = inverter.dauerbetrieb;
+  doc[BATTERYSTART] = t1;
+  doc[BATTERYSTOP] = t2;
 
   File configFile = LITTLEFS.open("/config.json", "w");
   if (!configFile) {

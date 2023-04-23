@@ -66,6 +66,9 @@ extern int GPIO25; //Channel Lueft. Charger
 extern int GPIO26; //Channel Lueferter Inverter
 extern int GPIO05; //Channel HLG600-30B
 
+extern int t1; //3.0.14 Batteriezeit start
+extern int t2; //3.0.14 Batteriezeit stop
+
 extern Luefter luefter;
 extern Battery battery;
 extern Charger charger;

@@ -53,6 +53,9 @@ int GPIO25 = 0;
 int GPIO26 = 1;
 int GPIO05 = 2;
 
+int t1 = 18; //batt zeit start
+int t2 = 9;  //batt zeit stop
+
 Luefter luefter;
 Battery battery;
 Charger charger;

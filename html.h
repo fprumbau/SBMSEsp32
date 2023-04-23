@@ -38,6 +38,7 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.12    (1) 11.04.23 :: Build mit neuen Libs
 <li>3.0.13    (1) 16.04.23 :: Umschaltung Nachtersatzstrom auf Netz wurde mit 1.0.7 ab 9 Uhr nur bei SOC<50% gemacht, das wurde entfernt und die Meldung von 10 auf 9 Uhr korrigiert
 <li>3.0.14    (1) 20.04.23 :: Abends sollte der Inverter nur automatisch an-, Morgends nur automatisch abschalten, um manuelle Eingriffe zu ermöglichen
+<li>3.0.14    (1) 23.04.23 :: Der Umschaltezeitpunkt t1 (an) und t2 (aus) ist nun ueber UI konfigurierbar
 <p>
 <h3>Offen:</h3>
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
@@ -189,6 +190,9 @@ div::-webkit-scrollbar-track {
       <option name="14">S1 aktiviert</option>
       <option name="15">Batteriedauerbetrieb</option>
     </select>
+    <br>
+    Von <input type="text" class="bs" id="sett1" value="18" onblur="updateServer(this.id);" style="width:26px;padding-left:5px;height:13pt;margin-top:5px"> pm
+    bis <input type="text" class="bs" id="sett2" value="9" onblur="updateServer(this.id);" style="width:26px;padding-left:5px;height:13pt"> am
 </input>
 </div2>
 </div3>
@@ -404,6 +408,8 @@ var pegel=0;
 var temp=0;
 var vorlauf='';
 var ruecklauf='';
+var oldT1='18';
+var oldT2='9';
 function updateUi() {
   if(json.hasOwnProperty("str1")) {
     string1=json.str1;
@@ -432,6 +438,16 @@ function updateUi() {
     var teslaCtlActive = json.ta;
     document.getElementById("teslaactive").checked = teslaCtlActive;
   }
+  if(json.hasOwnProperty("t1")) {    
+    var t1 = json.t1;
+    document.getElementById("sett1").value = t1;
+    oldT1 = t1;
+  }  
+  if(json.hasOwnProperty("t2")) {    
+    var t2 = json.t2;
+    document.getElementById("sett2").value = t2;
+    oldT2 = t2;
+  }   
   if(json.hasOwnProperty("dt")) {
     var dt = json.dt;
     document.getElementById("datetime").innerHTML=dt;
@@ -609,6 +625,24 @@ function updateServer(txt) {
           o.lm = document.getElementById("setv").value;  //charge limit
           queryTeslaStateAfter = true;
           setOff(document.getElementById("set"));
+        break;             
+        case "sett1":
+          t1 = document.getElementById("sett1").value; 
+          if(t1 != '16' && t1 != '17' && t1 != '18' && t1 != '19' && t1 != '20' && t1 != '21') {
+            alert('Der Wert darf nur 16-21 betragen');
+            document.getElementById("sett1").value = oldT1
+            return
+          } 
+          o.t1 = t1
+        break;       
+        case "sett2":
+          t2 = document.getElementById("sett2").value; 
+          if(t2 != '5' && t2 != '6' && t2 != '7' && t2 != '8' && t2 != '9' && t2 != '10') {
+            alert('Der Wert darf nur 5-10 betragen');
+            document.getElementById("sett2").value = oldT2
+            return
+          } 
+          o.t2 = t2          
         break;             
         case "charge":    
           var charge = document.getElementById("charge");      
