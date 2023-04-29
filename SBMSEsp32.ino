@@ -443,6 +443,8 @@ void commandLine() {
         controller.debugCtrl=true;
         controller.retrieveData();
         controller.debugCtrl=false;
+      } else if(cmd.startsWith(F("toggle nacht"))) {
+        inverter.toggleNacht();
       } else if(cmd.startsWith(F("pwm "))) {      
         msg = F("setze PWM:");     
         String pwm = cmd.substring(4); 
@@ -544,6 +546,7 @@ void commandLine() {
         Serial.println(F(" - verbose :: Aktiviert ESP verbose logging ( esp_log_level_set('*', ESP_LOG_VERBOSE) )"));
         Serial.println(F(" - print :: Schreibe einige abgeleitete Werte auf den Bildschirm"));
         Serial.println(F(" - calibrate :: Calibrate AC voltage sensor and output it to serial"));
+        Serial.println(F(" - toggle nacht :: Umschaltung des Nachflags"));        
         return;
       }
       Serial.println(msg);

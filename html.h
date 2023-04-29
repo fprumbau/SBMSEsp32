@@ -39,13 +39,15 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.13    (1) 16.04.23 :: Umschaltung Nachtersatzstrom auf Netz wurde mit 1.0.7 ab 9 Uhr nur bei SOC<50% gemacht, das wurde entfernt und die Meldung von 10 auf 9 Uhr korrigiert
 <li>3.0.14    (1) 20.04.23 :: Abends sollte der Inverter nur automatisch an-, Morgends nur automatisch abschalten, um manuelle Eingriffe zu ermöglichen
 <li>3.0.14    (1) 23.04.23 :: Der Umschaltezeitpunkt t1 (an) und t2 (aus) ist nun ueber UI konfigurierbar
+<li>3.0.15    (1) 29.04.23 :: Fehler in inverter.cpp behoben. Morgens ist nie hour<t2, es wurde nie von Nacht auf Tag umgeschaltet. Und da es immer Nacht war, wurde auch Abends nie auf Batteriebetrieb umgeschaltet.
+<li>3.0.15    (1) 29.04.23 :: Ueber 'toggle nacht' laesst sich jetzt von der Konsole das Nacht-Flag umschalten.
 <p>
 <h3>Offen:</h3>
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
 - Teslaintration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "3.0.14"
+#define VERSION "3.0.15"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

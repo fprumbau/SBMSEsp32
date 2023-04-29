@@ -93,6 +93,10 @@ void Inverter::setRed() {
   digitalWrite(LED_BLUE, LOW);
 }
 
+void Inverter::toggleNacht() {
+  nacht = !nacht;
+}
+
 /**
  * Pruefe die Werte fuer SOC (StateOfCharge) und
  * CellVoltages (cv)
@@ -167,7 +171,7 @@ void Inverter::check()  {
 
       //ab v.0.9.9.29 zwischen 19Uhr und 9Uhr morgens Batterie schalten; Vorraussetzung (0.9.9.31!!!): stop (statt nur socLimit) beruecksichtigen)
       //ab 3.0.14 t1 Batteriestartzeit, t2 Batterieendezeit
-      if(hours>=t1 || hours < t2) {
+      if(hours>=t1 || hours < t2) { 
           if(!nacht && !battery.isOn() && battery.isReady2Activate()) { //das 'nacht'-Flag verhindert, dass mehrfach versucht wird, auf Batterie umzuschalten; war die Umschaltung erfolgreich, ist nacht==true
               //3.0.14 Umschaltung auf Batterie  nur zwischen 18...24Uhr
               if(hours >= t1) {
@@ -185,17 +189,15 @@ void Inverter::check()  {
               }
           } 
       } else {
-          //3.0.14 Umschaltung auf Netz nur zwischen 0..9Uhr
-          if(!dauerbetrieb && hours < t2) { //3.0.9
+          //3.0.14 Umschaltung auf Netz nur nach t2 (z.B. 9 Uhr), aber VOR t1 (z.B. 19 Uhr)
+          if(!dauerbetrieb && (hours > t2 && hours < t1)) { //3.0.9
             nacht = false;
             if(battery.isOn()) {              
-                if(battery.isOn()) {
-                    String msg = F("Schalte ab ");
-                    msg+=t2;
-                    msg+= F(" Uhr auf Netzversorgung");
-                    msg+=battery.soc;
-                    starteNetzvorrang(msg);    
-                } 
+                  String msg = F("Schalte ab ");
+                  msg+=t2;
+                  msg+= F(" Uhr auf Netzversorgung");
+                  msg+=battery.soc;
+                  starteNetzvorrang(msg);                    
             }
           }
       }
@@ -229,4 +231,8 @@ void Inverter::print() {
   Serial.println(F("--------------------------------"));
   Serial.print(F("Inverter.nacht: "));
   Serial.println(nacht);
+  Serial.print(F("Batteriestartzeit: "));
+  Serial.println(t1);  
+  Serial.print(F("Batterieendezeit: "));
+  Serial.println(t2);    
 }

@@ -15,6 +15,7 @@ class Inverter {
     void starteNetzvorrang(String reason); //Netzbetrieb aktivieren
     bool starteBatterie(String reason); //Batteriebetrieb aktivieren   
     void handleButtonPressed(); //Tastersteuerung, um Inverterstatus zu toggeln 
+    void toggleNacht(); //Schaltet zwischen Nacht und Tag
     void print();
 };
 
