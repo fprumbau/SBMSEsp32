@@ -3,35 +3,35 @@ const char changelog[] PROGMEM = R"=====(
 
 <li>1.0.18    (1) Meter-Rendering Chrome gefixed
 <li>3.0.0     (1) RELAY_PIN(21) wird von GPIO21 auf GPIO0 gelegt
-<li>3.0.0     (2) LiquidCrystal_I2C Unterst&uuml;tzung
+<li>          (2) LiquidCrystal_I2C Unterst&uuml;tzung
 <li>3.0.1     (1) Inverter bekommt print-Funktion, um 'nacht'-Flag ausgeben zu koennen
-<li>3.0.1     (1) Inverter: Das 'nacht'-Flag muss am Tage IMMER auf false gesetzt werden (es wurde sonst nur umgesetzt wenn der SOC<50%). Wurde dann der Inverter Manuell gestopped, startete er abends nicht mehr automatisch
-<li>3.0.1     (2) Funktion voltageSensor.calibrate() in CLI-Hilfe integriert
-<li>3.0.1     (3) Logs vereinfacht, nur noch 3 Zeilen, kein CIFS mehr.
-<li>3.0.1     (4) Commmandline-Input wird nur bis zum ersten Lineinput gelesen. 
-<li>3.0.1     (5) Wenn die Netzspannung fehlt, wird nun auch immer der L&uuml;fter aktiviert (voltageSensor.hasNetzspannung())
+<li>          (1) Inverter: Das 'nacht'-Flag muss am Tage IMMER auf false gesetzt werden (es wurde sonst nur umgesetzt wenn der SOC<50%). Wurde dann der Inverter Manuell gestopped, startete er abends nicht mehr automatisch
+<li>          (2) Funktion voltageSensor.calibrate() in CLI-Hilfe integriert
+<li>          (3) Logs vereinfacht, nur noch 3 Zeilen, kein CIFS mehr.
+<li>          (4) Commmandline-Input wird nur bis zum ersten Lineinput gelesen. 
+<li>          (5) Wenn die Netzspannung fehlt, wird nun auch immer der L&uuml;fter aktiviert (voltageSensor.hasNetzspannung())
 <li>3.0.2     (1) Nutzung von LittleFS anstatt SPIFFS
 <li>3.0.3     (1) Eine Fehlermeldung, wenn die SBMS-Daten nicht zu dekodieren waren, konnte wegen der enthaltenen Sonderzeichen nicht zum Client geschickt werden. Sie wird nun zus&auml;tzlich auf Serial ausgegeben.
-<li>3.0.3     (2) Wird keine SBMS-Nachricht gelesen (zu kurz), dann wird die Status-LED wieder auf Blau gestellt, anderfalls auf Gr&uuml;n
+<li>          (2) Wird keine SBMS-Nachricht gelesen (zu kurz), dann wird die Status-LED wieder auf Blau gestellt, anderfalls auf Gr&uuml;n
 <li>3.0.4     (1) Versuch zu verhindern, dass RELAY_PIN (0) nach jedem Restart (Spannung weg) sofort schaltet und den Bootvorgang st&ouml;rt
 <li>3.0.5     (1) Die Variable 'wait_excess_power_start_millis' wurde von 0 auf 5000ms gesetzt (Zeit bevor S1 geschaltet wird)
-<li>3.0.5     (2) Die Reaktionszeit des Chargers 2 wird von 30s auf 5s heruntergesetzt ( s2MinRestMillis )
-<li>3.0.5     (3) Die Reaktionszeit des Chargers 1 wird von 60s auf 20s heruntergesetzt ( s1MinRestMillis )
-<li>3.0.5     (4) Charger.cpp (calculateDc) wurde jeder Wert um 10 erh&ouml;ht (um den Solarstrom besser auszunutzen)
+<li>          (2) Die Reaktionszeit des Chargers 2 wird von 30s auf 5s heruntergesetzt ( s2MinRestMillis )
+<li>          (3) Die Reaktionszeit des Chargers 1 wird von 60s auf 20s heruntergesetzt ( s1MinRestMillis )
+<li>          (4) Charger.cpp (calculateDc) wurde jeder Wert um 10 erh&ouml;ht (um den Solarstrom besser auszunutzen)
 <li>3.0.6     (1) Charger.cpp (calculateDc) wurde jeder Wert um nochmals 10 erhoeht (um den Solarstrom besser auszunutzen)
-<li>3.0.6     (2) Battery.cpp generiert nun eine Nachricht bei Zellunterspannung, die im Inverterevent aufs Display gebracht wird (inkl. SOC)
-<li>3.0.6     (3) Die Zellspannungsgrenze im Nachtbetrieb wird von 3050mV auf 3100mV erhoeht, damit mehr f&uuml;r Notf&auml;lle &uuml;brig bleibt
-<li>3.0.6     (4) Im Nicht-Nachtmodus (inverter.cpp) wurde bei <50% immer auf Netzbetrieb geschaltet. Dies wird nun nur gemacht, wenn Netzspannung anliegt
-<li>3.0.6     (5) Im Nachtbetrieb (battery.cpp) wird die hoehere Zellspannungsgrenze nur dann genommen, wenn Netzspannung vorliegt, sonst die niedere (2800mV)
-<li>3.0.6     (6) Charger.cpp: Wird debugCharger gesetzt, dann werden die Kalkulationsergebnisse in den Webclient gesendet ( netto, dcValue )
+<li>          (2) Battery.cpp generiert nun eine Nachricht bei Zellunterspannung, die im Inverterevent aufs Display gebracht wird (inkl. SOC)
+<li>          (3) Die Zellspannungsgrenze im Nachtbetrieb wird von 3050mV auf 3100mV erhoeht, damit mehr f&uuml;r Notf&auml;lle &uuml;brig bleibt
+<li>          (4) Im Nicht-Nachtmodus (inverter.cpp) wurde bei <50% immer auf Netzbetrieb geschaltet. Dies wird nun nur gemacht, wenn Netzspannung anliegt
+<li>          (5) Im Nachtbetrieb (battery.cpp) wird die hoehere Zellspannungsgrenze nur dann genommen, wenn Netzspannung vorliegt, sonst die niedere (2800mV)
+<li>          (6) Charger.cpp: Wird debugCharger gesetzt, dann werden die Kalkulationsergebnisse in den Webclient gesendet ( netto, dcValue )
 <li>3.0.7     (1) S2-Relais (schaltet Charger 2 ganz ein/aus) seit l&auml;ngerem Defekt, dadurch l&auml;dt S2 IMMER mit ca. 1A. Da S1 aktuell nicht ben&ouml;tigt, Tausch (revert, da repariert)
 <li>3.0.8     (1) Luefter: TEMP_THRESHOLD_HIGH = 37->33; TEMP_THRESHOLD_LOW = 35->30
-<li>3.0.8     (2) Charger S1 ist jetzt ganz deaktivierbar
-<li>3.0.8     (3) Begrenzung der Kommastellen von Vorlauf- und Ruecklauftemperatur auf eine.
-<li>3.0.8     (4) Charger S1 wurde bisher erst nach 30s negativem Income abgeschaltet. Dies wird jetzt erst nach 60s gemacht.
+<li>          (2) Charger S1 ist jetzt ganz deaktivierbar
+<li>          (3) Begrenzung der Kommastellen von Vorlauf- und Ruecklauftemperatur auf eine.
+<li>          (4) Charger S1 wurde bisher erst nach 30s negativem Income abgeschaltet. Dies wird jetzt erst nach 60s gemacht.
 <li>3.0.9     (1) Der Inverter hat um 07:48 ( 02.06.22 ) auf Nachtmodus geschaltet und gemeint 'Batteriezeit ab 18 Uhr'. Die Uhrzeit wird nun mit ausgegeben.
-<li>3.0.9     (2) Flag f&uuml;r den Inverterdauerbetrieb ( 'dauerbetrieb' ) eingef&uuml;hrt, muss noch in WebCom-Optionsleiste aufgenommen werden
-<li>3.0.9     (3) Dauerbetrieb &uuml;ber Web-UI schaltbar, Status wird in Config abgelegt
+<li>          (2) Flag f&uuml;r den Inverterdauerbetrieb ( 'dauerbetrieb' ) eingef&uuml;hrt, muss noch in WebCom-Optionsleiste aufgenommen werden
+<li>          (3) Dauerbetrieb &uuml;ber Web-UI schaltbar, Status wird in Config abgelegt
 <li>3.0.10    (1) Der S2-Notmodus (in Inverter.cpp aktiviert) darf nur abgeschaltet werden, wenn die Batterie keinen Fehler mehr meldet (checkCellVoltages)
 <li>3.0.10    (2) Alle an wc.sendClients &uuml;berrgebenen Meldungen sollten auch auf STDOUT landen
 <li>3.0.11    (1) CTRL.isUpForSeconds scheitert nicht mehr nach 50d70min wegen unsigned long rollover
@@ -40,14 +40,24 @@ const char changelog[] PROGMEM = R"=====(
 <li>3.0.14    (1) 20.04.23 :: Abends sollte der Inverter nur automatisch an-, Morgends nur automatisch abschalten, um manuelle Eingriffe zu ermöglichen
 <li>3.0.14    (1) 23.04.23 :: Der Umschaltezeitpunkt t1 (an) und t2 (aus) ist nun ueber UI konfigurierbar
 <li>3.0.15    (1) 29.04.23 :: Fehler in inverter.cpp behoben. Morgens ist nie hour<t2, es wurde nie von Nacht auf Tag umgeschaltet. Und da es immer Nacht war, wurde auch Abends nie auf Batteriebetrieb umgeschaltet.
-<li>3.0.15    (1) 29.04.23 :: Ueber 'toggle nacht' laesst sich jetzt von der Konsole das Nacht-Flag umschalten.
+<li>          (2)          :: Ueber 'toggle nacht' laesst sich jetzt von der Konsole das Nacht-Flag umschalten.
+<li>3.0.16    (1) 30.04.23 :: Die morgendliche Umschaltzeit geht ab der 1 Minute, also nicht >t2 (dann wird bei t2==7 Uhr erst um 8 umgeschaltet)
+<li>3.0.17    (1) 03.09.23 :: Update von 1.0.5 auf 2.0.11 der ESP32 Libs
+<li>3.0.17    (2) 03.09.23 :: 
+<li>3.0.17    (2) 03.09.23 :: Fehler in Log.cpp, Luefter.cpp
+<li>3.0.18    (1) 04.11.23 :: Update von 2.0.11 auf 2.0.13 der ESP32 Libs
+<li>3.1.0     (1) 16.11.24 :: Update aller Libs und der Boardlibs (3.0.1 auf 3.0.7)
+              (2)             aus 0.9.9.88: (6) Watchdogtimer abstellen (999s, no panic handler), Syntaxupdate
 <p>
 <h3>Offen:</h3>
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
-- Teslaintration: https://tesla-api.timdorr.com/api-basics/authentication
+- Nach einem Wifi-Restart wird die Reconnectzeit korrekt mit '6.6.2023, 11:16:43' angegeben. In der UI (über Websockets) kommt jedoch "dt": "2023-06-05T22:33:14Z". Was gilt hier und was wird für
+  die Kalkulation der Nacht-/Tagzeit übernommen? Wird die Anwendung neu gestartet, wird in der UI die aktuelle Zeit -1h angezeigt. Hier wird also das konfigurierte Offset +1h nicht berücksichtigt.
+  Hier wird die datetime-Variable genutzt, die auch aktualisiert wird.
+<br>- Teslaintegration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "3.0.15"
+#define VERSION "3.0.18"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

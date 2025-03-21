@@ -31,6 +31,15 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   wc.onWsEvent(server, client, type, arg, data, len);
 }
 
+//999s
+#define WDT_TIMEOUT 999000 
+
+esp_task_wdt_config_t twdt_config = {
+        .timeout_ms = WDT_TIMEOUT,
+        //.idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
+        .trigger_panic = false,
+    };
+
 /**********************************************************************/
 /*                                                                    */
 /*                Setup                                               */
@@ -38,7 +47,10 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 /**********************************************************************/
 void setup() {
 
-  esp_task_wdt_init(999,false); //0.9.9.88
+  Serial.println("Configuring WDT...");
+  esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
+  esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   Serial.begin(115200);  //USB Serial Pins 4,2, 
   Serial.setDebugOutput(true); //0.9.9.98
@@ -87,13 +99,21 @@ void setup() {
   int freq = 100;
   int resolution = 10; //0...1024
   
-  ledcSetup(GPIO25, freq, resolution); 
-  ledcSetup(GPIO26, freq, resolution); 
-  ledcSetup(GPIO05, freq, resolution); //HLG600B
+  //https://github.com/espressif/arduino-esp32/blob/master/docs/en/migration_guides/2.x_to_3.0.rst#ledc
+  ledcAttach(GPIO25, freq, resolution); 
+  ledcAttach(GPIO26, freq, resolution); 
+  ledcAttach(GPIO05, freq, resolution); //HLG600B
 
-  ledcAttachPin(PWM_L1, 0);
-  ledcAttachPin(PWM_L2, 1);
-  ledcAttachPin(PWM_S2, 2);
+  delay(115);
+
+  //ledcWriteNote(GPIO25, freq, resolution); 
+  //ledcWriteNote(GPIO26, freq, resolution); 
+  //ledcWriteNote(GPIO05, freq, resolution); //HLG600B
+
+
+  //ledcAttachPin(PWM_L1, 0);
+  //ledcAttachPin(PWM_L2, 1);
+  //ledcAttachPin(PWM_S2, 2);
 
   //Leds
   pinMode(LED_RED, OUTPUT);
@@ -171,7 +191,7 @@ void setup() {
   });
 
   server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(LITTLEFS, "/favicon.ico", "image/x-icon");
+    request->send(LittleFS, "/favicon.ico", "image/x-icon");
   });
 
   //Registriere Eventhandler WebsocketEvents
@@ -182,8 +202,8 @@ void setup() {
 
   timeClient.begin();
   // Set offset time in seconds to adjust for your timezone, for example:
-  // GMT +1 = 3600
-  timeClient.setTimeOffset(3600);
+  // GMT +1 = 3600 im Winter, GMT+2 =7200 im Sommer
+  timeClient.setTimeOffset(7200);
   
   // initialize other the air updates
   updater.init(hostName);
@@ -191,13 +211,13 @@ void setup() {
   //neuer Taskcode Multicore
   xTaskCreatePinnedToCore(loop0, "Task0", 5000, NULL, 0, &Task0, 0);
 
-  // v.0.9.9.65 favicon via LITTLEFS
-  if(!LITTLEFS.begin()){
-    Serial.println(F(">> An Error has occurred while mounting LITTLEFS"));
+  // v.0.9.9.65 favicon via LittleFS
+  if(!LittleFS.begin()){
+    Serial.println(F(">> An Error has occurred while mounting LittleFS"));
     return;
   }
 
-  //0.9.9.76 Load config LITTLEFS
+  //0.9.9.76 Load config LittleFS
   //config.save(); //NUR mit vorher eingestellten Werten einkommentieren!!!, siehe CFG.save(..)
   config.load();
 

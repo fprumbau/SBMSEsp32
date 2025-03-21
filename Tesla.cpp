@@ -444,10 +444,10 @@ void Tesla::reset() {
   _hasUpdate = false;
 }
 
-const char* Tesla::vehicleId() {
+char* Tesla::vehicleId() {
   return _vehicle_id;
 }
 
-const char* Tesla::authorization() {
+char* Tesla::authorization() {
   return _authorization;
 }

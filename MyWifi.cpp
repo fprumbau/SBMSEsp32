@@ -49,7 +49,7 @@ void MyWifi::connect() {
           timeClient.forceUpdate();
         }
         if(isBooting) {
-          runningSince = timeClient.getFormattedDate();
+          runningSince = timeClient.getFormattedTime();
         }
   }
 }

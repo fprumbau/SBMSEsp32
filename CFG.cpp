@@ -1,4 +1,4 @@
-#include "config.h"
+//#include "config.h"
 #include "global.h"
 
 #define WEBUSER "webUser"
@@ -14,10 +14,10 @@
 
 void CFG::load() {
 
-  if(!LITTLEFS.begin()) {
+  if(!LittleFS.begin()) {
     return;
   }
-  File configFile = LITTLEFS.open("/config.json", "r");
+  File configFile = LittleFS.open("/config.json", "r");
   if(!configFile){
     return;
   }
@@ -129,7 +129,7 @@ void CFG::load() {
 
 bool CFG::save() {
   
-  if(!LITTLEFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
+  if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
     return false;
   }
 
@@ -146,7 +146,7 @@ bool CFG::save() {
   doc[BATTERYSTART] = t1;
   doc[BATTERYSTOP] = t2;
 
-  File configFile = LITTLEFS.open("/config.json", "w");
+  File configFile = LittleFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println(F("Failed to open config file for writing"));
     return false;
@@ -230,10 +230,10 @@ char* CFG::webPass() {
   return _webPass;
 }
 const char* CFG::load(const String& key) {
-  if(!LITTLEFS.begin()) {
+  if(!LittleFS.begin()) {
     return NULL;
   }
-  File configFile = LITTLEFS.open("/config.json", "r");
+  File configFile = LittleFS.open("/config.json", "r");
   if(!configFile){
     return NULL;
   }
@@ -266,10 +266,10 @@ const char* CFG::load(const String& key) {
 }       
 bool CFG::save(const String& key, const String& val) {
 
-  if(!LITTLEFS.begin()) {
+  if(!LittleFS.begin()) {
     return NULL;
   }
-  File configFile = LITTLEFS.open("/config.json", "r");
+  File configFile = LittleFS.open("/config.json", "r");
   if(!configFile){
     return NULL;
   }
@@ -310,6 +310,7 @@ bool CFG::save(const String& key, const String& val) {
 
   configFile.flush();
   configFile.close();  
+  return true;
 }
 
 void CFG::print() {

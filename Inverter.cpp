@@ -150,7 +150,7 @@ void Inverter::check()  {
   int hours = timeClient.getHours();
   int mins = timeClient.getMinutes();
   int secs = timeClient.getSeconds();
-  datetime = timeClient.getFormattedDate();
+  datetime = timeClient.getFormattedTime();
   if (debugInverter) {
       Serial.print(F("Time: "));
       Serial.print(hours);
@@ -190,7 +190,7 @@ void Inverter::check()  {
           } 
       } else {
           //3.0.14 Umschaltung auf Netz nur nach t2 (z.B. 9 Uhr), aber VOR t1 (z.B. 19 Uhr)
-          if(!dauerbetrieb && (hours > t2 && hours < t1)) { //3.0.9
+          if(!dauerbetrieb && (hours >= t2 && hours < t1)) { //3.0.9
             nacht = false;
             if(battery.isOn()) {              
                   String msg = F("Schalte ab ");

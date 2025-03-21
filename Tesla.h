@@ -20,7 +20,7 @@ class Tesla {
     const char* _charge_stop = "/command/charge_stop";
     const char* _auth = "/oauth/token";
     const char* _wakeup = "/wake_up";
-
+    
     float _chargeRate;  //10.9
     int _chargerPhases; //1
     int _chargerActualCurrent; //11 (A)
@@ -63,8 +63,8 @@ class Tesla {
     bool hasUpdate();
     void reset();
     const char* status();
-    const char* vehicleId();
-    const char* authorization();
+    char* vehicleId();
+    char* authorization();
 };
 
 #endif

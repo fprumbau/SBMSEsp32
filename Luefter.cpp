@@ -79,7 +79,7 @@ void Luefter::check() {
 }
 
 bool Luefter::isOn() {
-  !digitalRead(RELAY_4);
+  return !digitalRead(RELAY_4);
 }
 
 void Luefter::start() {

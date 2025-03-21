@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <NTPClient.h>
-#include <LITTLEFS.h>
+#include <LittleFS.h>
 #include <WiFiUdp.h>
 #include <FS.h>
 

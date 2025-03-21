@@ -31,6 +31,7 @@ bool LOG::append(String logEntry) {
     }
     logEvents[0] = timeClient.getFormattedTime() + " " + logEntry;
   }
+  return true;
 }
 
 String LOG::get(int index) {  

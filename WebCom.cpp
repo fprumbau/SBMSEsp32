@@ -12,7 +12,7 @@ void WebCom::sendClients(const char* msg) {
 void WebCom::sendClients(const char* msg, bool save) { 
   //Fixme save msg (wenn client sich connected, bekommt er alle im Buffer liegenden Nachrichten)
   String str = String((char*)0);
-  str = timeClient.getFormattedDate();
+  str = timeClient.getFormattedTime();
   str += ": ";
   str += msg;
   Serial.println(msg);
@@ -129,9 +129,9 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["cs"] = perry.isCharging();
         doc["sc"] = perry.getSoC();
         doc["bl"] = perry.getSoC();
-        doc["dt"]=datetime;
-        doc["t"]=temp;
-        doc["ta"]=teslaCtrlActive;
+        doc["dt"] = datetime;
+        doc["t"] = temp;
+        doc["ta"] = teslaCtrlActive;
         doc["str1"] = controller.string1;
         doc["str2"] = controller.string2;
         doc["pgl"] = controller.pegel;
