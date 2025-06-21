@@ -53,6 +53,19 @@ void setup() {
   esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   Serial.begin(115200);  //USB Serial Pins 4,2, 
+
+  // Task für loop0 auf Core 0 erstellen
+  xTaskCreatePinnedToCore(
+    loop0,           // Task-Funktion
+    "Task0",         // Name
+    20000,           // Stack-Größe (in Bytes)
+    NULL,            // Parameter
+    1,               // Priorität (1 = niedrig, höher = wichtiger)
+    NULL,            // Task-Handle
+    0                // Core 0
+  );
+
+
   Serial.setDebugOutput(true); //0.9.9.98
   
   //WROOM hat 16/17 auf RX2/TX2 verbunden
@@ -81,7 +94,7 @@ void setup() {
   //manuell Invertersteuerung
   pinMode(TASTER, INPUT_PULLUP);
   tasterConfig.setEventHandler(handleButton);
-  taster.init(TASTER, HIGH, 0 /* id */);
+  taster.init(TASTER, HIGH, 0);
 
   //Gibt Strom auf BEIDE Charger
   digitalWrite(RELAY_S1, LOW); //schaltet nur Power an beider Charger an; (S1 wird zusätzlich über RELAY_3 gestartet)  
@@ -98,12 +111,12 @@ void setup() {
 
   int freq = 100;
   int resolution = 10; //0...1024
-  
-  //https://github.com/espressif/arduino-esp32/blob/master/docs/en/migration_guides/2.x_to_3.0.rst#ledc
-  ledcAttach(GPIO25, freq, resolution); 
-  ledcAttach(GPIO26, freq, resolution); 
-  ledcAttach(GPIO05, freq, resolution); //HLG600B
 
+  //https://github.com/espressif/arduino-esp32/blob/master/docs/en/migration_guides/2.x_to_3.0.rst#ledc
+  //ledcAttach(GPIO25, freq, resolution); 
+  //ledcAttach(GPIO26, freq, resolution); 
+  //ledcAttach(GPIO05, freq, resolution); //HLG600B
+  
   delay(115);
 
   //ledcWriteNote(GPIO25, freq, resolution); 
@@ -212,9 +225,19 @@ void setup() {
   xTaskCreatePinnedToCore(loop0, "Task0", 5000, NULL, 0, &Task0, 0);
 
   // v.0.9.9.65 favicon via LittleFS
-  if(!LittleFS.begin()){
-    Serial.println(F(">> An Error has occurred while mounting LittleFS"));
-    return;
+  if(!LittleFS.begin(false)){  // false = nicht formatieren
+    if (LittleFS.format()) {
+        Serial.println("LittleFS Formatted Successfully");
+        if (LittleFS.begin(false)) {
+          Serial.println("LittleFS Mounted Successfully");
+        } else {
+          Serial.println("LittleFS Mount Failed After Format");
+          return;
+        }
+    } else {
+      Serial.println("LittleFS Format Failed");
+      return;
+    }
   }
 
   //0.9.9.76 Load config LittleFS
@@ -224,8 +247,8 @@ void setup() {
   //Initialisiere LCD
   display.init();
 
-  adcAttachPin(34); //AC-Voltagesensor
-  analogReadResolution(12); //4095 Werte
+  //AC-Sensor ZMPT101B auf 4095 Werte stellen
+  analogReadResolution(12); 
 }
 
 /**********************************************************************/
@@ -235,9 +258,11 @@ void setup() {
 /**********************************************************************/
 void loop0(void * parameter) {
   //Der normale Arduino loop laeuft automatisch in einer Schleife; die Schleife DARF nicht leer sein!!!
-  for(;;) {
-      commandLine();    //Pruefen, ob eine Kommandozeileneingabe vorhanden ist
-      vTaskDelay(10);   //if not: Task watchdog got triggered. The following tasks did not feed the watchdog in time
+  while(true) {
+
+      commandLine(); // Deine Kommandozeilen-Funktion
+      vTaskDelay(10 / portTICK_PERIOD_MS); // 10 ms Pause, um Watchdog zu entlasten  
+    
       //0.9.9.94 Wird mehr als 10Min keine SBMS-Nachricht mehr empfangen und läuft der Batteriemodus, dann beende diesen
       long now = millis();
       long lrm = lastReceivedMillis;
@@ -269,6 +294,7 @@ void loop0(void * parameter) {
         controller.retrieveData();
       }
       //xSemaphoreGive(semaphore);
+      
   }
 }
 
