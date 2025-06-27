@@ -80,3 +80,9 @@ void Display::print() {
   String s = screen;
   Serial.println(s);
 }
+
+bool isI2CDevicePresent(uint8_t address) {
+  Wire.beginTransmission(address);
+  uint8_t error = Wire.endTransmission();
+  return (error == 0); // true, wenn Gerät antwortet
+}

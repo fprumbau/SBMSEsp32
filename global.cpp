@@ -65,7 +65,7 @@ WebCom wc;
 Inverter inverter;
 AsyncWebServer server(80);
 OTA updater;
-SBMS sbms;
+//SBMS sbms;
 Utils utils;
 AsyncUDP udp;
 WiFiUDP ntpUdp;

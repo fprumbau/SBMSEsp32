@@ -44,9 +44,13 @@ unsigned int SBMS::char_off(char c) {
 
 bool SBMS::read() {
 
+  long now = millis();
+  Serial.printf("aaSBMS::read started at %lu ms\n", now);
+
 
   long now = millis();
   if((now -lastDisplayUpdate) > 300) {
+      Serial.println("aaUpdating display...");
       display.update();
       lastDisplayUpdate = now;
   }
@@ -62,6 +66,7 @@ bool SBMS::read() {
   */
   if (( now - lastReceivedMillis ) > 4000 && ( now - lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )   
 
+    Serial.println("Caahecking serialSBMS...");
     lastChecked = now;
 
     int len;
@@ -76,34 +81,43 @@ bool SBMS::read() {
 
     } else {
 
-      int index;
+      int index = 0;
       const int STRING_BUFFER_SIZE = 70; //Max. Laenge der Pakete oben ist 61
       char stringBuffer[STRING_BUFFER_SIZE];
+      memset(stringBuffer, 0, STRING_BUFFER_SIZE); // Initialisiere mit \0
+
+      // Überspringe ungültige Daten bis zum nächsten \0
       if (serialSBMS.available() > 61) {
         while (serialSBMS.available() > 0) {
-          //bis zum nächsten String-Start ( \0 ) vorlesen
           char c = serialSBMS.read();
           if (c == '\0') break;
+          yield(); // Scheduler freigeben
         }
       }
 
+      // Lese Daten in stringBuffer
       while (serialSBMS.available() > 0) {
         char c = serialSBMS.read();
-        if (c >= 32 && index < STRING_BUFFER_SIZE - 1) {
+        if (c >= 32) {
           stringBuffer[index++] = c;
         } else {
+          stringBuffer[index] = '\0'; // Terminiere String
           if (debugSbms) {
             Serial.print(F("Empfangenes String-Endezeichen / aktueller Index: "));
             Serial.print((int)c);
             Serial.print(F(" / "));
             Serial.println(index);
           }
-          if (index > 0) {
-            stringBuffer[index] = '\0';
-            index = 0;
-          }
           break;
         }
+        yield(); // Scheduler freigeben
+      }
+
+      stringBuffer[index] = '\0'; // Sicherstellen, dass String terminiert ist
+      if (index == 0) {
+        if (debugSbms) 
+          Serial.println("Keine Daten von serialSBMS empfangen");
+        return false;
       }
 
       data = String(stringBuffer);
@@ -198,6 +212,7 @@ bool SBMS::read() {
     //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
     lastReceivedMillis = millis();
 
+    Serial.printf("aaSBMS::read completed at %lu ms\n", millis());
     return true;
 
   }
@@ -233,3 +248,5 @@ void SBMS::print() {
   Serial.print(F("SBMS.testFixed: "));
   Serial.println(testFixed);
 }
+
+SBMS sbms;

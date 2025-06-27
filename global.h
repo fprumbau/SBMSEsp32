@@ -82,7 +82,7 @@ extern OTA updater; //Over-the-air updater
 extern AsyncUDP udp;
 extern WiFiUDP ntpUdp;
 extern NTPClient timeClient;
-extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+//extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
 extern Utils utils; 
 extern int udpResets; //0.9.9.92 Zaehlen von Resets
 

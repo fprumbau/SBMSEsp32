@@ -12,6 +12,7 @@ class Display {
       void line2buff(const char* txt, int offset);
       void prepareLine(int line, int offset);
       void draw();
+      bool isI2CDevicePresent(uint8_t address);
       
     public:
       void init();

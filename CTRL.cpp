@@ -75,7 +75,8 @@ void CTRL::retrieveData() {
           pegel = doc["pegel"];
           temp = doc["temp"];
 
-          Serial.println(F("CTRL.retrieveData GET: read ok"));
+          //FIXME DebugFlag hinzu
+          //Serial.println(F("CTRL.retrieveData GET: read ok"));
               
       } else {
         

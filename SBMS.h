@@ -25,4 +25,6 @@ class SBMS {
   
 };
 
+extern SBMS sbms;//SBMS solar battery charger functions, uncompress etc.
+
 #endif

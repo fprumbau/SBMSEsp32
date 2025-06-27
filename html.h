@@ -8,7 +8,13 @@ const char changelog[] PROGMEM = R"=====(
               (2)             Die Anbindung des AC-Sensors ZMPT101B erfordert keine Bindung des Pins im Hauptsketch mit adcAttachPin(34); die Zeile entfaellt
 <li>4.0.1     (1)             Neue Libs
 <li>4.0.8     (1) 21.06.25 :: Version laeuft wieder, ledcAttach in SBMSEsp32::116 auskommentiert (3Zeilen).
-             
+<li>4.0.9     (1) 25.06.25 :: In html.h wird die Herkunftsip geprüft, so dass bei Kontakt aus dem Internet für die Websockts das wss-Protokoll verwendet wird
+              (2)             Verhinderung eines Speicherzugriffsfehlers in SBMS.cpp, read, weil der stringBuffer u.U. nicht richtig terminiert wurde. Siehe auch Doku in GrokDoc.odt
+<li>4.0.10    (1) 26.06.25 :: Weiteren Fehler in SBMS.cpp::read() behoben, Speicherzugriffsfehler, wahrscheinlich Indexüberschreitung.
+<li>4.0.11    (1) 26.06.25 :: "Keine Daten von serialSBMS empfangen" im DebugSBMS-Modus, "CTRL.retrieveData GET: read ok" in CTRL.cpp als OK-Meldung unterdrueckt
+              (2) 26.06.25 :: Definition und Deklarartion von 'SBMS sbms' aus global in SBMS.h und SBMS.cpp verschoben.
+              (3) 27.06.25 :: In SBMS.read Timingdebugausgaben und weitere yield()-Anweisungen eingearbeitet, um Watchdog-Ausnahmen zu analysieren
+              (4) 27.06.25 :: Die Initialisierung des Displays in setup mit display.init() war zur Analyse auskommentiert, dies wurde entfernt (LCD-Display zur Systemspannung und Meldungen)
 <p>
 <h3>Offen:</h3>
 - Untersuchen, was der Wegfall von ledcAttach zu bedeuten hat
@@ -24,7 +30,7 @@ const char changelog[] PROGMEM = R"=====(
 <br>- Teslaintegration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "4.0.9"
+#define VERSION "4.0.11"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>
@@ -331,7 +337,11 @@ return(g.debug||a.debugAll)&&console.debug("ReconnectingWebSocket","send",g.url,
 return a.prototype.onopen=function(){},a.prototype.onclose=function(){},a.prototype.onconnecting=function(){},a.prototype.onmessage=function(){},
 a.prototype.onerror=function(){},a.debugAll=!1,a.CONNECTING=WebSocket.CONNECTING,a.OPEN=WebSocket.OPEN,a.CLOSING=WebSocket.CLOSING,a.CLOSED=WebSocket.CLOSED,a});
 var ip = location.host;
-var connection = new ReconnectingWebSocket('ws://' + ip + '/ws', null, { debug:true, reconnectInterval: 6000, reconnectDecay: 1.1, maxReconnectInterval: 10000 });
+var url = 'wss://' + ip + '/ws';
+if (ip === '192.168.178.47' || ip === '192.168.178.51') {
+  url = 'ws://' + ip + '/ws'
+}
+var connection = new ReconnectingWebSocket(url, null, { debug:true, reconnectInterval: 6000, reconnectDecay: 1.1, maxReconnectInterval: 10000 });
 console.log('Trying to open Webclient socket');
 connection.onopen = function () { 
   log('Connect: ' + new Date()); 

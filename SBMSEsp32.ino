@@ -11,7 +11,6 @@ AceButton taster(&tasterConfig);
 
 //Erster Versuch mit Multi-Core Multitasking
 TaskHandle_t Task0;
-//SemaphoreHandle_t semaphore;
 
 /**
  * Buttonsteuerung, um manuell den Inverter schalten zu koennen
@@ -55,7 +54,7 @@ void setup() {
   Serial.begin(115200);  //USB Serial Pins 4,2, 
 
   // Task für loop0 auf Core 0 erstellen
-  xTaskCreatePinnedToCore(
+  /*xTaskCreatePinnedToCore(
     loop0,           // Task-Funktion
     "Task0",         // Name
     20000,           // Stack-Größe (in Bytes)
@@ -63,8 +62,7 @@ void setup() {
     1,               // Priorität (1 = niedrig, höher = wichtiger)
     NULL,            // Task-Handle
     0                // Core 0
-  );
-
+  );*/
 
   Serial.setDebugOutput(true); //0.9.9.98
   
