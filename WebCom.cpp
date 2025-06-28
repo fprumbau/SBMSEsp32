@@ -120,8 +120,9 @@ void WebCom::updateUi(AsyncWebSocketClient *client, bool all) {
         doc["s2"]=charger.isChargerOn(2);
         doc["b"]=battery.isOn();
         doc["n"]=netto;
-        if(sbms.data != NULL && sbms.data.length() == 60 && sbms.data.charAt(0) != 'P') {
-           doc["d"]=sbms.data;
+        const char* sbmsData = sbms.getData();
+        if (sbmsData != nullptr && sbms.getDataLength() == 60 && sbms.getDataCharAt(0) != 'P') {
+          doc["d"] = sbmsData;
         }
         if(perry.hasUpdate()) {
           doc["rts"] = perry.status();
@@ -507,7 +508,7 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
     msg->concat(value);
     msg->concat(F("; "));
 
-    String s = name;
+    /*String s = name;
     float sens;
     sens = voltageSensor.getSensitivity();
     if(s.equals("debugWeb")) {    
@@ -516,7 +517,7 @@ void WebCom::buildMessage(String* msg, const char* name, const char* value) {
         sens+=0.00001;       
     }
     voltageSensor.setSensitivity(sens);
-    Serial.println(sens, 6);
+    Serial.println(sens, 6);*/
 }
 
 void WebCom::print() {

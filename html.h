@@ -8,29 +8,32 @@ const char changelog[] PROGMEM = R"=====(
               (2)             Die Anbindung des AC-Sensors ZMPT101B erfordert keine Bindung des Pins im Hauptsketch mit adcAttachPin(34); die Zeile entfaellt
 <li>4.0.1     (1)             Neue Libs
 <li>4.0.8     (1) 21.06.25 :: Version laeuft wieder, ledcAttach in SBMSEsp32::116 auskommentiert (3Zeilen).
-<li>4.0.9     (1) 25.06.25 :: In html.h wird die Herkunftsip geprüft, so dass bei Kontakt aus dem Internet für die Websockts das wss-Protokoll verwendet wird
+<li>4.0.9     (1) 25.06.25 :: In html.h wird die Herkunftsip geprueft, so dass bei Kontakt aus dem Internet fuer die Websocktes das wss-Protokoll verwendet wird
               (2)             Verhinderung eines Speicherzugriffsfehlers in SBMS.cpp, read, weil der stringBuffer u.U. nicht richtig terminiert wurde. Siehe auch Doku in GrokDoc.odt
-<li>4.0.10    (1) 26.06.25 :: Weiteren Fehler in SBMS.cpp::read() behoben, Speicherzugriffsfehler, wahrscheinlich Indexüberschreitung.
-<li>4.0.11    (1) 26.06.25 :: "Keine Daten von serialSBMS empfangen" im DebugSBMS-Modus, "CTRL.retrieveData GET: read ok" in CTRL.cpp als OK-Meldung unterdrueckt
+<li>4.0.10    (1) 26.06.25 :: Weiteren Fehler in SBMS.cpp::read() behoben, Speicherzugriffsfehler, wahrscheinlich Indexueberschreitung.
+<li>4.0.11    (1) 26.06.25 :: 'Keine Daten von serialSBMS empfangen' im DebugSBMS-Modus, 'CTRL.retrieveData GET: read ok' in CTRL.cpp als OK-Meldung unterdrueckt
               (2) 26.06.25 :: Definition und Deklarartion von 'SBMS sbms' aus global in SBMS.h und SBMS.cpp verschoben.
               (3) 27.06.25 :: In SBMS.read Timingdebugausgaben und weitere yield()-Anweisungen eingearbeitet, um Watchdog-Ausnahmen zu analysieren
               (4) 27.06.25 :: Die Initialisierung des Displays in setup mit display.init() war zur Analyse auskommentiert, dies wurde entfernt (LCD-Display zur Systemspannung und Meldungen)
+<li>4.0.12    (1) 27.06.25 :: Debugmeldungen wurden aus SBMS::read() entfernt. Die SBMS-read-Methode wird anscheinend alle 10ms ausgelöst (kann das begrenzt werden)       
+<li>4.0.13    (1) 27.06.25 :: In WebCom.buildMessage hat sich Code zur Justierung des Spannungssensors verirrt, der bei Zugriff viele Zeilenumbrueche (10x) geschrieben hat.      
+              (2)             In SBMS.h/.cpp wurde der String data durch einen char* ersetzt, um Speicherfragmentierung zu verhindern.
 <p>
 <h3>Offen:</h3>
 - Untersuchen, was der Wegfall von ledcAttach zu bedeuten hat
 - Neuen Debugmodus umsetzen, wie er in der Absaugsteuerung implementiert wurde.
-- Variablen aus der Global.cpp in die dafür zugehörigen Modul-Klassen verbringen.
-- Neue Teslasteuerung implementieren (Bluetoothanbindung über ESP)
-- Websockets über Apache reparieren, aktuell ist die Steuerung von außen nicht aufrufbar.
+- Variablen aus der Global.cpp in die dafuer zugehoerigen Modul-Klassen verbringen.
+- Neue Teslasteuerung implementieren (Bluetoothanbindung ueber ESP)
+- Websockets ueber Apache reparieren, aktuell ist die Steuerung von außen nicht aufrufbar.
 - Markanten kurzen User+Pass in config.json ablegen.
 - Debugmeldungen erreichen den Webclient nur (z.B. bei debugRelais==1), wenn auch der Debug Web(Client) eingeschaltet ist
-- Nach einem Wifi-Restart wird die Reconnectzeit korrekt mit '6.6.2023, 11:16:43' angegeben. In der UI (über Websockets) kommt jedoch "dt": "2023-06-05T22:33:14Z". Was gilt hier und was wird für
-  die Kalkulation der Nacht-/Tagzeit übernommen? Wird die Anwendung neu gestartet, wird in der UI die aktuelle Zeit -1h angezeigt. Hier wird also das konfigurierte Offset +1h nicht beruecksichtigt.
+- Nach einem Wifi-Restart wird die Reconnectzeit korrekt mit '6.6.2023, 11:16:43' angegeben. In der UI (ueber Websockets) kommt jedoch "dt": "2023-06-05T22:33:14Z". Was gilt hier und was wird fuer
+  die Kalkulation der Nacht-/Tagzeit uebernommen? Wird die Anwendung neu gestartet, wird in der UI die aktuelle Zeit -1h angezeigt. Hier wird also das konfigurierte Offset +1h nicht beruecksichtigt.
   Hier wird die datetime-Variable genutzt, die auch aktualisiert wird.
 <br>- Teslaintegration: https://tesla-api.timdorr.com/api-basics/authentication
 )=====";
 
-#define VERSION "4.0.11"
+#define VERSION "4.0.13"
 
 const char update[] PROGMEM = R"=====(
 <!DOCTYPE html><html lang="de" style="height:100%;"><head>

@@ -44,13 +44,9 @@ unsigned int SBMS::char_off(char c) {
 
 bool SBMS::read() {
 
-  long now = millis();
-  Serial.printf("aaSBMS::read started at %lu ms\n", now);
+  unsigned long now = millis();
 
-
-  long now = millis();
   if((now -lastDisplayUpdate) > 300) {
-      Serial.println("aaUpdating display...");
       display.update();
       lastDisplayUpdate = now;
   }
@@ -66,7 +62,6 @@ bool SBMS::read() {
   */
   if (( now - lastReceivedMillis ) > 4000 && ( now - lastChecked ) > 2000) { //Verarbeitung hoechstens alle 4 Sekunden, Versuch nur alle 2 Sekunden ( SBMS aktualisiert nun alle 5s )   
 
-    Serial.println("Caahecking serialSBMS...");
     lastChecked = now;
 
     int len;
@@ -76,9 +71,10 @@ bool SBMS::read() {
       //data = "5+'0GT$,I+GvG|H#GnH[HUHs+T##-##|##%##(##################%{*";
       //data = "#$7%XS$*GOGRGTGPGOGRGOGP*]##-##9##E#####################%N(";
       //data = "#$87%K$*GDGGGPGDG2GLGLGL*m##-##:##@#####################%N(";
-      data = testData;
-      len = data.length();
-
+      
+      //strncpy(dataBuffer, testData, SBMS_DATA_BUFFER_SIZE);
+      //dataBuffer[SBMS_DATA_BUFFER_SIZE - 1] = '\0';
+      //len = strlen(dataBuffer);
     } else {
 
       int index = 0;
@@ -120,8 +116,9 @@ bool SBMS::read() {
         return false;
       }
 
-      data = String(stringBuffer);
-      len = data.length();
+      strncpy(dataBuffer, stringBuffer, SBMS_DATA_BUFFER_SIZE);
+      dataBuffer[SBMS_DATA_BUFFER_SIZE - 1] = '\0';
+      len = strlen(dataBuffer);
 
     }
 
@@ -133,7 +130,7 @@ bool SBMS::read() {
 
     if (debugSbms && len > 0) {
       Serial.print(">");
-      Serial.print(data);
+      Serial.print(dataBuffer);
       Serial.println("<");
       Serial.print("Length 'data': ");
       Serial.println(len);
@@ -143,7 +140,7 @@ bool SBMS::read() {
       if (debugSbms) {
         String errData = String((char*)0);
         errData.reserve(100);
-        errData += "Fehler, SBMS-Daten scheinen zu kurz zu sein: (len: ";
+        errData += "Fehler, SBMS-Daten zu kurz: (len: ";
         errData += len;
         errData += ");";
         Serial.println(errData);
@@ -162,59 +159,49 @@ bool SBMS::read() {
     //Werte nun ans Webfrontend schicken
     wc.updateUi(); //ab 0.9.9.22 wird data per JSon uebermittelt
 
-    const char* txt = data.c_str();
+    const char* txt = dataBuffer;
 
     if (debugSbms) {
-      String outString = String((char*)0);
-      outString.reserve(100);
-      outString += "\nSOC: ";
+      char outString[100];
+      snprintf(outString, sizeof(outString), "\nSOC: ");
       if (len >= 8) {
-        battery.soc = sbms.dcmp(6, 2, txt, len);
-        outString += battery.soc;
-        outString += "(Limit:";
-        outString += battery.socLimit;
-        outString += "); ";
+        battery.soc = dcmp(6, 2, txt, len);
+        snprintf(outString + strlen(outString), sizeof(outString) - strlen(outString),
+                 "%ld(Limit:%ld); ", battery.soc, battery.socLimit);
       }
       if (len >= 24) {
         for (int k = 0; k < 8; k++) {
           int loc = k * 2 + 8;
-          battery.cv[k] = sbms.dcmp(loc, 2, txt, len);
-          outString += "cv";
-          outString += ( k + 1 );
-          outString += "[";
-          outString += battery.cv[k];
-          outString += "], ";
+          battery.cv[k] = dcmp(loc, 2, txt, len);
+          snprintf(outString + strlen(outString), sizeof(outString) - strlen(outString),
+                   "cv%d[%ld], ", k + 1, battery.cv[k]);
         }
       }
       if (len >= 26) {
-        //((dcmp(24,2,data)/10)-45)
-        temp = (sbms.dcmp(24, 2, txt, len) / 10) - 45;
+        temp = (dcmp(24, 2, txt, len) / 10) - 45;
       }
       Serial.print(outString);
       Serial.print(F("; StopBattery: "));
       Serial.println(inverter.stopBattery);
     } else {
       if (len >= 8) {
-        readSoc(txt,len);
+        readSoc(txt, len);
       }
       if (len >= 24) {
         for (int k = 0; k < 8; k++) {
           int loc = k * 2 + 8;
-          battery.cv[k] = sbms.dcmp(loc, 2, txt, len);
+          battery.cv[k] = dcmp(loc, 2, txt, len);
         }
       }
       if (len >= 26) {
-        temp = (sbms.dcmp(24, 2, txt, len) / 10) - 45;
+        temp = (dcmp(24, 2, txt, len) / 10) - 45;
       }
     }
     yield();
 
     //Timeoutcounter nur zuruecksetzen, wenn etwas empfangen wurde
     lastReceivedMillis = millis();
-
-    Serial.printf("aaSBMS::read completed at %lu ms\n", millis());
     return true;
-
   }
 
   return false;

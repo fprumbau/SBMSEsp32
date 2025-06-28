@@ -308,6 +308,7 @@ void loop() {
       taster.check();   //Buttonsteuerung (Inverter-/Batterieumschaltung)
       yield();      
 
+  
       //SMBS-Werte auslesen (State of Charge, Cell voltages)
       if(sbms.read()) { 
         yield();

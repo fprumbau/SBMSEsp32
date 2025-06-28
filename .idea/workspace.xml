@@ -10,7 +10,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="688fe3da-a399-414e-913f-e5ae167bec02" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/SBMSEsp32.ino" beforeDir="false" afterPath="$PROJECT_DIR$/SBMSEsp32.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SBMS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/SBMS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SBMSEsp32.4.0.9.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebCom.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/WebCom.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.elf" beforeDir="false" afterPath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.elf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.map" beforeDir="false" afterPath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.merged.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/esp32.esp32.esp32/SBMSEsp32.ino.merged.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/html.h" beforeDir="false" afterPath="$PROJECT_DIR$/html.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +53,13 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
+  <component name="RunManager">
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -73,9 +88,9 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1063" y="478" width="424" height="488" key="FileChooserDialogImpl" timestamp="1606847310353">
-      <screen x="0" y="0" width="2560" height="1440" />
+    <state x="869" y="232" width="1292" height="1103" key="VCS.ChangeListViewerDialog" timestamp="1751097971240">
+      <screen x="0" y="0" width="5083" height="1440" />
     </state>
-    <state x="1063" y="478" width="424" height="488" key="FileChooserDialogImpl/2560.120.1920.1200/0.0.2560.1440@0.0.2560.1440" timestamp="1606847310353" />
+    <state x="869" y="232" width="1292" height="1103" key="VCS.ChangeListViewerDialog/0.0.5083.1440@0.0.5083.1440" timestamp="1751097971240" />
   </component>
 </project>
